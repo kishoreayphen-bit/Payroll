@@ -1,17 +1,29 @@
 import { ArrowRight, CheckCircle2, Users, DollarSign, FileText, Shield, Clock, TrendingUp } from 'lucide-react';
 
+const getFeatureGradient = (color) => {
+  const gradients = {
+    blue: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+    green: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    purple: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',
+    indigo: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+    red: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+    orange: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+  };
+  return gradients[color] || gradients.blue;
+};
+
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-20">
             <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'}}>
                 <DollarSign className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold" style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}>
                 PayrollPro
               </span>
             </div>
@@ -22,10 +34,10 @@ export default function LandingPage() {
               <a href="#contact" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</a>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+              <button className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-4 py-2">
                 Sign In
               </button>
-              <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2.5 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200 font-medium">
+              <button className="text-white px-6 py-2.5 rounded-lg hover:shadow-lg transition-all duration-200 font-medium" style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)'}}>
                 Get Started
               </button>
             </div>
@@ -34,27 +46,27 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-20 pb-32 px-4 sm:px-6 lg:px-8">
+      <section className="pt-16 pb-24 px-4 sm:px-6 lg:px-8" style={{background: 'linear-gradient(180deg, #fafafa 0%, #f5f3ff 100%)'}}>
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
-              <div className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full">
-                <span className="text-blue-600 text-sm font-medium">🚀 Modern Payroll Management</span>
+              <div className="inline-flex items-center px-4 py-2 rounded-full" style={{background: 'linear-gradient(90deg, #ede9fe 0%, #ddd6fe 100%)'}}>
+                <span className="text-sm font-medium" style={{color: '#6366f1'}}>🚀 Modern Payroll Management</span>
               </div>
               <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 Simplify Your
-                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> Payroll </span>
+                <span style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}> Payroll </span>
                 Process
               </h1>
               <p className="text-xl text-gray-600 leading-relaxed">
                 Streamline payroll, automate compliance, and empower your workforce with our comprehensive payroll management solution.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-lg hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold text-lg flex items-center justify-center group">
+                <button className="text-white px-8 py-4 rounded-lg hover:shadow-xl transition-all duration-200 font-semibold text-lg flex items-center justify-center group" style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)'}}>
                   Start Free Trial
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg hover:border-blue-600 hover:text-blue-600 transition-all duration-200 font-semibold text-lg">
+                <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg hover:border-indigo-600 hover:text-indigo-600 transition-all duration-200 font-semibold text-lg">
                   Watch Demo
                 </button>
               </div>
@@ -70,12 +82,12 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-3xl transform rotate-3 opacity-20"></div>
-              <div className="relative bg-white rounded-3xl shadow-2xl p-8 transform hover:scale-105 transition-transform duration-300">
+              <div className="absolute inset-0 rounded-3xl transform rotate-3 opacity-20" style={{background: 'linear-gradient(135deg, #818cf8 0%, #a78bfa 100%)'}}></div>
+              <div className="relative bg-white rounded-3xl shadow-2xl p-8">
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                  <div className="flex items-center justify-between p-4 rounded-xl" style={{background: 'linear-gradient(90deg, #ede9fe 0%, #ddd6fe 100%)'}}>
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{background: '#6366f1'}}>
                         <Users className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -85,9 +97,9 @@ export default function LandingPage() {
                     </div>
                     <div className="text-green-600 text-sm font-medium">+12%</div>
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+                  <div className="flex items-center justify-between p-4 rounded-xl" style={{background: 'linear-gradient(90deg, #d1fae5 0%, #a7f3d0 100%)'}}>
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{background: '#10b981'}}>
                         <DollarSign className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -97,9 +109,9 @@ export default function LandingPage() {
                     </div>
                     <div className="text-green-600 text-sm font-medium">On Time</div>
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
+                  <div className="flex items-center justify-between p-4 rounded-xl" style={{background: 'linear-gradient(90deg, #fae8ff 0%, #f3e8ff 100%)'}}>
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{background: '#a855f7'}}>
                         <Clock className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -117,12 +129,12 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-white">
+      <section id="features" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Everything You Need for
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> Payroll Excellence</span>
+              <span style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}> Payroll Excellence</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Comprehensive features designed to automate and simplify your entire payroll workflow
@@ -168,8 +180,8 @@ export default function LandingPage() {
                 color: "orange"
               }
             ].map((feature, index) => (
-              <div key={index} className="group p-8 bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200 hover:shadow-xl hover:scale-105 transition-all duration-300">
-                <div className={`w-14 h-14 bg-gradient-to-br from-${feature.color}-500 to-${feature.color}-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+              <div key={index} className="group p-8 bg-white rounded-2xl border border-gray-200 hover:shadow-xl transition-all duration-300">
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-6" style={{background: getFeatureGradient(feature.color)}}>
                   <feature.icon className="w-7 h-7 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
@@ -181,7 +193,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
+      <section className="py-20" style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             {[
@@ -192,7 +204,7 @@ export default function LandingPage() {
             ].map((stat, index) => (
               <div key={index} className="text-white">
                 <div className="text-5xl font-bold mb-2">{stat.number}</div>
-                <div className="text-blue-100 text-lg">{stat.label}</div>
+                <div className="text-indigo-100 text-lg">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -206,7 +218,7 @@ export default function LandingPage() {
             <div className="space-y-8">
               <h2 className="text-4xl font-bold text-gray-900">
                 Why Choose
-                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> PayrollPro?</span>
+                <span style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}> PayrollPro?</span>
               </h2>
               <div className="space-y-6">
                 {[
@@ -227,16 +239,16 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-3xl transform -rotate-3 opacity-20"></div>
+              <div className="absolute inset-0 rounded-3xl transform -rotate-3 opacity-20" style={{background: 'linear-gradient(135deg, #818cf8 0%, #a78bfa 100%)'}}></div>
               <div className="relative bg-white rounded-3xl shadow-2xl p-8">
                 <div className="space-y-4">
                   <div className="h-4 bg-gray-200 rounded-full w-3/4"></div>
                   <div className="h-4 bg-gray-200 rounded-full w-full"></div>
                   <div className="h-4 bg-gray-200 rounded-full w-5/6"></div>
-                  <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+                  <div className="mt-8 p-6 rounded-xl" style={{background: 'linear-gradient(90deg, #d1fae5 0%, #a7f3d0 100%)'}}>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">Payroll Status</span>
-                      <span className="px-3 py-1 bg-green-500 text-white text-sm rounded-full">Completed</span>
+                      <span className="px-3 py-1 text-white text-sm rounded-full" style={{background: '#10b981'}}>Completed</span>
                     </div>
                   </div>
                 </div>
@@ -247,7 +259,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
+      <section className="py-20" style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)'}}>
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-bold text-white mb-6">
             Ready to Transform Your Payroll?
@@ -256,10 +268,10 @@ export default function LandingPage() {
             Join thousands of companies already using PayrollPro to streamline their payroll operations
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold text-lg">
+            <button className="bg-white px-8 py-4 rounded-lg hover:shadow-xl transition-all duration-200 font-semibold text-lg" style={{color: '#6366f1'}}>
               Start Free Trial
             </button>
-            <button className="border-2 border-white text-white px-8 py-4 rounded-lg hover:bg-white hover:text-blue-600 transition-all duration-200 font-semibold text-lg">
+            <button className="border-2 border-white text-white px-8 py-4 rounded-lg hover:bg-white transition-all duration-200 font-semibold text-lg" style={{'--hover-color': '#6366f1'}}>
               Schedule Demo
             </button>
           </div>
@@ -272,7 +284,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'}}>
                   <DollarSign className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-xl font-bold text-white">PayrollPro</span>
