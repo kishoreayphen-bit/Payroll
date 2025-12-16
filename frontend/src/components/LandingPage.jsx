@@ -46,19 +46,19 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-16 pb-24 px-4 sm:px-6 lg:px-8" style={{background: 'linear-gradient(180deg, #fafafa 0%, #f5f3ff 100%)'}}>
+      <section className="pt-24 pb-32 px-4 sm:px-6 lg:px-8" style={{background: 'linear-gradient(180deg, #ffffff 0%, #f8f7ff 50%, #f5f3ff 100%)'}}>
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center px-4 py-2 rounded-full" style={{background: 'linear-gradient(90deg, #ede9fe 0%, #ddd6fe 100%)'}}>
                 <span className="text-sm font-medium" style={{color: '#6366f1'}}>🚀 Modern Payroll Management</span>
               </div>
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-5xl lg:text-7xl font-extrabold text-gray-900 leading-tight tracking-tight">
                 Simplify Your
                 <span style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}> Payroll </span>
                 Process
               </h1>
-              <p className="text-xl text-gray-600 leading-relaxed">
+              <p className="text-xl text-gray-600 leading-relaxed max-w-xl">
                 Streamline payroll, automate compliance, and empower your workforce with our comprehensive payroll management solution.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -82,10 +82,10 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="relative">
-              <div className="absolute inset-0 rounded-3xl transform rotate-3 opacity-20" style={{background: 'linear-gradient(135deg, #818cf8 0%, #a78bfa 100%)'}}></div>
-              <div className="relative bg-white rounded-3xl shadow-2xl p-8">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between p-4 rounded-xl" style={{background: 'linear-gradient(90deg, #ede9fe 0%, #ddd6fe 100%)'}}>
+              <div className="absolute -inset-4 rounded-3xl transform rotate-2 opacity-10" style={{background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', filter: 'blur(20px)'}}></div>
+              <div className="relative bg-white rounded-3xl shadow-2xl p-10 border border-gray-100">
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between p-5 rounded-2xl border border-indigo-100" style={{background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)'}}>
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{background: '#6366f1'}}>
                         <Users className="w-6 h-6 text-white" />
@@ -97,7 +97,7 @@ export default function LandingPage() {
                     </div>
                     <div className="text-green-600 text-sm font-medium">+12%</div>
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl" style={{background: 'linear-gradient(90deg, #d1fae5 0%, #a7f3d0 100%)'}}>
+                  <div className="flex items-center justify-between p-5 rounded-2xl border border-green-100" style={{background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)'}}>
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{background: '#10b981'}}>
                         <DollarSign className="w-6 h-6 text-white" />
@@ -109,7 +109,7 @@ export default function LandingPage() {
                     </div>
                     <div className="text-green-600 text-sm font-medium">On Time</div>
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl" style={{background: 'linear-gradient(90deg, #fae8ff 0%, #f3e8ff 100%)'}}>
+                  <div className="flex items-center justify-between p-5 rounded-2xl border border-purple-100" style={{background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)'}}>
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{background: '#a855f7'}}>
                         <Clock className="w-6 h-6 text-white" />
@@ -129,10 +129,10 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-gray-50">
+      <section id="features" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
               Everything You Need for
               <span style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}> Payroll Excellence</span>
             </h2>
@@ -141,7 +141,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
             {[
               {
                 icon: Users,
@@ -180,12 +180,12 @@ export default function LandingPage() {
                 color: "orange"
               }
             ].map((feature, index) => (
-              <div key={index} className="group p-8 bg-white rounded-2xl border border-gray-200 hover:shadow-xl transition-all duration-300">
-                <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-6" style={{background: getFeatureGradient(feature.color)}}>
+              <div key={index} className="group p-8 bg-gradient-to-br from-white to-gray-50 rounded-3xl border border-gray-200 hover:shadow-2xl hover:border-indigo-200 transition-all duration-300 hover:-translate-y-1">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg" style={{background: getFeatureGradient(feature.color)}}>
                   <feature.icon className="w-7 h-7 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed text-base">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -193,8 +193,12 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20" style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)'}}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 relative overflow-hidden" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)'}}>
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full filter blur-3xl"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full filter blur-3xl"></div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             {[
               { number: "10K+", label: "Active Users" },
@@ -202,9 +206,9 @@ export default function LandingPage() {
               { number: "500M+", label: "Processed Monthly" },
               { number: "4.9/5", label: "Customer Rating" }
             ].map((stat, index) => (
-              <div key={index} className="text-white">
-                <div className="text-5xl font-bold mb-2">{stat.number}</div>
-                <div className="text-indigo-100 text-lg">{stat.label}</div>
+              <div key={index} className="text-white transform hover:scale-110 transition-transform duration-300">
+                <div className="text-6xl font-extrabold mb-3">{stat.number}</div>
+                <div className="text-indigo-100 text-xl font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -212,11 +216,11 @@ export default function LandingPage() {
       </section>
 
       {/* Benefits Section */}
-      <section id="benefits" className="py-20 bg-gray-50">
+      <section id="benefits" className="py-24 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
-              <h2 className="text-4xl font-bold text-gray-900">
+              <h2 className="text-5xl font-extrabold text-gray-900 tracking-tight">
                 Why Choose
                 <span style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}> PayrollPro?</span>
               </h2>
@@ -229,23 +233,23 @@ export default function LandingPage() {
                   "Seamless integration with existing systems",
                   "24/7 customer support and training"
                 ].map((benefit, index) => (
-                  <div key={index} className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mt-1">
+                  <div key={index} className="flex items-start space-x-4 p-4 rounded-xl hover:bg-white transition-colors duration-200">
+                    <div className="flex-shrink-0 w-7 h-7 bg-green-500 rounded-full flex items-center justify-center mt-0.5 shadow-md">
                       <CheckCircle2 className="w-4 h-4 text-white" />
                     </div>
-                    <p className="text-lg text-gray-700">{benefit}</p>
+                    <p className="text-lg text-gray-700 font-medium">{benefit}</p>
                   </div>
                 ))}
               </div>
             </div>
             <div className="relative">
-              <div className="absolute inset-0 rounded-3xl transform -rotate-3 opacity-20" style={{background: 'linear-gradient(135deg, #818cf8 0%, #a78bfa 100%)'}}></div>
-              <div className="relative bg-white rounded-3xl shadow-2xl p-8">
+              <div className="absolute -inset-4 rounded-3xl transform -rotate-2 opacity-10" style={{background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', filter: 'blur(20px)'}}></div>
+              <div className="relative bg-white rounded-3xl shadow-2xl p-10 border border-gray-100">
                 <div className="space-y-4">
-                  <div className="h-4 bg-gray-200 rounded-full w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded-full w-full"></div>
-                  <div className="h-4 bg-gray-200 rounded-full w-5/6"></div>
-                  <div className="mt-8 p-6 rounded-xl" style={{background: 'linear-gradient(90deg, #d1fae5 0%, #a7f3d0 100%)'}}>
+                  <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-100 rounded-full w-3/4 animate-pulse"></div>
+                  <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-100 rounded-full w-full animate-pulse" style={{animationDelay: '0.1s'}}></div>
+                  <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-100 rounded-full w-5/6 animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                  <div className="mt-8 p-6 rounded-2xl border border-green-200" style={{background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)'}}>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">Payroll Status</span>
                       <span className="px-3 py-1 text-white text-sm rounded-full" style={{background: '#10b981'}}>Completed</span>
@@ -259,19 +263,23 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20" style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)'}}>
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-white mb-6">
+      <section className="py-24 relative overflow-hidden" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)'}}>
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full filter blur-3xl"></div>
+          <div className="absolute bottom-10 right-10 w-72 h-72 bg-white rounded-full filter blur-3xl"></div>
+        </div>
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative z-10">
+          <h2 className="text-5xl font-extrabold text-white mb-6 tracking-tight">
             Ready to Transform Your Payroll?
           </h2>
-          <p className="text-xl text-blue-100 mb-10">
+          <p className="text-xl text-indigo-100 mb-12 max-w-2xl mx-auto">
             Join thousands of companies already using PayrollPro to streamline their payroll operations
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white px-8 py-4 rounded-lg hover:shadow-xl transition-all duration-200 font-semibold text-lg" style={{color: '#6366f1'}}>
+            <button className="bg-white px-10 py-5 rounded-xl hover:shadow-2xl transition-all duration-200 font-bold text-lg transform hover:scale-105" style={{color: '#6366f1'}}>
               Start Free Trial
             </button>
-            <button className="border-2 border-white text-white px-8 py-4 rounded-lg hover:bg-white transition-all duration-200 font-semibold text-lg" style={{'--hover-color': '#6366f1'}}>
+            <button className="border-2 border-white text-white px-10 py-5 rounded-xl hover:bg-white hover:text-indigo-600 transition-all duration-200 font-bold text-lg transform hover:scale-105">
               Schedule Demo
             </button>
           </div>
