@@ -16,9 +16,9 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+      <nav className="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex justify-between items-center h-16 sm:h-20">
             <div className="flex items-center space-x-2">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'}}>
                 <DollarSign className="w-6 h-6 text-white" />
@@ -27,17 +27,17 @@ export default function LandingPage() {
                 PayrollPro
               </span>
             </div>
-            <div className="hidden md:flex space-x-8">
-              <a href="#features" className="text-gray-700 hover:text-blue-600 transition-colors">Features</a>
-              <a href="#benefits" className="text-gray-700 hover:text-blue-600 transition-colors">Benefits</a>
-              <a href="#pricing" className="text-gray-700 hover:text-blue-600 transition-colors">Pricing</a>
-              <a href="#contact" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</a>
+            <div className="hidden md:flex items-center space-x-1">
+              <a href="#features" className="text-gray-700 hover:text-indigo-600 font-medium transition-all duration-200 px-4 py-2 rounded-lg hover:bg-indigo-50">Features</a>
+              <a href="#benefits" className="text-gray-700 hover:text-indigo-600 font-medium transition-all duration-200 px-4 py-2 rounded-lg hover:bg-indigo-50">Benefits</a>
+              <a href="#pricing" className="text-gray-700 hover:text-indigo-600 font-medium transition-all duration-200 px-4 py-2 rounded-lg hover:bg-indigo-50">Pricing</a>
+              <a href="#contact" className="text-gray-700 hover:text-indigo-600 font-medium transition-all duration-200 px-4 py-2 rounded-lg hover:bg-indigo-50">Contact</a>
             </div>
-            <div className="flex items-center space-x-4">
-              <button className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-4 py-2">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <button className="text-gray-700 hover:text-indigo-600 font-semibold transition-all duration-200 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-50 text-sm sm:text-base">
                 Sign In
               </button>
-              <button className="text-white px-6 py-2.5 rounded-lg hover:shadow-lg transition-all duration-200 font-medium" style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)'}}>
+              <button className="text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold text-sm sm:text-base" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'}}>
                 Get Started
               </button>
             </div>
@@ -62,11 +62,11 @@ export default function LandingPage() {
                 Streamline payroll, automate compliance, and empower your workforce with our comprehensive payroll management solution.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <button className="text-white px-8 py-4 rounded-lg hover:shadow-xl transition-all duration-200 font-semibold text-lg flex items-center justify-center group" style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)'}}>
+                <button className="text-white px-8 py-4 rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-bold text-base sm:text-lg flex items-center justify-center group" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'}}>
                   Start Free Trial
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg hover:border-indigo-600 hover:text-indigo-600 transition-all duration-200 font-semibold text-lg">
+                <button className="border-2 border-gray-300 bg-white text-gray-700 px-8 py-4 rounded-xl hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50 hover:scale-105 transition-all duration-300 font-bold text-base sm:text-lg">
                   Watch Demo
                 </button>
               </div>
@@ -276,10 +276,10 @@ export default function LandingPage() {
             Join thousands of companies already using PayrollPro to streamline their payroll operations
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
-            <button className="bg-white px-8 sm:px-10 py-4 sm:py-5 rounded-lg sm:rounded-xl hover:shadow-2xl transition-all duration-200 font-bold text-base sm:text-lg transform hover:scale-105" style={{color: '#6366f1'}}>
+            <button className="bg-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl hover:shadow-2xl transition-all duration-300 font-bold text-base sm:text-lg transform hover:scale-105" style={{color: '#6366f1'}}>
               Start Free Trial
             </button>
-            <button className="border-2 border-white text-white px-8 sm:px-10 py-4 sm:py-5 rounded-lg sm:rounded-xl hover:bg-white hover:text-indigo-600 transition-all duration-200 font-bold text-base sm:text-lg transform hover:scale-105">
+            <button className="border-2 border-white text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl hover:bg-white hover:text-indigo-600 transition-all duration-300 font-bold text-base sm:text-lg transform hover:scale-105">
               Schedule Demo
             </button>
           </div>
