@@ -1,4 +1,5 @@
-import { ArrowRight, CheckCircle2, Users, DollarSign, FileText, Shield, Clock, TrendingUp } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Users, DollarSign, FileText, Shield, Clock, TrendingUp, Menu, X } from 'lucide-react';
+import { useState } from 'react';
 
 const getFeatureGradient = (color) => {
   const gradients = {
@@ -13,12 +14,13 @@ const getFeatureGradient = (color) => {
 };
 
 export default function LandingPage() {
+  const [mobileOpen, setMobileOpen] = useState(false);
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Navigation */}
       <nav className="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 sm:h-20">
+          <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'}}>
                 <DollarSign className="w-6 h-6 text-white" />
@@ -27,63 +29,87 @@ export default function LandingPage() {
                 PayrollPro
               </span>
             </div>
-            <div className="hidden md:flex items-center space-x-1">
+            <div className="hidden md:flex items-center gap-6">
               <a href="#features" className="text-gray-700 hover:text-indigo-600 font-medium transition-all duration-200 px-4 py-2 rounded-lg hover:bg-indigo-50">Features</a>
               <a href="#benefits" className="text-gray-700 hover:text-indigo-600 font-medium transition-all duration-200 px-4 py-2 rounded-lg hover:bg-indigo-50">Benefits</a>
               <a href="#pricing" className="text-gray-700 hover:text-indigo-600 font-medium transition-all duration-200 px-4 py-2 rounded-lg hover:bg-indigo-50">Pricing</a>
               <a href="#contact" className="text-gray-700 hover:text-indigo-600 font-medium transition-all duration-200 px-4 py-2 rounded-lg hover:bg-indigo-50">Contact</a>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <button className="text-gray-700 hover:text-indigo-600 font-semibold transition-all duration-200 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-50 text-sm sm:text-base">
+            <div className="hidden md:flex items-center space-x-2 sm:space-x-3">
+              <button className="text-gray-700 hover:text-indigo-600 font-semibold transition-all duration-200 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-50 text-sm sm:text-base focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2">
                 Sign In
               </button>
-              <button className="text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold text-sm sm:text-base" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'}}>
+              <button className="text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg hover:shadow-xl hover:scale-105 transition-all duration-200 font-semibold text-sm sm:text-base focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'}}>
                 Get Started
               </button>
             </div>
+            <div className="md:hidden">
+              <button aria-label="Toggle menu" aria-expanded={mobileOpen} onClick={() => setMobileOpen((o) => !o)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-700">
+                {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
+          {mobileOpen && (
+            <div className="md:hidden mt-2 border-t border-gray-200 pt-2 pb-4">
+              <div className="grid gap-1">
+                <a href="#features" onClick={() => setMobileOpen(false)} className="px-3 py-2 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 text-gray-700 font-medium">Features</a>
+                <a href="#benefits" onClick={() => setMobileOpen(false)} className="px-3 py-2 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 text-gray-700 font-medium">Benefits</a>
+                <a href="#pricing" onClick={() => setMobileOpen(false)} className="px-3 py-2 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 text-gray-700 font-medium">Pricing</a>
+                <a href="#contact" onClick={() => setMobileOpen(false)} className="px-3 py-2 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 text-gray-700 font-medium">Contact</a>
+              </div>
+              <div className="mt-3 flex gap-2">
+                <button className="flex-1 text-gray-700 hover:text-indigo-600 font-semibold transition-all duration-200 px-4 py-2 rounded-lg hover:bg-gray-50 text-base focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2">
+                  Sign In
+                </button>
+                <button className="flex-1 text-white px-4 py-2 rounded-lg hover:shadow-xl transition-all duration-200 font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'}}>
+                  Get Started
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-24 pb-32 px-4 sm:px-6 lg:px-8" style={{background: 'linear-gradient(180deg, #ffffff 0%, #f8f7ff 50%, #f5f3ff 100%)'}}>
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <section className="pt-20 pb-24 px-4 sm:px-6 lg:px-8" style={{background: 'linear-gradient(180deg, #ffffff 0%, #f8f7ff 50%, #f5f3ff 100%)'}}>
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center px-4 py-2 rounded-full" style={{background: 'linear-gradient(90deg, #ede9fe 0%, #ddd6fe 100%)'}}>
                 <span className="text-sm font-medium" style={{color: '#6366f1'}}>🚀 Modern Payroll Management</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-gray-900 leading-tight tracking-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-5xl font-extrabold text-gray-900 leading-[1.1] tracking-tight max-w-2xl">
                 Simplify Your
                 <span style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}> Payroll </span>
                 Process
               </h1>
-              <p className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-xl">
+              <p className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-lg">
                 Streamline payroll, automate compliance, and empower your workforce with our comprehensive payroll management solution.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <button className="text-white px-8 py-4 rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-bold text-base sm:text-lg flex items-center justify-center group" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'}}>
+                <button className="text-white px-7 sm:px-8 py-3.5 sm:py-4 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 font-bold text-base sm:text-lg flex items-center justify-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'}}>
                   Start Free Trial
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button className="border-2 border-gray-300 bg-white text-gray-700 px-8 py-4 rounded-xl hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50 hover:scale-105 transition-all duration-300 font-bold text-base sm:text-lg">
+                <button className="border-2 border-gray-300 bg-white text-gray-700 px-7 sm:px-8 py-3.5 sm:py-4 rounded-xl shadow-sm hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50 hover:scale-105 transition-all duration-300 font-bold text-base sm:text-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2">
                   Watch Demo
                 </button>
               </div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-8 pt-4">
-                <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 pt-4 text-sm text-gray-500">
+                <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-green-500" />
                   <span className="text-gray-600">No credit card required</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <span className="hidden sm:inline text-gray-300">•</span>
+                <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-green-500" />
                   <span className="text-gray-600">14-day free trial</span>
                 </div>
               </div>
             </div>
             <div className="relative mt-12 lg:mt-0">
-              <div className="absolute -inset-4 rounded-3xl transform rotate-2 opacity-10" style={{background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', filter: 'blur(20px)'}}></div>
-              <div className="relative bg-white rounded-2xl lg:rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-10 border border-gray-100">
+              <div className="absolute -inset-4 rounded-3xl transform rotate-2 opacity-5" style={{background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', filter: 'blur(12px)'}}></div>
+              <div className="relative w-full max-w-md sm:max-w-lg lg:max-w-xl mx-auto bg-white/80 backdrop-blur-md rounded-2xl lg:rounded-3xl shadow-xl p-6 sm:p-8 lg:p-10 border border-gray-100">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-indigo-100" style={{background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)'}}>
                     <div className="flex items-center space-x-3">
@@ -129,19 +155,19 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4 sm:mb-6 tracking-tight">
+      <section id="features" className="py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 sm:mb-16 lg:mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-4xl font-extrabold text-gray-900 mb-4 sm:mb-6 tracking-tight">
               Everything You Need for
               <span style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}> Payroll Excellence</span>
             </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+            <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto px-4">
               Comprehensive features designed to automate and simplify your entire payroll workflow
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-8">
             {[
               {
                 icon: Users,
@@ -193,22 +219,22 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-24 relative overflow-hidden" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)'}}>
+      <section className="py-16 relative overflow-hidden" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)'}}>
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full filter blur-3xl"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full filter blur-3xl"></div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
               { number: "10K+", label: "Active Users" },
               { number: "99.9%", label: "Uptime" },
               { number: "500M+", label: "Processed Monthly" },
               { number: "4.9/5", label: "Customer Rating" }
             ].map((stat, index) => (
-              <div key={index} className="text-white transform hover:scale-105 sm:hover:scale-110 transition-transform duration-300 p-4">
-                <div className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-2 sm:mb-3">{stat.number}</div>
-                <div className="text-indigo-100 text-sm sm:text-base lg:text-xl font-medium">{stat.label}</div>
+              <div key={index} className="text-white transform hover:scale-105 transition-transform duration-300 p-3 sm:p-4">
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-1 sm:mb-2">{stat.number}</div>
+                <div className="text-indigo-100 text-xs sm:text-sm lg:text-base font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -216,15 +242,15 @@ export default function LandingPage() {
       </section>
 
       {/* Benefits Section */}
-      <section id="benefits" className="py-24 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight">
+      <section id="benefits" className="py-16 bg-gradient-to-b from-white to-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <h2 className="text-3xl sm:text-4xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">
                 Why Choose
                 <span style={{background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}> PayrollPro?</span>
               </h2>
-              <div className="space-y-4 sm:space-y-5">
+              <div className="space-y-4">
                 {[
                   "Save 80% of time spent on payroll processing",
                   "Eliminate manual errors with automated calculations",
@@ -233,16 +259,16 @@ export default function LandingPage() {
                   "Seamless integration with existing systems",
                   "24/7 customer support and training"
                 ].map((benefit, index) => (
-                  <div key={index} className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-white transition-colors duration-200">
-                    <div className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 bg-green-500 rounded-full flex items-center justify-center mt-0.5 shadow-md">
-                      <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+                  <div key={index} className="flex items-start gap-3 p-3 rounded-xl hover:bg-white transition-colors duration-200">
+                    <div className="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mt-0.5 shadow-md">
+                      <CheckCircle2 className="w-3 h-3 text-white" />
                     </div>
-                    <p className="text-base sm:text-lg text-gray-700 font-medium">{benefit}</p>
+                    <p className="text-base text-gray-700 font-medium">{benefit}</p>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="relative mt-12 lg:mt-0">
+            <div className="relative mt-10 lg:mt-0">
               <div className="absolute -inset-4 rounded-3xl transform -rotate-2 opacity-10" style={{background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', filter: 'blur(20px)'}}></div>
               <div className="relative bg-white rounded-2xl lg:rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-10 border border-gray-100">
                 <div className="space-y-4">
@@ -263,23 +289,23 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 relative overflow-hidden" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)'}}>
+      <section className="py-16 relative overflow-hidden" style={{background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)'}}>
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full filter blur-3xl"></div>
           <div className="absolute bottom-10 right-10 w-72 h-72 bg-white rounded-full filter blur-3xl"></div>
         </div>
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative z-10">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4 sm:mb-6 tracking-tight">
+        <div className="max-w-3xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative z-10">
+          <h2 className="text-3xl sm:text-4xl lg:text-4xl font-extrabold text-white mb-4 sm:mb-6 tracking-tight">
             Ready to Transform Your Payroll?
           </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-indigo-100 mb-8 sm:mb-12 max-w-2xl mx-auto px-4">
+          <p className="text-base sm:text-lg lg:text-lg text-indigo-100 mb-8 sm:mb-10 max-w-2xl mx-auto px-4">
             Join thousands of companies already using PayrollPro to streamline their payroll operations
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
-            <button className="bg-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl hover:shadow-2xl transition-all duration-300 font-bold text-base sm:text-lg transform hover:scale-105" style={{color: '#6366f1'}}>
+            <button className="bg-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl hover:shadow-2xl transition-all duration-300 font-bold text-base sm:text-lg transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" style={{color: '#6366f1'}}>
               Start Free Trial
             </button>
-            <button className="border-2 border-white text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl hover:bg-white hover:text-indigo-600 transition-all duration-300 font-bold text-base sm:text-lg transform hover:scale-105">
+            <button className="border-2 border-white text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl hover:bg-white hover:text-indigo-600 transition-all duration-300 font-bold text-base sm:text-lg transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
               Schedule Demo
             </button>
           </div>
