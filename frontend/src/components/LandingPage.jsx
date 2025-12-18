@@ -102,7 +102,7 @@ export default function LandingPage() {
                 <Link to="/login" className="w-full py-3 rounded-xl font-semibold text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors text-center">
                   Log in
                 </Link>
-                <Link to="/signup" className="w-full py-3 rounded-xl font-semibold text-white shadow-lg shadow-pink-500/20 text-center" style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}>
+                <Link to="/tenant/register" className="w-full py-3 rounded-xl font-semibold text-white shadow-lg shadow-pink-500/20 text-center" style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}>
                   Get Started
                 </Link>
               </div>
@@ -133,11 +133,10 @@ export default function LandingPage() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <button className="px-6 py-3 rounded-xl text-white font-bold text-base shadow-xl shadow-pink-500/20 hover:shadow-pink-500/30 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 group"
-                    style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}>
+                  <Link to="/tenant/register" className="px-6 py-3 rounded-xl text-white font-bold text-base shadow-xl shadow-pink-500/20 hover:shadow-pink-500/30 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 group" style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}>
                     Start Free Trial
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
+                  </Link>
                   <button className="px-6 py-3 rounded-xl bg-white text-slate-700 font-bold text-base border border-slate-200 shadow-sm hover:border-pink-200 hover:text-pink-600 hover:bg-pink-50/50 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
                     <div className="w-5 h-5 rounded-full bg-pink-100 flex items-center justify-center">
                       <div className="w-0 h-0 border-t-[3px] border-t-transparent border-l-[5px] border-l-pink-600 border-b-[3px] border-b-transparent ml-0.5"></div>
@@ -715,10 +714,9 @@ export default function LandingPage() {
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Ready to transform your payroll?</h2>
             <p className="text-base text-slate-600 mb-8 max-w-2xl mx-auto">Join over 10,000 companies that trust PayrollPro to pay their teams on time, every time.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-3 rounded-xl text-white font-bold text-base shadow-xl shadow-pink-500/20 hover:shadow-pink-500/30 hover:-translate-y-1 transition-all duration-300"
-                style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}>
+              <Link to="/tenant/register" className="px-8 py-3 rounded-xl text-white font-bold text-base shadow-xl shadow-pink-500/20 hover:shadow-pink-500/30 hover:-translate-y-1 transition-all duration-300" style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}>
                 Get Started for Free
-              </button>
+              </Link>
               <button className="px-8 py-3 rounded-xl text-slate-700 font-bold text-base border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-300">
                 Contact Sales
               </button>
