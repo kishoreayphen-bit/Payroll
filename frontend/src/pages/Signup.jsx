@@ -5,14 +5,15 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { Mail, Lock, Eye, EyeOff, User, Phone, CheckCircle2, X, Building2, MapPin } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Phone, CheckCircle2, X, Building2, MapPin } from 'lucide-react';
 
 const signupSchema = z
   .object({
-    firstName: z.string().min(2, 'First name must be at least 2 characters'),
-    lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+    companyName: z.string().min(2, 'Company name must be at least 2 characters').max(200, 'Company name too long'),
     email: z.string().email('Invalid email address').min(1, 'Email is required'),
     phoneNumber: z.string().regex(/^[0-9]{10}$/, 'Enter a valid 10-digit phone number'),
+    country: z.string().min(1, 'Country is required'),
+    state: z.string().min(1, 'State is required'),
     password: z
       .string()
       .min(8, 'Password must be at least 8 characters')
@@ -38,13 +39,14 @@ export default function Signup() {
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [verifying, setVerifying] = useState(false);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, watch, setValue } = useForm({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      companyName: '',
       email: '',
       phoneNumber: '',
+      country: '',
+      state: '',
       password: '',
       confirmPassword: '',
       acceptTerms: false,
@@ -52,7 +54,23 @@ export default function Signup() {
   });
 
   const phoneNumber = watch('phoneNumber');
+  const selectedCountry = watch('country');
   const navigate = useNavigate();
+
+  // State options based on country
+  const stateOptions = {
+    'India': ['Andhra Pradesh', 'Karnataka', 'Kerala', 'Tamil Nadu', 'Telangana', 'Maharashtra', 'Gujarat', 'Delhi', 'West Bengal'],
+    'United States': ['California', 'Texas', 'Florida', 'New York', 'Illinois', 'Pennsylvania', 'Ohio'],
+    'United Kingdom': ['England', 'Scotland', 'Wales', 'Northern Ireland'],
+    'Canada': ['Ontario', 'Quebec', 'British Columbia', 'Alberta'],
+  };
+
+  const currentStateOptions = stateOptions[selectedCountry] || [];
+
+  // Reset state when country changes
+  React.useEffect(() => {
+    setValue('state', '');
+  }, [selectedCountry, setValue]);
 
   const handleSendOTP = () => {
     if (phoneNumber && phoneNumber.match(/^\d{10}$/)) {
@@ -108,7 +126,7 @@ export default function Signup() {
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Decorative */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-pink-100 via-rose-50 to-white p-12 flex-col justify-between relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-pink-100 via-rose-50 to-white p-12 flex-col justify-start relative overflow-hidden">
         {/* Decorative Blobs */}
         <div className="absolute top-20 left-20 w-64 h-64 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
         <div className="absolute top-40 right-20 w-64 h-64 bg-rose-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
@@ -131,11 +149,7 @@ export default function Signup() {
           }
         `}</style>
 
-        {/* <div className="relative z-10">
-          <img src="/logo.png" alt="PayrollPro" className="h-12 mb-8" />
-        </div> */}
-
-        <div className="relative z-10 space-y-8">
+        <div className="relative z-10 space-y-5 pb-12 lg:pb-16">
           <div className="flex items-center gap-4 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
             <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center flex-shrink-0">
               <CheckCircle2 className="w-6 h-6 text-white" />
@@ -166,8 +180,7 @@ export default function Signup() {
             </div>
           </div>
         </div>
-
-        <div className="relative z-10">
+        <div className="relative z-10 pt-6 lg:pt-8">
           <h2 className="text-4xl font-bold text-slate-900 mb-4">
             Payroll made simple, efficient, and auto-compliant for every business.
           </h2>
@@ -188,33 +201,18 @@ export default function Signup() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input
-                    id="firstName"
-                    placeholder="First Name"
-                    className="pl-9 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
-                    {...register('firstName')}
-                  />
-                </div>
-                {errors.firstName && <p className="mt-1 text-xs text-red-600">{errors.firstName.message}</p>}
+            {/* Company Name */}
+            <div>
+              <div className="relative">
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  id="companyName"
+                  placeholder="Company Name"
+                  className="pl-9 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                  {...register('companyName')}
+                />
               </div>
-
-              <div>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input
-                    id="lastName"
-                    placeholder="Last Name"
-                    className="pl-9 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
-                    {...register('lastName')}
-                  />
-                </div>
-                {errors.lastName && <p className="mt-1 text-xs text-red-600">{errors.lastName.message}</p>}
-              </div>
+              {errors.companyName && <p className="mt-1 text-xs text-red-600">{errors.companyName.message}</p>}
             </div>
 
             {/* Email */}
@@ -230,6 +228,45 @@ export default function Signup() {
                 />
               </div>
               {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
+            </div>
+
+            {/* Country and State */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
+                  <select
+                    id="country"
+                    className="w-full h-11 pl-9 pr-3 rounded-lg border border-slate-300 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 appearance-none"
+                    {...register('country')}
+                  >
+                    <option value="">Select Country</option>
+                    <option value="India">India</option>
+                    <option value="United States">United States</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Canada">Canada</option>
+                  </select>
+                </div>
+                {errors.country && <p className="mt-1 text-xs text-red-600">{errors.country.message}</p>}
+              </div>
+
+              <div>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
+                  <select
+                    id="state"
+                    disabled={!selectedCountry || currentStateOptions.length === 0}
+                    className="w-full h-11 pl-9 pr-3 rounded-lg border border-slate-300 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 disabled:bg-slate-50 disabled:text-slate-400 appearance-none"
+                    {...register('state')}
+                  >
+                    <option value="">{currentStateOptions.length ? 'Select State' : 'Select Country First'}</option>
+                    {currentStateOptions.map((state) => (
+                      <option key={state} value={state}>{state}</option>
+                    ))}
+                  </select>
+                </div>
+                {errors.state && <p className="mt-1 text-xs text-red-600">{errors.state.message}</p>}
+              </div>
             </div>
 
             {/* Phone Number with OTP */}

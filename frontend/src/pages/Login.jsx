@@ -37,7 +37,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Decorative */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-pink-100 via-rose-50 to-white p-12 flex-col justify-between relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-pink-100 via-rose-50 to-white p-12 flex-col justify-start relative overflow-hidden">
         {/* Decorative Blobs */}
         <div className="absolute top-20 left-20 w-64 h-64 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
         <div className="absolute top-40 right-20 w-64 h-64 bg-rose-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
@@ -64,7 +64,7 @@ export default function Login() {
           <img src="/logo.png" alt="PayrollPro" className="h-12 mb-8" />
         </div> */}
 
-        <div className="relative z-10 space-y-8">
+        <div className="relative z-10 space-y-5 pb-12 lg:pb-16">
           <div className="flex items-center gap-4 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
             <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center flex-shrink-0">
               <CheckCircle2 className="w-6 h-6 text-white" />
@@ -96,7 +96,7 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="relative z-10">
+        <div className="relative z-10 pt-6 lg:pt-8">
           <h2 className="text-4xl font-bold text-slate-900 mb-4">
             Payroll made simple, efficient, and auto-compliant for every business.
           </h2>
