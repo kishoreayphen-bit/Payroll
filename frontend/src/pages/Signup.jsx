@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '../contexts/AuthContext';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { Mail, Lock, Eye, EyeOff, Phone, CheckCircle2, X, Building2, MapPin } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Phone, CheckCircle2, X, Building2, MapPin, AlertCircle } from 'lucide-react';
 
 const signupSchema = z
   .object({
@@ -38,6 +39,10 @@ export default function Signup() {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [error, setError] = useState('');
+
+  const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, watch, setValue } = useForm({
     resolver: zodResolver(signupSchema),
@@ -55,7 +60,6 @@ export default function Signup() {
 
   const phoneNumber = watch('phoneNumber');
   const selectedCountry = watch('country');
-  const navigate = useNavigate();
 
   // State options based on country
   const stateOptions = {
@@ -114,13 +118,28 @@ export default function Signup() {
     console.log(`Sign up with ${provider}`);
   };
 
-  const onSubmit = (data) => {
-    if (!phoneVerified) {
-      alert('Please verify your phone number first');
-      return;
+  const onSubmit = async (data) => {
+    try {
+      if (!phoneVerified) {
+        setError('Please verify your phone number first');
+        return;
+      }
+
+      setError('');
+      await signup({
+        companyName: data.companyName,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        country: data.country,
+        state: data.state,
+        password: data.password,
+      });
+
+      // Navigate to login after successful signup
+      navigate('/login');
+    } catch (err) {
+      setError(err.message || 'Signup failed. Please try again.');
     }
-    console.log('Signup data:', data);
-    navigate('/login');
   };
 
   return (
@@ -199,6 +218,14 @@ export default function Signup() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-slate-900 mb-2">Let's get started</h1>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-5 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Company Name */}

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '../contexts/AuthContext';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { Mail, Lock, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const loginSchema = z.object({
   emailOrUsername: z.string().min(1, 'Email or username is required'),
@@ -15,6 +16,10 @@ const loginSchema = z.object({
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -24,13 +29,22 @@ export default function Login() {
     }
   });
 
-  const onSubmit = (data) => {
-    // TODO: integrate API
-    console.log('Login data:', data);
+  const onSubmit = async (data) => {
+    try {
+      setError('');
+      await login({
+        email: data.emailOrUsername,
+        password: data.password
+      });
+      // Navigate to organization selection page after successful login
+      navigate('/select-organization');
+    } catch (err) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    }
   };
 
   const handleSocialLogin = (provider) => {
-    console.log(`Login with ${provider}`);
+    console.log(`Login with ${provider} `);
     // TODO: Implement social login
   };
 
@@ -44,21 +58,21 @@ export default function Login() {
         <div className="absolute bottom-20 left-40 w-64 h-64 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
 
         <style>{`
-          @keyframes blob {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-          }
-          .animate-blob {
-            animation: blob 7s infinite;
-          }
-          .animation-delay-2000 {
-            animation-delay: 2s;
-          }
-          .animation-delay-4000 {
-            animation-delay: 4s;
-          }
-        `}</style>
+@keyframes blob {
+  0 %, 100 % { transform: translate(0, 0) scale(1); }
+  33 % { transform: translate(30px, -50px) scale(1.1); }
+  66 % { transform: translate(-20px, 20px) scale(0.9); }
+}
+          .animate - blob {
+  animation: blob 7s infinite;
+}
+          .animation - delay - 2000 {
+  animation - delay: 2s;
+}
+          .animation - delay - 4000 {
+  animation - delay: 4s;
+}
+`}</style>
 
         {/* <div className="relative z-10">
           <img src="/logo.png" alt="PayrollPro" className="h-12 mb-8" />
@@ -116,6 +130,14 @@ export default function Login() {
             <h1 className="text-3xl font-bold text-slate-900 mb-2">Sign in</h1>
             <p className="text-slate-600">to access PayrollPro</p>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-5 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Email/Username */}
