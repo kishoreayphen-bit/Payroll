@@ -9,6 +9,8 @@ import TenantRegister from './pages/TenantRegister'
 import OrganizationList from './pages/OrganizationList'
 import OrganizationSelect from './pages/OrganizationSelect'
 import Dashboard from './pages/Dashboard'
+import EmployeeList from './pages/EmployeeList'
+import AddEmployee from './pages/AddEmployee'
 import TestOrganizations from './pages/TestOrganizations'
 
 function App() {
@@ -48,6 +50,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employees"
+            element={
+              <ProtectedRoute>
+                <EmployeeList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employees/add"
+            element={
+              <ProtectedRoute>
+                <AddEmployee />
               </ProtectedRoute>
             }
           />

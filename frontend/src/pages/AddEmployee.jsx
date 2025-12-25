@@ -1,0 +1,847 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import {
+    ArrowRight,
+    Check,
+    User,
+    DollarSign,
+    FileText,
+    CreditCard,
+    X,
+    Users,
+    Settings,
+    Heart,
+    Shield,
+    Wallet,
+    FolderOpen,
+    BarChart3,
+    Menu,
+    LayoutDashboard,
+    Receipt,
+    ChevronRight,
+    Search,
+    Bell,
+    LogOut,
+    Building,
+    FileCheck
+} from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { useAuth } from '../contexts/AuthContext';
+import { api } from '../services/authService';
+
+const STEPS = [
+    { id: 1, name: 'Basic Details', icon: User },
+    { id: 2, name: 'Salary Details', icon: DollarSign },
+    { id: 3, name: 'Personal Details', icon: FileText },
+    { id: 4, name: 'Payment Information', icon: CreditCard }
+];
+
+export default function AddEmployee() {
+    const navigate = useNavigate();
+    const { user, logout } = useAuth();
+    const [currentStep, setCurrentStep] = useState(1);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [showCompanyMenu, setShowCompanyMenu] = useState(false);
+    const [organization, setOrganization] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    const { register, handleSubmit, formState: { errors } } = useForm({
+        defaultValues: {
+            firstName: '',
+            middleName: '',
+            lastName: '',
+            employeeId: '',
+            dateOfJoining: '',
+            workEmail: '',
+            mobileNumber: '',
+            isDirector: false,
+            gender: '',
+            workLocation: '',
+            designation: '',
+            department: '',
+            enablePortalAccess: false,
+            professionalTax: true,
+            basicSalary: '',
+            hra: '',
+            conveyanceAllowance: '',
+            medicalAllowance: '',
+            specialAllowance: '',
+            dateOfBirth: '',
+            personalEmail: '',
+            address: '',
+            city: '',
+            state: '',
+            pinCode: '',
+            emergencyContact: '',
+            emergencyContactName: '',
+            bankName: '',
+            accountNumber: '',
+            ifscCode: '',
+            panNumber: '',
+            aadharNumber: ''
+        }
+    });
+
+    // Fetch organization data
+    useEffect(() => {
+        const fetchOrganization = async () => {
+            try {
+                const selectedOrgId = localStorage.getItem('selectedOrganizationId');
+
+                if (!selectedOrgId) {
+                    window.location.href = '/select-organization';
+                    return;
+                }
+
+                const response = await api.get('/organizations');
+                if (response.data && response.data.length > 0) {
+                    const selectedOrg = response.data.find(org => org.id === parseInt(selectedOrgId));
+                    if (selectedOrg) {
+                        setOrganization(selectedOrg);
+                    } else {
+                        setOrganization(response.data[0]);
+                        localStorage.setItem('selectedOrganizationId', response.data[0].id);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching organization:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrganization();
+    }, []);
+
+    const onSubmit = (data) => {
+        console.log('Employee Data:', data);
+        // TODO: Call API to save employee
+        navigate('/employees/add');
+    };
+
+    const nextStep = () => {
+        if (currentStep < STEPS.length) {
+            setCurrentStep(currentStep + 1);
+        }
+    };
+
+    const prevStep = () => {
+        if (currentStep > 1) {
+            setCurrentStep(currentStep - 1);
+        }
+    };
+
+    const renderStepContent = () => {
+        switch (currentStep) {
+            case 1:
+                return <BasicDetailsStep register={register} errors={errors} />;
+            case 2:
+                return <SalaryDetailsStep register={register} errors={errors} />;
+            case 3:
+                return <PersonalDetailsStep register={register} errors={errors} />;
+            case 4:
+                return <PaymentInformationStep register={register} errors={errors} />;
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <div className="h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white flex overflow-hidden">
+            {/* Sidebar */}
+            <div
+                className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col fixed left-0 top-0 h-screen transition-all duration-300 shadow-2xl ${sidebarOpen ? 'w-56' : 'w-0'
+                    }`}
+                style={{ overflow: sidebarOpen ? 'visible' : 'hidden' }}
+            >
+                {sidebarOpen && (
+                    <>
+                        {/* Logo and Close Button */}
+                        <div className="p-4 border-b border-slate-700/50 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center">
+                                    <Receipt className="w-4 h-4 text-white" />
+                                </div>
+                                <span className="text-lg font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">Payroll</span>
+                            </div>
+                            <button
+                                onClick={() => setSidebarOpen(false)}
+                                className="p-1 hover:bg-slate-700/50 rounded-lg transition-colors"
+                                title="Close sidebar"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        {/* Navigation */}
+                        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+                            <Link to="/dashboard" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <LayoutDashboard className="w-4 h-4" />
+                                <span className="text-sm">Dashboard</span>
+                            </Link>
+
+                            <Link to="/employees/add" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md">
+                                <Users className="w-4 h-4" />
+                                <span className="text-sm">Employees</span>
+                            </Link>
+
+                            <Link to="/pay-runs" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <DollarSign className="w-4 h-4" />
+                                <span className="text-sm">Pay Runs</span>
+                            </Link>
+
+                            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer">
+                                <Shield className="w-4 h-4" />
+                                <span className="text-sm">Approvals</span>
+                                <ChevronRight className="w-3 h-3 ml-auto" />
+                            </div>
+
+                            <Link to="/form16" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <FileCheck className="w-4 h-4" />
+                                <span className="text-sm">Form 16</span>
+                            </Link>
+
+                            <Link to="/loans" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <Wallet className="w-4 h-4" />
+                                <span className="text-sm">Loans</span>
+                            </Link>
+
+                            <Link to="/giving" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <Heart className="w-4 h-4" />
+                                <span className="text-sm">Giving</span>
+                            </Link>
+
+                            <Link to="/documents" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <FolderOpen className="w-4 h-4" />
+                                <span className="text-sm">Documents</span>
+                            </Link>
+
+                            <Link to="/reports" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <BarChart3 className="w-4 h-4" />
+                                <span className="text-sm">Reports</span>
+                            </Link>
+
+                            <Link to="/settings" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <Settings className="w-4 h-4" />
+                                <span className="text-sm">Settings</span>
+                            </Link>
+                        </nav>
+                    </>
+                )}
+            </div>
+
+            {/* Main Content */}
+            <div className={`flex-1 flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'ml-56' : 'ml-0'}`}>
+                {/* Top Bar */}
+                <div className="bg-white/80 backdrop-blur-md border-b border-pink-100 px-4 py-2.5 flex-shrink-0 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 flex-1">
+                            {!sidebarOpen && (
+                                <button
+                                    onClick={() => setSidebarOpen(true)}
+                                    className="p-1.5 hover:bg-pink-50 rounded-lg transition-colors"
+                                    title="Open sidebar"
+                                >
+                                    <Menu className="w-4 h-4 text-slate-600" />
+                                </button>
+                            )}
+                            <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+                                Add Employee
+                            </h1>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {/* Close Button */}
+                            <button
+                                onClick={() => navigate('/employees')}
+                                className="p-2 hover:bg-pink-50 rounded-lg transition-colors"
+                                title="Close and return to employee list"
+                            >
+                                <X className="w-5 h-5 text-slate-600" />
+                            </button>
+
+                            {/* Company Dropdown */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => {
+                                        setShowCompanyMenu(!showCompanyMenu);
+                                        setShowProfileMenu(false);
+                                    }}
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-pink-50 rounded-xl hover:bg-pink-100 transition-colors"
+                                >
+                                    <span className="text-slate-700 font-medium text-xs">
+                                        {loading ? 'Loading...' : (organization?.companyName || 'No Company')}
+                                    </span>
+                                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                                </button>
+                            </div>
+
+                            {/* Profile Dropdown */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => {
+                                        setShowProfileMenu(!showProfileMenu);
+                                        setShowCompanyMenu(false);
+                                    }}
+                                    className="w-8 h-8 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg hover:shadow-xl transition-shadow"
+                                >
+                                    {user?.email?.charAt(0).toUpperCase()}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Form Content */}
+                <div className="flex-1 overflow-y-auto p-6">
+                    {/* Stepper */}
+                    <div className="max-w-4xl mx-auto mb-8">
+                        <div className="flex items-center justify-between">
+                            {STEPS.map((step, index) => {
+                                const Icon = step.icon;
+                                const isActive = currentStep === step.id;
+                                const isCompleted = currentStep > step.id;
+
+                                return (
+                                    <React.Fragment key={step.id}>
+                                        <div className="flex flex-col items-center gap-2">
+                                            <div className={`
+                                                w-10 h-10 rounded-full flex items-center justify-center transition-all
+                                                ${isActive ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg shadow-pink-500/30' : ''}
+                                                ${isCompleted ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' : ''}
+                                                ${!isActive && !isCompleted ? 'bg-slate-200 text-slate-400' : ''}
+                                            `}>
+                                                {isCompleted ? (
+                                                    <Check className="w-5 h-5" />
+                                                ) : (
+                                                    <Icon className="w-5 h-5" />
+                                                )}
+                                            </div>
+                                            <p className={`text-xs font-semibold ${isActive ? 'text-pink-600' : 'text-slate-600'}`}>
+                                                {step.name}
+                                            </p>
+                                        </div>
+                                        {index < STEPS.length - 1 && (
+                                            <div className={`flex-1 h-0.5 mx-4 transition-all ${currentStep > step.id ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-slate-200'
+                                                }`} />
+                                        )}
+                                    </React.Fragment>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Form */}
+                    <form onSubmit={handleSubmit(onSubmit)} className="max-w-4xl mx-auto">
+                        <div className="bg-white rounded-2xl shadow-xl border border-pink-100 p-6 mb-6">
+                            {renderStepContent()}
+                        </div>
+
+                        {/* Navigation Buttons */}
+                        <div className="flex items-center justify-between">
+                            <div>
+                                {currentStep > 1 && (
+                                    <Button
+                                        type="button"
+                                        onClick={prevStep}
+                                        className="border-2 border-pink-600 text-pink-600 bg-pink-50 hover:bg-pink-100"
+                                    >
+                                        Previous
+                                    </Button>
+                                )}
+                            </div>
+                            <div className="flex gap-3">
+                                {currentStep < STEPS.length ? (
+                                    <Button
+                                        type="button"
+                                        onClick={nextStep}
+                                        className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white shadow-lg shadow-pink-500/30"
+                                    >
+                                        Next
+                                        <ArrowRight className="w-4 h-4 ml-2" />
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        type="submit"
+                                        className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white shadow-lg shadow-pink-500/30"
+                                    >
+                                        <Check className="w-4 h-4 mr-2" />
+                                        Save Employee
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-pink-600 text-right mt-4">* indicates mandatory fields</p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Step Components (same as before)
+function BasicDetailsStep({ register, errors }) {
+    return (
+        <div className="space-y-6">
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Employee Name <span className="text-pink-600">*</span>
+                </label>
+                <div className="grid grid-cols-3 gap-4">
+                    <Input
+                        {...register('firstName', { required: 'First name is required' })}
+                        placeholder="First Name"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    <Input
+                        {...register('middleName')}
+                        placeholder="Middle Name"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    <Input
+                        {...register('lastName', { required: 'Last name is required' })}
+                        placeholder="Last Name"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                </div>
+                {errors.firstName && <p className="text-xs text-red-500 mt-1">{errors.firstName.message}</p>}
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Employee ID <span className="text-pink-600">*</span>
+                    </label>
+                    <Input
+                        {...register('employeeId', { required: 'Employee ID is required' })}
+                        placeholder="Enter Employee ID"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    {errors.employeeId && <p className="text-xs text-red-500 mt-1">{errors.employeeId.message}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Date of Joining <span className="text-pink-600">*</span>
+                    </label>
+                    <Input
+                        type="date"
+                        {...register('dateOfJoining', { required: 'Date of joining is required' })}
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    {errors.dateOfJoining && <p className="text-xs text-red-500 mt-1">{errors.dateOfJoining.message}</p>}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Work Email <span className="text-pink-600">*</span>
+                    </label>
+                    <Input
+                        type="email"
+                        {...register('workEmail', {
+                            required: 'Work email is required',
+                            pattern: {
+                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                message: 'Invalid email address'
+                            }
+                        })}
+                        placeholder="abc@xyz.com"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    {errors.workEmail && <p className="text-xs text-red-500 mt-1">{errors.workEmail.message}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Mobile Number
+                    </label>
+                    <Input
+                        type="tel"
+                        {...register('mobileNumber')}
+                        placeholder="Enter Mobile Number"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                </div>
+            </div>
+
+            <div className="flex items-center gap-2 p-3 bg-pink-50 rounded-lg">
+                <input
+                    type="checkbox"
+                    {...register('isDirector')}
+                    className="w-4 h-4 text-pink-600 border-pink-300 rounded focus:ring-pink-500"
+                />
+                <label className="text-sm text-slate-700">
+                    Employee is a Director/person with substantial interest in the company.
+                </label>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Gender <span className="text-pink-600">*</span>
+                    </label>
+                    <select
+                        {...register('gender', { required: 'Gender is required' })}
+                        className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                    >
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                    {errors.gender && <p className="text-xs text-red-500 mt-1">{errors.gender.message}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Work Location <span className="text-pink-600">*</span>
+                    </label>
+                    <select
+                        {...register('workLocation', { required: 'Work location is required' })}
+                        className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                    >
+                        <option value="">Select</option>
+                        <option value="head-office">Head Office</option>
+                        <option value="branch-1">Branch 1</option>
+                        <option value="branch-2">Branch 2</option>
+                        <option value="remote">Remote</option>
+                    </select>
+                    {errors.workLocation && <p className="text-xs text-red-500 mt-1">{errors.workLocation.message}</p>}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Designation <span className="text-pink-600">*</span>
+                    </label>
+                    <select
+                        {...register('designation', { required: 'Designation is required' })}
+                        className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                    >
+                        <option value="">Select</option>
+                        <option value="manager">Manager</option>
+                        <option value="developer">Developer</option>
+                        <option value="designer">Designer</option>
+                        <option value="analyst">Analyst</option>
+                        <option value="hr">HR</option>
+                    </select>
+                    {errors.designation && <p className="text-xs text-red-500 mt-1">{errors.designation.message}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Department <span className="text-pink-600">*</span>
+                    </label>
+                    <select
+                        {...register('department', { required: 'Department is required' })}
+                        className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                    >
+                        <option value="">Select</option>
+                        <option value="engineering">Engineering</option>
+                        <option value="design">Design</option>
+                        <option value="marketing">Marketing</option>
+                        <option value="sales">Sales</option>
+                        <option value="hr">Human Resources</option>
+                    </select>
+                    {errors.department && <p className="text-xs text-red-500 mt-1">{errors.department.message}</p>}
+                </div>
+            </div>
+
+            <div className="border-t border-pink-100 pt-6">
+                <div className="flex items-start gap-3 p-4 bg-pink-50 rounded-lg">
+                    <input
+                        type="checkbox"
+                        {...register('enablePortalAccess')}
+                        className="w-4 h-4 text-pink-600 border-pink-300 rounded focus:ring-pink-500 mt-1"
+                    />
+                    <div>
+                        <label className="text-sm font-semibold text-slate-700 block mb-1">
+                            Enable Portal Access
+                        </label>
+                        <p className="text-xs text-slate-600">
+                            The employee will be able to view payslips, submit their IT declaration and create reimbursement claims through the employee portal.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="border-t border-pink-100 pt-6">
+                <h3 className="text-lg font-bold text-slate-900 mb-2">Statutory Components</h3>
+                <p className="text-sm text-slate-600 mb-4">Enable the necessary benefits and tax applicable for this employee.</p>
+                <div className="flex items-center gap-2 p-3 bg-pink-50 rounded-lg">
+                    <input
+                        type="checkbox"
+                        {...register('professionalTax')}
+                        defaultChecked
+                        className="w-4 h-4 text-pink-600 border-pink-300 rounded focus:ring-pink-500"
+                    />
+                    <label className="text-sm font-semibold text-slate-700">
+                        Professional Tax
+                    </label>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function SalaryDetailsStep({ register, errors }) {
+    return (
+        <div className="space-y-6">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Salary Components</h3>
+
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Basic Salary <span className="text-pink-600">*</span>
+                    </label>
+                    <Input
+                        type="number"
+                        {...register('basicSalary', { required: 'Basic salary is required' })}
+                        placeholder="Enter amount"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    {errors.basicSalary && <p className="text-xs text-red-500 mt-1">{errors.basicSalary.message}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        HRA (House Rent Allowance)
+                    </label>
+                    <Input
+                        type="number"
+                        {...register('hra')}
+                        placeholder="Enter amount"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Conveyance Allowance
+                    </label>
+                    <Input
+                        type="number"
+                        {...register('conveyanceAllowance')}
+                        placeholder="Enter amount"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Medical Allowance
+                    </label>
+                    <Input
+                        type="number"
+                        {...register('medicalAllowance')}
+                        placeholder="Enter amount"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Special Allowance
+                </label>
+                <Input
+                    type="number"
+                    {...register('specialAllowance')}
+                    placeholder="Enter amount"
+                    className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                />
+            </div>
+        </div>
+    );
+}
+
+function PersonalDetailsStep({ register, errors }) {
+    return (
+        <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Date of Birth <span className="text-pink-600">*</span>
+                    </label>
+                    <Input
+                        type="date"
+                        {...register('dateOfBirth', { required: 'Date of birth is required' })}
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    {errors.dateOfBirth && <p className="text-xs text-red-500 mt-1">{errors.dateOfBirth.message}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Personal Email
+                    </label>
+                    <Input
+                        type="email"
+                        {...register('personalEmail')}
+                        placeholder="personal@email.com"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Address <span className="text-pink-600">*</span>
+                </label>
+                <textarea
+                    {...register('address', { required: 'Address is required' })}
+                    rows="3"
+                    placeholder="Enter full address"
+                    className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                />
+                {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address.message}</p>}
+            </div>
+
+            <div className="grid grid-cols-3 gap-6">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        City <span className="text-pink-600">*</span>
+                    </label>
+                    <Input
+                        {...register('city', { required: 'City is required' })}
+                        placeholder="Enter city"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    {errors.city && <p className="text-xs text-red-500 mt-1">{errors.city.message}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        State <span className="text-pink-600">*</span>
+                    </label>
+                    <Input
+                        {...register('state', { required: 'State is required' })}
+                        placeholder="Enter state"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    {errors.state && <p className="text-xs text-red-500 mt-1">{errors.state.message}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Pin Code <span className="text-pink-600">*</span>
+                    </label>
+                    <Input
+                        {...register('pinCode', { required: 'Pin code is required' })}
+                        placeholder="Enter pin code"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    {errors.pinCode && <p className="text-xs text-red-500 mt-1">{errors.pinCode.message}</p>}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Emergency Contact Name
+                    </label>
+                    <Input
+                        {...register('emergencyContactName')}
+                        placeholder="Enter name"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Emergency Contact Number
+                    </label>
+                    <Input
+                        type="tel"
+                        {...register('emergencyContact')}
+                        placeholder="Enter phone number"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function PaymentInformationStep({ register, errors }) {
+    return (
+        <div className="space-y-6">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Bank Details</h3>
+
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Bank Name <span className="text-pink-600">*</span>
+                    </label>
+                    <Input
+                        {...register('bankName', { required: 'Bank name is required' })}
+                        placeholder="Enter bank name"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    {errors.bankName && <p className="text-xs text-red-500 mt-1">{errors.bankName.message}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Account Number <span className="text-pink-600">*</span>
+                    </label>
+                    <Input
+                        {...register('accountNumber', { required: 'Account number is required' })}
+                        placeholder="Enter account number"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    {errors.accountNumber && <p className="text-xs text-red-500 mt-1">{errors.accountNumber.message}</p>}
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    IFSC Code <span className="text-pink-600">*</span>
+                </label>
+                <Input
+                    {...register('ifscCode', { required: 'IFSC code is required' })}
+                    placeholder="Enter IFSC code"
+                    className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                />
+                {errors.ifscCode && <p className="text-xs text-red-500 mt-1">{errors.ifscCode.message}</p>}
+            </div>
+
+            <div className="border-t border-pink-100 pt-6 mt-6">
+                <h3 className="text-lg font-bold text-slate-900 mb-4">Tax Information</h3>
+
+                <div className="grid grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">
+                            PAN Number <span className="text-pink-600">*</span>
+                        </label>
+                        <Input
+                            {...register('panNumber', {
+                                required: 'PAN number is required',
+                                pattern: {
+                                    value: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+                                    message: 'Invalid PAN format'
+                                }
+                            })}
+                            placeholder="ABCDE1234F"
+                            className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                        />
+                        {errors.panNumber && <p className="text-xs text-red-500 mt-1">{errors.panNumber.message}</p>}
+                    </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">
+                            Aadhar Number
+                        </label>
+                        <Input
+                            {...register('aadharNumber', {
+                                pattern: {
+                                    value: /^[0-9]{12}$/,
+                                    message: 'Aadhar must be 12 digits'
+                                }
+                            })}
+                            placeholder="Enter 12-digit Aadhar number"
+                            className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                        />
+                        {errors.aadharNumber && <p className="text-xs text-red-500 mt-1">{errors.aadharNumber.message}</p>}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
