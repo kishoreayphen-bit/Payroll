@@ -155,13 +155,6 @@ export default function Dashboard() {
 
                         {/* Navigation */}
                         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                            <div className="mb-4">
-                                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg shadow-pink-500/30">
-                                    <LayoutDashboard className="w-5 h-5" />
-                                    <span className="font-semibold">Getting Started</span>
-                                </div>
-                            </div>
-
                             <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md">
                                 <LayoutDashboard className="w-5 h-5" />
                                 <span>Dashboard</span>
@@ -218,7 +211,7 @@ export default function Dashboard() {
             </div>
 
             {/* Main Content - With left margin for fixed sidebar */}
-            <div className={`flex-1 flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
+            <div className={`flex-1 flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'ml-56' : 'ml-0'}`}>
                 {/* Top Bar - Fixed */}
                 <div className="bg-white/80 backdrop-blur-md border-b border-pink-100 px-6 py-4 flex-shrink-0 shadow-sm">
                     <div className="flex items-center justify-between">

@@ -149,7 +149,7 @@ export default function EmployeeList() {
         <div className="h-screen bg-slate-50 flex overflow-hidden">
             {/* Sidebar */}
             <div
-                className={`bg-slate-900 text-white flex flex-col fixed left-0 top-0 h-screen transition-all duration-300 shadow-xl ${sidebarOpen ? 'w-52' : 'w-0'
+                className={`bg-slate-900 text-white flex flex-col fixed left-0 top-0 h-screen transition-all duration-300 shadow-xl ${sidebarOpen ? 'w-56' : 'w-0'
                     }`}
                 style={{ overflow: sidebarOpen ? 'visible' : 'hidden' }}
             >
@@ -218,7 +218,7 @@ export default function EmployeeList() {
             </div>
 
             {/* Main Content */}
-            <div className={`flex-1 flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'ml-52' : 'ml-0'}`}>
+            <div className={`flex-1 flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'ml-56' : 'ml-0'}`}>
                 {/* Top Bar */}
                 <div className="bg-white border-b border-slate-200 px-4 py-2 flex-shrink-0">
                     <div className="flex items-center justify-between">
