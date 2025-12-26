@@ -417,6 +417,7 @@ export default function EmployeeList() {
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
                         )}
                     </div>
                 </div>
