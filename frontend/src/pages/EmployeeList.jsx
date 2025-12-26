@@ -332,8 +332,9 @@ export default function EmployeeList() {
                                 )}
                             </div>
                         ) : (
-                            <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-                                <table className="w-full">
+                            <div className="bg-white rounded-lg border border-slate-200">
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-[1200px] w-full">
                                     <thead className="bg-slate-50 border-b border-slate-200">
                                         <tr>
                                             <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Employee</th>
@@ -343,7 +344,7 @@ export default function EmployeeList() {
                                             <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Contact</th>
                                             <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Salary</th>
                                             <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
-                                            <th className="px-4 py-2.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
+                                            <th className="px-4 pr-6 py-2.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap w-32">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-200">
@@ -389,7 +390,7 @@ export default function EmployeeList() {
                                                         {employee.status}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-4 pr-6 py-3 w-32">
                                                     <div className="flex items-center justify-end gap-1">
                                                         <button
                                                             className="p-1.5 hover:bg-slate-100 rounded transition-colors"
