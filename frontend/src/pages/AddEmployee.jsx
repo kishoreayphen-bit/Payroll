@@ -160,73 +160,73 @@ export default function AddEmployee() {
                 {sidebarOpen && (
                     <>
                         {/* Logo and Close Button */}
-                        <div className="p-4 border-b border-slate-700/50 flex items-center justify-between">
+                        <div className="p-6 border-b border-slate-700/50 flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center">
-                                    <Receipt className="w-4 h-4 text-white" />
+                                <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center">
+                                    <Receipt className="w-5 h-5 text-white" />
                                 </div>
-                                <span className="text-lg font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">Payroll</span>
+                                <span className="text-xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">Payroll</span>
                             </div>
                             <button
                                 onClick={() => setSidebarOpen(false)}
-                                className="p-1 hover:bg-slate-700/50 rounded-lg transition-colors"
+                                className="p-1.5 hover:bg-slate-700/50 rounded-lg transition-colors"
                                 title="Close sidebar"
                             >
-                                <X className="w-4 h-4" />
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
 
                         {/* Navigation */}
-                        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-                            <Link to="/dashboard" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <LayoutDashboard className="w-4 h-4" />
-                                <span className="text-sm">Dashboard</span>
+                        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                            <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <LayoutDashboard className="w-5 h-5" />
+                                <span>Dashboard</span>
                             </Link>
 
-                            <Link to="/employees/add" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md">
-                                <Users className="w-4 h-4" />
-                                <span className="text-sm">Employees</span>
+                            <Link to="/employees" className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md">
+                                <Users className="w-5 h-5" />
+                                <span>Employees</span>
                             </Link>
 
-                            <Link to="/pay-runs" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <DollarSign className="w-4 h-4" />
-                                <span className="text-sm">Pay Runs</span>
+                            <Link to="/pay-runs" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <DollarSign className="w-5 h-5" />
+                                <span>Pay Runs</span>
                             </Link>
 
-                            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer">
-                                <Shield className="w-4 h-4" />
-                                <span className="text-sm">Approvals</span>
-                                <ChevronRight className="w-3 h-3 ml-auto" />
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer">
+                                <Shield className="w-5 h-5" />
+                                <span>Approvals</span>
+                                <ChevronRight className="w-4 h-4 ml-auto" />
                             </div>
 
-                            <Link to="/form16" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <FileCheck className="w-4 h-4" />
-                                <span className="text-sm">Form 16</span>
+                            <Link to="/form16" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <FileCheck className="w-5 h-5" />
+                                <span>Form 16</span>
                             </Link>
 
-                            <Link to="/loans" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Wallet className="w-4 h-4" />
-                                <span className="text-sm">Loans</span>
+                            <Link to="/loans" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <Wallet className="w-5 h-5" />
+                                <span>Loans</span>
                             </Link>
 
-                            <Link to="/giving" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Heart className="w-4 h-4" />
-                                <span className="text-sm">Giving</span>
+                            <Link to="/giving" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <Heart className="w-5 h-5" />
+                                <span>Giving</span>
                             </Link>
 
-                            <Link to="/documents" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <FolderOpen className="w-4 h-4" />
-                                <span className="text-sm">Documents</span>
+                            <Link to="/documents" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <FolderOpen className="w-5 h-5" />
+                                <span>Documents</span>
                             </Link>
 
-                            <Link to="/reports" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <BarChart3 className="w-4 h-4" />
-                                <span className="text-sm">Reports</span>
+                            <Link to="/reports" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <BarChart3 className="w-5 h-5" />
+                                <span>Reports</span>
                             </Link>
 
-                            <Link to="/settings" className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Settings className="w-4 h-4" />
-                                <span className="text-sm">Settings</span>
+                            <Link to="/settings" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <Settings className="w-5 h-5" />
+                                <span>Settings</span>
                             </Link>
                         </nav>
                     </>

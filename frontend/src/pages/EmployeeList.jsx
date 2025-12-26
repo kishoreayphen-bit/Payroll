@@ -149,67 +149,67 @@ export default function EmployeeList() {
         <div className="h-screen bg-slate-50 flex overflow-hidden">
             {/* Sidebar */}
             <div
-                className={`bg-slate-900 text-white flex flex-col fixed left-0 top-0 h-screen transition-all duration-300 shadow-xl ${sidebarOpen ? 'w-56' : 'w-0'
+                className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col fixed left-0 top-0 h-screen transition-all duration-300 shadow-2xl ${sidebarOpen ? 'w-56' : 'w-0'
                     }`}
                 style={{ overflow: sidebarOpen ? 'visible' : 'hidden' }}
             >
                 {sidebarOpen && (
                     <>
                         {/* Logo */}
-                        <div className="p-3 border-b border-slate-700/50 flex items-center justify-between">
+                        <div className="p-6 border-b border-slate-700/50 flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 bg-rose-500 rounded-md flex items-center justify-center">
-                                    <Receipt className="w-3.5 h-3.5 text-white" />
+                                <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center">
+                                    <Receipt className="w-5 h-5 text-white" />
                                 </div>
-                                <span className="text-base font-semibold text-white">Payroll</span>
+                                <span className="text-xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">Payroll</span>
                             </div>
                             <button
                                 onClick={() => setSidebarOpen(false)}
-                                className="p-1 hover:bg-slate-700/50 rounded transition-colors"
+                                className="p-1.5 hover:bg-slate-700/50 rounded-lg transition-colors"
                             >
-                                <X className="w-3.5 h-3.5" />
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
 
                         {/* Navigation */}
-                        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
-                            <Link to="/dashboard" className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all text-sm">
-                                <LayoutDashboard className="w-3.5 h-3.5" />
+                        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                            <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <LayoutDashboard className="w-5 h-5" />
                                 <span>Dashboard</span>
                             </Link>
 
-                            <Link to="/employees" className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                                <Users className="w-3.5 h-3.5" />
-                                <span className="text-sm">Employees</span>
+                            <Link to="/employees" className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md">
+                                <Users className="w-5 h-5" />
+                                <span>Employees</span>
                             </Link>
 
-                            <Link to="/pay-runs" className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all text-sm">
-                                <DollarSign className="w-3.5 h-3.5" />
+                            <Link to="/pay-runs" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <DollarSign className="w-5 h-5" />
                                 <span>Pay Runs</span>
                             </Link>
 
-                            <Link to="/form16" className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all text-sm">
-                                <FileCheck className="w-3.5 h-3.5" />
+                            <Link to="/form16" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <FileCheck className="w-5 h-5" />
                                 <span>Form 16</span>
                             </Link>
 
-                            <Link to="/loans" className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all text-sm">
-                                <Wallet className="w-3.5 h-3.5" />
+                            <Link to="/loans" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <Wallet className="w-5 h-5" />
                                 <span>Loans</span>
                             </Link>
 
-                            <Link to="/documents" className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all text-sm">
-                                <FolderOpen className="w-3.5 h-3.5" />
+                            <Link to="/documents" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <FolderOpen className="w-5 h-5" />
                                 <span>Documents</span>
                             </Link>
 
-                            <Link to="/reports" className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all text-sm">
-                                <BarChart3 className="w-3.5 h-3.5" />
+                            <Link to="/reports" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <BarChart3 className="w-5 h-5" />
                                 <span>Reports</span>
                             </Link>
 
-                            <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all text-sm">
-                                <Settings className="w-3.5 h-3.5" />
+                            <Link to="/settings" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <Settings className="w-5 h-5" />
                                 <span>Settings</span>
                             </Link>
                         </nav>
