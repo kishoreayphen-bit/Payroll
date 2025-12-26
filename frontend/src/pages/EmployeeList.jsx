@@ -183,6 +183,12 @@ export default function EmployeeList() {
                                 <span>Employees</span>
                             </Link>
 
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer">
+                                <Shield className="w-5 h-5" />
+                                <span>Approvals</span>
+                                <ChevronRight className="w-4 h-4 ml-auto" />
+                            </div>
+
                             <Link to="/pay-runs" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
                                 <DollarSign className="w-5 h-5" />
                                 <span>Pay Runs</span>
@@ -196,6 +202,11 @@ export default function EmployeeList() {
                             <Link to="/loans" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
                                 <Wallet className="w-5 h-5" />
                                 <span>Loans</span>
+                            </Link>
+
+                            <Link to="/giving" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
+                                <Heart className="w-5 h-5" />
+                                <span>Giving</span>
                             </Link>
 
                             <Link to="/documents" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
@@ -218,11 +229,14 @@ export default function EmployeeList() {
             </div>
 
             {/* Main Content */}
-            <div className={`flex-1 flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'ml-56' : 'ml-0'}`}>
+            <div
+                className={`flex-1 min-w-0 flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'ml-56' : 'ml-0'}`}
+                style={{ width: sidebarOpen ? 'calc(100vw - 14rem)' : '100vw' }}
+            >
                 {/* Top Bar */}
                 <div className="bg-white border-b border-slate-200 px-4 py-2 flex-shrink-0">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between min-w-0">
+                        <div className="flex items-center gap-3 min-w-0">
                             {!sidebarOpen && (
                                 <button
                                     onClick={() => setSidebarOpen(true)}
@@ -264,7 +278,7 @@ export default function EmployeeList() {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto p-4 min-w-0">
                     <div className="max-w-full">
                         {/* Actions Bar */}
                         <div className="mb-3 flex items-center justify-between gap-3">
