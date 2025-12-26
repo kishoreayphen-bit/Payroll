@@ -72,8 +72,13 @@ export default function AddEmployee() {
             hraMonthly: '',
             fixedAllowanceMonthly: '',
             dateOfBirth: '',
+            age: '',
+            fatherName: '',
             personalEmail: '',
+            differentlyAbledType: 'none',
             address: '',
+            addressLine1: '',
+            addressLine2: '',
             city: '',
             state: '',
             pinCode: '',
@@ -82,6 +87,7 @@ export default function AddEmployee() {
             bankName: '',
             accountNumber: '',
             ifscCode: '',
+            paymentMethod: 'bank_transfer',
             panNumber: '',
             aadharNumber: ''
         }
@@ -143,9 +149,9 @@ export default function AddEmployee() {
             case 2:
                 return <SalaryDetailsStep register={register} errors={errors} watch={watch} setValue={setValue} />;
             case 3:
-                return <PersonalDetailsStep register={register} errors={errors} />;
+                return <PersonalDetailsStep register={register} errors={errors} watch={watch} setValue={setValue} />;
             case 4:
-                return <PaymentInformationStep register={register} errors={errors} />;
+                return <PaymentInformationStep register={register} errors={errors} watch={watch} />;
             default:
                 return null;
         }
@@ -688,7 +694,17 @@ function SalaryDetailsStep({ register, errors, watch, setValue }) {
     );
 }
 
-function PersonalDetailsStep({ register, errors }) {
+function PersonalDetailsStep({ register, errors, watch, setValue }) {
+    const dob = watch('dateOfBirth');
+    useEffect(() => {
+        if (!dob) { setValue('age', ''); return; }
+        const birth = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const m = today.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) { age--; }
+        setValue('age', age > 0 ? String(age) : '0');
+    }, [dob, setValue]);
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-2 gap-6">
@@ -705,12 +721,66 @@ function PersonalDetailsStep({ register, errors }) {
                 </div>
                 <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Personal Email
+                        Age
+                    </label>
+                    <Input
+                        readOnly
+                        {...register('age')}
+                        placeholder="0"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500 bg-slate-50"
+                    />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Father's Name <span className="text-pink-600">*</span>
+                    </label>
+                    <Input
+                        {...register('fatherName', { required: "Father's name is required" })}
+                        placeholder="Enter father's name"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    {errors.fatherName && <p className="text-xs text-red-500 mt-1">{errors.fatherName.message}</p>}
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        PAN
+                    </label>
+                    <Input
+                        {...register('panNumber', { pattern: { value: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, message: 'Invalid PAN format' } })}
+                        placeholder="AAAAA0000A"
+                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    {errors.panNumber && <p className="text-xs text-red-500 mt-1">{errors.panNumber.message}</p>}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Differently Abled Type
+                    </label>
+                    <select
+                        {...register('differentlyAbledType')}
+                        className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                    >
+                        <option value="none">None</option>
+                        <option value="physical">Physical Disability</option>
+                        <option value="visual">Visual Impairment</option>
+                        <option value="hearing">Hearing Impairment</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Personal Email Address
                     </label>
                     <Input
                         type="email"
                         {...register('personalEmail')}
-                        placeholder="personal@email.com"
+                        placeholder="abc@xyz.com"
                         className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
                     />
                 </div>
@@ -718,161 +788,123 @@ function PersonalDetailsStep({ register, errors }) {
 
             <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Address <span className="text-pink-600">*</span>
+                    Residential Address
                 </label>
-                <textarea
-                    {...register('address', { required: 'Address is required' })}
-                    rows="3"
-                    placeholder="Enter full address"
-                    className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                <Input
+                    {...register('addressLine1')}
+                    placeholder="Address Line 1"
+                    className="mb-3 border-pink-200 focus:ring-pink-500 focus:border-pink-500"
                 />
-                {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address.message}</p>}
-            </div>
-
-            <div className="grid grid-cols-3 gap-6">
-                <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        City <span className="text-pink-600">*</span>
-                    </label>
+                <Input
+                    {...register('addressLine2')}
+                    placeholder="Address Line 2"
+                    className="mb-3 border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                />
+                <div className="grid grid-cols-3 gap-6">
                     <Input
-                        {...register('city', { required: 'City is required' })}
-                        placeholder="Enter city"
+                        {...register('city')}
+                        placeholder="City"
                         className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
                     />
-                    {errors.city && <p className="text-xs text-red-500 mt-1">{errors.city.message}</p>}
-                </div>
-                <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        State <span className="text-pink-600">*</span>
-                    </label>
+                    <select
+                        {...register('state')}
+                        className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                    >
+                        <option value="">State</option>
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Telangana">Telangana</option>
+                        <option value="Karnataka">Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Other">Other</option>
+                    </select>
                     <Input
-                        {...register('state', { required: 'State is required' })}
-                        placeholder="Enter state"
-                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
-                    />
-                    {errors.state && <p className="text-xs text-red-500 mt-1">{errors.state.message}</p>}
-                </div>
-                <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Pin Code <span className="text-pink-600">*</span>
-                    </label>
-                    <Input
-                        {...register('pinCode', { required: 'Pin code is required' })}
-                        placeholder="Enter pin code"
+                        {...register('pinCode', { pattern: { value: /^[0-9]{6}$/, message: 'PIN must be 6 digits' } })}
+                        placeholder="PIN Code"
                         className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
                     />
                     {errors.pinCode && <p className="text-xs text-red-500 mt-1">{errors.pinCode.message}</p>}
-                </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Emergency Contact Name
-                    </label>
-                    <Input
-                        {...register('emergencyContactName')}
-                        placeholder="Enter name"
-                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Emergency Contact Number
-                    </label>
-                    <Input
-                        type="tel"
-                        {...register('emergencyContact')}
-                        placeholder="Enter phone number"
-                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
-                    />
                 </div>
             </div>
         </div>
     );
 }
 
-function PaymentInformationStep({ register, errors }) {
+function PaymentInformationStep({ register, errors, watch }) {
+    const paymentMethod = watch('paymentMethod');
     return (
         <div className="space-y-6">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Bank Details</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-4">How would you like to pay this employee? <span className="text-pink-600">*</span></h3>
 
-            <div className="grid grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Bank Name <span className="text-pink-600">*</span>
-                    </label>
-                    <Input
-                        {...register('bankName', { required: 'Bank name is required' })}
-                        placeholder="Enter bank name"
-                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
-                    />
-                    {errors.bankName && <p className="text-xs text-red-500 mt-1">{errors.bankName.message}</p>}
-                </div>
-                <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Account Number <span className="text-pink-600">*</span>
-                    </label>
-                    <Input
-                        {...register('accountNumber', { required: 'Account number is required' })}
-                        placeholder="Enter account number"
-                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
-                    />
-                    {errors.accountNumber && <p className="text-xs text-red-500 mt-1">{errors.accountNumber.message}</p>}
-                </div>
-            </div>
-
-            <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    IFSC Code <span className="text-pink-600">*</span>
+            <div className="space-y-3">
+                <label className={`flex items-start gap-4 p-4 rounded-xl border ${paymentMethod === 'direct_deposit' ? 'border-pink-400 bg-pink-50' : 'border-pink-100'} cursor-pointer`}>
+                    <input type="radio" value="direct_deposit" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
+                    <div>
+                        <div className="font-semibold text-slate-900">Direct Deposit (Automated Process)</div>
+                        <div className="text-sm text-slate-600">Initiate payment in the system once the pay run is approved</div>
+                    </div>
+                    <span className="ml-auto text-xs text-pink-600">Configure Now</span>
                 </label>
-                <Input
-                    {...register('ifscCode', { required: 'IFSC code is required' })}
-                    placeholder="Enter IFSC code"
-                    className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
-                />
-                {errors.ifscCode && <p className="text-xs text-red-500 mt-1">{errors.ifscCode.message}</p>}
+
+                <label className={`flex items-start gap-4 p-4 rounded-xl border ${paymentMethod === 'bank_transfer' ? 'border-pink-400 bg-pink-50' : 'border-pink-100'} cursor-pointer`}>
+                    <input type="radio" value="bank_transfer" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
+                    <div>
+                        <div className="font-semibold text-slate-900">Bank Transfer (Manual Process)</div>
+                        <div className="text-sm text-slate-600">Download Bank Advice and process the payment through your bank's website</div>
+                    </div>
+                </label>
+
+                <label className={`flex items-start gap-4 p-4 rounded-xl border ${paymentMethod === 'cheque' ? 'border-pink-400 bg-pink-50' : 'border-pink-100'} cursor-pointer`}>
+                    <input type="radio" value="cheque" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
+                    <div>
+                        <div className="font-semibold text-slate-900">Cheque</div>
+                    </div>
+                </label>
+
+                <label className={`flex items-start gap-4 p-4 rounded-xl border ${paymentMethod === 'cash' ? 'border-pink-400 bg-pink-50' : 'border-pink-100'} cursor-pointer`}>
+                    <input type="radio" value="cash" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
+                    <div>
+                        <div className="font-semibold text-slate-900">Cash</div>
+                    </div>
+                </label>
+                {errors.paymentMethod && <p className="text-xs text-red-500">{errors.paymentMethod.message}</p>}
             </div>
 
-            <div className="border-t border-pink-100 pt-6 mt-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Tax Information</h3>
-
-                <div className="grid grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            PAN Number <span className="text-pink-600">*</span>
-                        </label>
-                        <Input
-                            {...register('panNumber', {
-                                required: 'PAN number is required',
-                                pattern: {
-                                    value: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
-                                    message: 'Invalid PAN format'
-                                }
-                            })}
-                            placeholder="ABCDE1234F"
-                            className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
-                        />
-                        {errors.panNumber && <p className="text-xs text-red-500 mt-1">{errors.panNumber.message}</p>}
+            {paymentMethod === 'bank_transfer' && (
+                <div className="border-t border-pink-100 pt-6">
+                    <h4 className="text-md font-bold text-slate-900 mb-4">Bank Details</h4>
+                    <div className="grid grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">Bank Name <span className="text-pink-600">*</span></label>
+                            <Input
+                                {...register('bankName', { validate: (v) => paymentMethod !== 'bank_transfer' || !!v || 'Bank name is required' })}
+                                placeholder="Enter bank name"
+                                className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                            />
+                            {errors.bankName && <p className="text-xs text-red-500 mt-1">{errors.bankName.message}</p>}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">Account Number <span className="text-pink-600">*</span></label>
+                            <Input
+                                {...register('accountNumber', { validate: (v) => paymentMethod !== 'bank_transfer' || !!v || 'Account number is required' })}
+                                placeholder="Enter account number"
+                                className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
+                            />
+                            {errors.accountNumber && <p className="text-xs text-red-500 mt-1">{errors.accountNumber.message}</p>}
+                        </div>
                     </div>
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            Aadhar Number
-                        </label>
+                    <div className="mt-4">
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">IFSC Code <span className="text-pink-600">*</span></label>
                         <Input
-                            {...register('aadharNumber', {
-                                pattern: {
-                                    value: /^[0-9]{12}$/,
-                                    message: 'Aadhar must be 12 digits'
-                                }
-                            })}
-                            placeholder="Enter 12-digit Aadhar number"
+                            {...register('ifscCode', { validate: (v) => paymentMethod !== 'bank_transfer' || !!v || 'IFSC code is required' })}
+                            placeholder="Enter IFSC code"
                             className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
                         />
-                        {errors.aadharNumber && <p className="text-xs text-red-500 mt-1">{errors.aadharNumber.message}</p>}
+                        {errors.ifscCode && <p className="text-xs text-red-500 mt-1">{errors.ifscCode.message}</p>}
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }
