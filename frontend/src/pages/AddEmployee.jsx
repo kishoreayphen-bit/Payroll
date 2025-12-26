@@ -48,7 +48,7 @@ export default function AddEmployee() {
     const [organization, setOrganization] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const { register, handleSubmit, formState: { errors } } = useForm({
+    const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm({
         defaultValues: {
             firstName: '',
             middleName: '',
@@ -64,11 +64,13 @@ export default function AddEmployee() {
             department: '',
             enablePortalAccess: false,
             professionalTax: true,
-            basicSalary: '',
-            hra: '',
-            conveyanceAllowance: '',
-            medicalAllowance: '',
-            specialAllowance: '',
+            annualCtc: '',
+            basicPercentOfCtc: 50,
+            hraPercentOfBasic: 50,
+            conveyanceAllowanceMonthly: '',
+            basicMonthly: '',
+            hraMonthly: '',
+            fixedAllowanceMonthly: '',
             dateOfBirth: '',
             personalEmail: '',
             address: '',
@@ -139,7 +141,7 @@ export default function AddEmployee() {
             case 1:
                 return <BasicDetailsStep register={register} errors={errors} />;
             case 2:
-                return <SalaryDetailsStep register={register} errors={errors} />;
+                return <SalaryDetailsStep register={register} errors={errors} watch={watch} setValue={setValue} />;
             case 3:
                 return <PersonalDetailsStep register={register} errors={errors} />;
             case 4:
@@ -586,72 +588,101 @@ function BasicDetailsStep({ register, errors }) {
     );
 }
 
-function SalaryDetailsStep({ register, errors }) {
+function SalaryDetailsStep({ register, errors, watch, setValue }) {
+    const annualCtc = parseFloat(watch('annualCtc')) || 0;
+    const basicPercentOfCtc = parseFloat(watch('basicPercentOfCtc')) || 0;
+    const hraPercentOfBasic = parseFloat(watch('hraPercentOfBasic')) || 0;
+    const conveyanceAllowanceMonthly = parseFloat(watch('conveyanceAllowanceMonthly')) || 0;
+    const monthlyCtc = annualCtc > 0 ? annualCtc / 12 : 0;
+    const basicMonthlyCalc = monthlyCtc * (basicPercentOfCtc / 100);
+    const hraMonthlyCalc = basicMonthlyCalc * (hraPercentOfBasic / 100);
+    const fixedAllowanceMonthlyCalc = Math.max(0, monthlyCtc - (basicMonthlyCalc + hraMonthlyCalc + conveyanceAllowanceMonthly));
+    React.useEffect(() => {
+        setValue('basicMonthly', Number.isFinite(basicMonthlyCalc) ? basicMonthlyCalc.toFixed(2) : '0.00');
+        setValue('hraMonthly', Number.isFinite(hraMonthlyCalc) ? hraMonthlyCalc.toFixed(2) : '0.00');
+        setValue('fixedAllowanceMonthly', Number.isFinite(fixedAllowanceMonthlyCalc) ? fixedAllowanceMonthlyCalc.toFixed(2) : '0.00');
+    }, [annualCtc, basicPercentOfCtc, hraPercentOfBasic, conveyanceAllowanceMonthly, setValue, basicMonthlyCalc, hraMonthlyCalc, fixedAllowanceMonthlyCalc]);
     return (
         <div className="space-y-6">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Salary Components</h3>
-
-            <div className="grid grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Basic Salary <span className="text-pink-600">*</span>
-                    </label>
-                    <Input
-                        type="number"
-                        {...register('basicSalary', { required: 'Basic salary is required' })}
-                        placeholder="Enter amount"
-                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
-                    />
-                    {errors.basicSalary && <p className="text-xs text-red-500 mt-1">{errors.basicSalary.message}</p>}
-                </div>
-                <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        HRA (House Rent Allowance)
-                    </label>
-                    <Input
-                        type="number"
-                        {...register('hra')}
-                        placeholder="Enter amount"
-                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
-                    />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Conveyance Allowance
-                    </label>
-                    <Input
-                        type="number"
-                        {...register('conveyanceAllowance')}
-                        placeholder="Enter amount"
-                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Medical Allowance
-                    </label>
-                    <Input
-                        type="number"
-                        {...register('medicalAllowance')}
-                        placeholder="Enter amount"
-                        className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
-                    />
-                </div>
-            </div>
-
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Salary Details</h3>
+            {/* Hidden fields to submit computed values */}
+            <input type="hidden" {...register('basicMonthly')} value={(basicMonthlyCalc || 0).toFixed(2)} />
+            <input type="hidden" {...register('hraMonthly')} value={(hraMonthlyCalc || 0).toFixed(2)} />
+            <input type="hidden" {...register('fixedAllowanceMonthly')} value={(fixedAllowanceMonthlyCalc || 0).toFixed(2)} />
             <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Special Allowance
-                </label>
-                <Input
-                    type="number"
-                    {...register('specialAllowance')}
-                    placeholder="Enter amount"
-                    className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
-                />
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Annual CTC <span className="text-pink-600">*</span></label>
+                <div className="flex items-center gap-2">
+                    <div className="relative w-full max-w-xs">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">₹</span>
+                        <Input type="number" step="0.01" min="0" placeholder="0"
+                            {...register('annualCtc', { required: 'Annual CTC is required' })}
+                            className="pl-7 border-pink-200 focus:ring-pink-500 focus:border-pink-500" />
+                    </div>
+                    <span className="text-sm text-slate-600">per year</span>
+                </div>
+                {errors.annualCtc && <p className="text-xs text-red-500 mt-1">{errors.annualCtc.message}</p>}
+            </div>
+            <div className="bg-white rounded-2xl border border-pink-100">
+                <div className="grid grid-cols-4 gap-4 px-4 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider bg-slate-50 border-b border-pink-100">
+                    <div>Salary Components</div>
+                    <div>Calculation Type</div>
+                    <div className="text-right">Monthly Amount</div>
+                    <div className="text-right">Annual Amount</div>
+                </div>
+                <div className="px-4 py-3 text-xs text-slate-500">Earnings</div>
+                <div className="divide-y divide-slate-100">
+                    <div className="grid grid-cols-4 gap-4 px-4 py-3 items-center">
+                        <div className="text-sm text-slate-900">Basic</div>
+                        <div className="flex items-center gap-2">
+                            <Input type="number" step="0.01" min="0" max="100" {...register('basicPercentOfCtc')} className="w-24 border-pink-200 focus:ring-pink-500 focus:border-pink-500" />
+                            <span className="text-sm text-slate-600">% of CTC</span>
+                        </div>
+                        <div className="text-right">
+                            <Input readOnly value={(basicMonthlyCalc || 0).toFixed(2)} className="w-28 text-right bg-slate-50" />
+                        </div>
+                        <div className="text-right">{(basicMonthlyCalc * 12).toFixed(2)}</div>
+                    </div>
+                    <div className="grid grid-cols-4 gap-4 px-4 py-3 items-center">
+                        <div className="text-sm text-slate-900">House Rent Allowance</div>
+                        <div className="flex items-center gap-2">
+                            <Input type="number" step="0.01" min="0" max="100" {...register('hraPercentOfBasic')} className="w-24 border-pink-200 focus:ring-pink-500 focus:border-pink-500" />
+                            <span className="text-sm text-slate-600">% of Basic</span>
+                        </div>
+                        <div className="text-right">
+                            <Input readOnly value={(hraMonthlyCalc || 0).toFixed(2)} className="w-28 text-right bg-slate-50" />
+                        </div>
+                        <div className="text-right">{(hraMonthlyCalc * 12).toFixed(2)}</div>
+                    </div>
+                    <div className="grid grid-cols-4 gap-4 px-4 py-3 items-center">
+                        <div className="text-sm text-slate-900">Conveyance Allowance</div>
+                        <div className="text-sm text-slate-600">Fixed amount</div>
+                        <div className="text-right">
+                            <Input type="number" step="0.01" min="0" {...register('conveyanceAllowanceMonthly')} className="w-28 text-right border-pink-200 focus:ring-pink-500 focus:border-pink-500" />
+                        </div>
+                        <div className="text-right">{(conveyanceAllowanceMonthly * 12).toFixed(2)}</div>
+                    </div>
+                    <div className="grid grid-cols-4 gap-4 px-4 py-3 items-center">
+                        <div className="text-sm text-slate-900">Fixed Allowance</div>
+                        <div className="text-sm text-slate-600">Fixed amount</div>
+                        <div className="text-right">
+                            <Input readOnly value={(fixedAllowanceMonthlyCalc || 0).toFixed(2)} className="w-28 text-right bg-slate-50" />
+                        </div>
+                        <div className="text-right">{(fixedAllowanceMonthlyCalc * 12).toFixed(2)}</div>
+                    </div>
+                </div>
+                <div className="px-4 py-3 bg-slate-50 border-t border-pink-100 flex items-center justify-between">
+                    <div className="font-semibold text-slate-900">Cost to Company</div>
+                    <div className="flex items-center gap-8">
+                        <div className="text-right">
+                            <div className="text-xs text-slate-500">Monthly</div>
+                            <div className="font-semibold">₹{(monthlyCtc || 0).toFixed(2)}</div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-xs text-slate-500">Annual</div>
+                            <div className="font-semibold">₹{(annualCtc || 0).toFixed(2)}</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
