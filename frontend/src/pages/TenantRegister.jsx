@@ -441,7 +441,7 @@ export default function TenantRegister() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate('/organizations')}
+                  onClick={() => navigate('/select-organization')}
                   className="flex-1 h-14 border-2 border-slate-300 hover:bg-slate-50"
                 >
                   Cancel
