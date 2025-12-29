@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Button } from '../components/ui/button';
+import { Select } from '../components/ui/select';
 import { Building2, MapPin, Briefcase, FileText, CheckCircle2, Loader2 } from 'lucide-react';
 import { api } from '../services/authService';
 
@@ -299,7 +300,7 @@ export default function TenantRegister() {
                     <Label htmlFor="businessLocation" className="text-slate-700 font-semibold">
                       Business Location <span className="text-red-500">*</span>
                     </Label>
-                    <select
+                    <Select
                       id="businessLocation"
                       className="mt-2 w-full h-10 px-4 rounded-lg border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                       {...register('businessLocation')}
@@ -307,7 +308,7 @@ export default function TenantRegister() {
                       {COUNTRIES.map(country => (
                         <option key={country} value={country}>{country}</option>
                       ))}
-                    </select>
+                    </Select>
                     {errors.businessLocation && <p className="mt-1.5 text-sm text-red-600">{errors.businessLocation.message}</p>}
                   </div>
 
@@ -315,7 +316,7 @@ export default function TenantRegister() {
                     <Label htmlFor="industry" className="text-slate-700 font-semibold">
                       Industry <span className="text-red-500">*</span>
                     </Label>
-                    <select
+                    <Select
                       id="industry"
                       className="mt-2 w-full h-10 px-4 rounded-lg border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                       style={{ appearance: 'menulist' }}
@@ -325,7 +326,7 @@ export default function TenantRegister() {
                       {INDUSTRIES.map(industry => (
                         <option key={industry} value={industry}>{industry}</option>
                       ))}
-                    </select>
+                    </Select>
                     {errors.industry && <p className="mt-1.5 text-sm text-red-600">{errors.industry.message}</p>}
                   </div>
                 </div>
@@ -361,7 +362,7 @@ export default function TenantRegister() {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
-                      <select
+                      <Select
                         id="state"
                         className="w-full h-10 px-4 rounded-lg border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 disabled:bg-slate-50"
                         disabled={stateOptions.length === 0}
@@ -371,7 +372,7 @@ export default function TenantRegister() {
                         {stateOptions.map(state => (
                           <option key={state} value={state}>{state}</option>
                         ))}
-                      </select>
+                      </Select>
                       {errors.state && <p className="mt-1.5 text-sm text-red-600">{errors.state.message}</p>}
                     </div>
 

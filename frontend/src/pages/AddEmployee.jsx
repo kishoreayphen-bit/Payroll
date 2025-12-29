@@ -28,6 +28,9 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { Checkbox } from '../components/ui/checkbox';
+import { Select } from '../components/ui/select';
+import { Radio } from '../components/ui/radio';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/authService';
 
@@ -476,8 +479,7 @@ function BasicDetailsStep({ register, errors }) {
             </div>
 
             <div className="flex items-center gap-2 p-3 bg-pink-50 rounded-lg">
-                <input
-                    type="checkbox"
+                <Checkbox
                     {...register('isDirector')}
                     className="w-4 h-4 text-pink-600 border-pink-300 rounded focus:ring-pink-500"
                 />
@@ -491,7 +493,7 @@ function BasicDetailsStep({ register, errors }) {
                     <label className="block text-sm font-semibold text-slate-700 mb-2">
                         Gender <span className="text-pink-600">*</span>
                     </label>
-                    <select
+                    <Select
                         {...register('gender', { required: 'Gender is required' })}
                         className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     >
@@ -499,14 +501,14 @@ function BasicDetailsStep({ register, errors }) {
                         <option value="male">Male</option>
                         <option value="female">Female</option>
                         <option value="other">Other</option>
-                    </select>
+                    </Select>
                     {errors.gender && <p className="text-xs text-red-500 mt-1">{errors.gender.message}</p>}
                 </div>
                 <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-2">
                         Work Location <span className="text-pink-600">*</span>
                     </label>
-                    <select
+                    <Select
                         {...register('workLocation', { required: 'Work location is required' })}
                         className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     >
@@ -515,7 +517,7 @@ function BasicDetailsStep({ register, errors }) {
                         <option value="branch-1">Branch 1</option>
                         <option value="branch-2">Branch 2</option>
                         <option value="remote">Remote</option>
-                    </select>
+                    </Select>
                     {errors.workLocation && <p className="text-xs text-red-500 mt-1">{errors.workLocation.message}</p>}
                 </div>
             </div>
@@ -525,7 +527,7 @@ function BasicDetailsStep({ register, errors }) {
                     <label className="block text-sm font-semibold text-slate-700 mb-2">
                         Designation <span className="text-pink-600">*</span>
                     </label>
-                    <select
+                    <Select
                         {...register('designation', { required: 'Designation is required' })}
                         className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     >
@@ -535,14 +537,14 @@ function BasicDetailsStep({ register, errors }) {
                         <option value="designer">Designer</option>
                         <option value="analyst">Analyst</option>
                         <option value="hr">HR</option>
-                    </select>
+                    </Select>
                     {errors.designation && <p className="text-xs text-red-500 mt-1">{errors.designation.message}</p>}
                 </div>
                 <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-2">
                         Department <span className="text-pink-600">*</span>
                     </label>
-                    <select
+                    <Select
                         {...register('department', { required: 'Department is required' })}
                         className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     >
@@ -552,15 +554,14 @@ function BasicDetailsStep({ register, errors }) {
                         <option value="marketing">Marketing</option>
                         <option value="sales">Sales</option>
                         <option value="hr">Human Resources</option>
-                    </select>
+                    </Select>
                     {errors.department && <p className="text-xs text-red-500 mt-1">{errors.department.message}</p>}
                 </div>
             </div>
 
             <div className="border-t border-pink-100 pt-6">
                 <div className="flex items-start gap-3 p-4 bg-pink-50 rounded-lg">
-                    <input
-                        type="checkbox"
+                    <Checkbox
                         {...register('enablePortalAccess')}
                         className="w-4 h-4 text-pink-600 border-pink-300 rounded focus:ring-pink-500 mt-1"
                     />
@@ -579,8 +580,7 @@ function BasicDetailsStep({ register, errors }) {
                 <h3 className="text-lg font-bold text-slate-900 mb-2">Statutory Components</h3>
                 <p className="text-sm text-slate-600 mb-4">Enable the necessary benefits and tax applicable for this employee.</p>
                 <div className="flex items-center gap-2 p-3 bg-pink-50 rounded-lg">
-                    <input
-                        type="checkbox"
+                    <Checkbox
                         {...register('professionalTax')}
                         defaultChecked
                         className="w-4 h-4 text-pink-600 border-pink-300 rounded focus:ring-pink-500"
@@ -762,7 +762,7 @@ function PersonalDetailsStep({ register, errors, watch, setValue }) {
                     <label className="block text-sm font-semibold text-slate-700 mb-2">
                         Differently Abled Type
                     </label>
-                    <select
+                    <Select
                         {...register('differentlyAbledType')}
                         className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     >
@@ -771,7 +771,7 @@ function PersonalDetailsStep({ register, errors, watch, setValue }) {
                         <option value="visual">Visual Impairment</option>
                         <option value="hearing">Hearing Impairment</option>
                         <option value="other">Other</option>
-                    </select>
+                    </Select>
                 </div>
                 <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -806,7 +806,7 @@ function PersonalDetailsStep({ register, errors, watch, setValue }) {
                         placeholder="City"
                         className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
                     />
-                    <select
+                    <Select
                         {...register('state')}
                         className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     >
@@ -818,7 +818,7 @@ function PersonalDetailsStep({ register, errors, watch, setValue }) {
                         <option value="Maharashtra">Maharashtra</option>
                         <option value="Delhi">Delhi</option>
                         <option value="Other">Other</option>
-                    </select>
+                    </Select>
                     <Input
                         {...register('pinCode', { pattern: { value: /^[0-9]{6}$/, message: 'PIN must be 6 digits' } })}
                         placeholder="PIN Code"
@@ -839,7 +839,7 @@ function PaymentInformationStep({ register, errors, watch }) {
 
             <div className="space-y-3">
                 <label className={`flex items-start gap-4 p-4 rounded-xl border ${paymentMethod === 'direct_deposit' ? 'border-pink-400 bg-pink-50' : 'border-pink-100'} cursor-pointer`}>
-                    <input type="radio" value="direct_deposit" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
+                    <Radio value="direct_deposit" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
                     <div>
                         <div className="font-semibold text-slate-900">Direct Deposit (Automated Process)</div>
                         <div className="text-sm text-slate-600">Initiate payment in the system once the pay run is approved</div>
@@ -848,7 +848,7 @@ function PaymentInformationStep({ register, errors, watch }) {
                 </label>
 
                 <label className={`flex items-start gap-4 p-4 rounded-xl border ${paymentMethod === 'bank_transfer' ? 'border-pink-400 bg-pink-50' : 'border-pink-100'} cursor-pointer`}>
-                    <input type="radio" value="bank_transfer" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
+                    <Radio value="bank_transfer" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
                     <div>
                         <div className="font-semibold text-slate-900">Bank Transfer (Manual Process)</div>
                         <div className="text-sm text-slate-600">Download Bank Advice and process the payment through your bank's website</div>
@@ -856,14 +856,14 @@ function PaymentInformationStep({ register, errors, watch }) {
                 </label>
 
                 <label className={`flex items-start gap-4 p-4 rounded-xl border ${paymentMethod === 'cheque' ? 'border-pink-400 bg-pink-50' : 'border-pink-100'} cursor-pointer`}>
-                    <input type="radio" value="cheque" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
+                    <Radio value="cheque" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
                     <div>
                         <div className="font-semibold text-slate-900">Cheque</div>
                     </div>
                 </label>
 
                 <label className={`flex items-start gap-4 p-4 rounded-xl border ${paymentMethod === 'cash' ? 'border-pink-400 bg-pink-50' : 'border-pink-100'} cursor-pointer`}>
-                    <input type="radio" value="cash" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
+                    <Radio value="cash" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
                     <div>
                         <div className="font-semibold text-slate-900">Cash</div>
                     </div>
