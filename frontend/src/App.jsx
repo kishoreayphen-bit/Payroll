@@ -10,6 +10,7 @@ import OrganizationList from './pages/OrganizationList'
 import OrganizationSelect from './pages/OrganizationSelect'
 import Dashboard from './pages/Dashboard'
 import EmployeeList from './pages/EmployeeList'
+import EmployeeDetails from './pages/EmployeeDetails'
 import AddEmployee from './pages/AddEmployee'
 import TestOrganizations from './pages/TestOrganizations'
 
@@ -58,6 +59,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <EmployeeList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employees/:id"
+            element={
+              <ProtectedRoute>
+                <EmployeeDetails />
               </ProtectedRoute>
             }
           />
