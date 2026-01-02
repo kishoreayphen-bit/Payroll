@@ -22,7 +22,12 @@ import {
     X,
     ArrowRight,
     LogOut,
-    Building
+    Building,
+    CheckCircle,
+    Calendar,
+    Gift,
+    FileText,
+    PieChart
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../contexts/AuthContext';
@@ -82,13 +87,15 @@ export default function Dashboard() {
             id: 2,
             title: 'Provide your Tax Details',
             completed: false,
-            link: '#'
+            link: '/settings/tax-details',
+            comingSoon: true
         },
         {
             id: 3,
             title: 'Configure your Pay Schedule',
             completed: false,
-            link: '#'
+            link: '/settings/pay-schedule',
+            comingSoon: true
         },
         {
             id: 4,
@@ -100,25 +107,28 @@ export default function Dashboard() {
                 { name: "Labour Welfare Fund", completed: false },
                 { name: "Professional Tax", completed: true, note: '(Configured based on Work Location)' }
             ],
-            link: '#'
+            link: '/settings/statutory',
+            comingSoon: true
         },
         {
             id: 5,
             title: 'Set up Salary Components',
             completed: false,
-            link: '#'
+            link: '/settings/salary-components',
+            comingSoon: true
         },
         {
             id: 6,
             title: 'Add Employees',
-            completed: false,
-            link: '#'
+            completed: true,
+            link: '/employees'
         },
         {
             id: 7,
             title: 'Configure Prior Payroll',
-            completed: true,
-            link: '#'
+            completed: false,
+            link: '/settings/prior-payroll',
+            comingSoon: true
         }
     ];
 
@@ -154,57 +164,81 @@ export default function Dashboard() {
                         </div>
 
                         {/* Navigation */}
-                        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                            <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md">
-                                <LayoutDashboard className="w-5 h-5" />
-                                <span>Dashboard</span>
-                            </Link>
+                        <nav className="flex-1 p-4 space-y-6 overflow-y-auto scrollbar-hide">
+                            {/* Main Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Main</span>
+                                </div>
+                                <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30">
+                                    <LayoutDashboard className="w-5 h-5" />
+                                    <span className="font-medium">Dashboard</span>
+                                </Link>
 
-                            <Link to="/employees" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Users className="w-5 h-5" />
-                                <span>Employees</span>
-                            </Link>
-
-                            <Link to="/pay-runs" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <DollarSign className="w-5 h-5" />
-                                <span>Pay Runs</span>
-                            </Link>
-
-                            <div className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer">
-                                <Shield className="w-5 h-5" />
-                                <span>Approvals</span>
-                                <ChevronRight className="w-4 h-4 ml-auto" />
+                                <Link to="/employees" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Users className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Employees</span>
+                                </Link>
                             </div>
 
-                            <Link to="/form16" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <FileCheck className="w-5 h-5" />
-                                <span>Form 16</span>
-                            </Link>
+                            {/* Payroll Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Payroll</span>
+                                </div>
+                                <Link to="/pay-runs" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Calendar className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Pay Runs</span>
+                                </Link>
 
-                            <Link to="/loans" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Wallet className="w-5 h-5" />
-                                <span>Loans</span>
-                            </Link>
+                                <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer group">
+                                    <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Approvals</span>
+                                    <ChevronRight className="w-4 h-4 ml-auto opacity-50" />
+                                </div>
 
-                            <Link to="/giving" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Heart className="w-5 h-5" />
-                                <span>Giving</span>
-                            </Link>
+                                <Link to="/form16" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <FileText className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Form 16</span>
+                                </Link>
+                            </div>
 
-                            <Link to="/documents" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <FolderOpen className="w-5 h-5" />
-                                <span>Documents</span>
-                            </Link>
+                            {/* Benefits Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Benefits</span>
+                                </div>
+                                <Link to="/loans" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Wallet className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Loans</span>
+                                </Link>
 
-                            <Link to="/reports" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <BarChart3 className="w-5 h-5" />
-                                <span>Reports</span>
-                            </Link>
+                                <Link to="/giving" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Gift className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Giving</span>
+                                </Link>
+                            </div>
 
-                            <Link to="/settings" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Settings className="w-5 h-5" />
-                                <span>Settings</span>
-                            </Link>
+                            {/* Management Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Management</span>
+                                </div>
+                                <Link to="/documents" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <FolderOpen className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Documents</span>
+                                </Link>
+
+                                <Link to="/reports" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <PieChart className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Reports</span>
+                                </Link>
+
+                                <Link to="/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Settings className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Settings</span>
+                                </Link>
+                            </div>
                         </nav>
                     </>
                 )}
@@ -230,8 +264,13 @@ export default function Dashboard() {
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                                 <input
                                     type="text"
-                                    placeholder="Search in Employee"
+                                    placeholder="Search employees..."
                                     className="w-full pl-10 pr-4 py-2 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && e.target.value.trim()) {
+                                            window.location.href = `/employees?search=${encodeURIComponent(e.target.value.trim())}`;
+                                        }
+                                    }}
                                 />
                             </div>
                         </div>
@@ -286,10 +325,9 @@ export default function Dashboard() {
                                 )}
                             </div>
 
-                            <button className="p-2 hover:bg-pink-50 rounded-xl transition-colors">
+                            <Link to="/notifications" className="p-2 hover:bg-pink-50 rounded-xl transition-colors block">
                                 <Bell className="w-4 h-4 text-slate-600" />
-                                <span className="absolute top-1 right-1 w-2 h-2 bg-pink-500 rounded-full"></span>
-                            </button>
+                            </Link>
 
                             <button className="p-2 hover:bg-pink-50 rounded-xl transition-colors">
                                 <Settings className="w-4 h-4 text-slate-600" />

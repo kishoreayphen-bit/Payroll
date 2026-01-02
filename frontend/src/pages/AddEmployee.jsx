@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import {
     ArrowRight,
@@ -44,14 +44,20 @@ const STEPS = [
 export default function AddEmployee() {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
-    const [currentStep, setCurrentStep] = useState(1);
+    const [searchParams] = useSearchParams();
+    const editEmployeeId = searchParams.get('edit');
+    const stepParam = searchParams.get('step');
+    const isEditMode = !!editEmployeeId;
+
+    const [currentStep, setCurrentStep] = useState(stepParam ? parseInt(stepParam) : 1);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showCompanyMenu, setShowCompanyMenu] = useState(false);
     const [organization, setOrganization] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [employeeData, setEmployeeData] = useState(null);
 
-    const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm({
+    const { register, handleSubmit, formState: { errors }, watch, setValue, reset } = useForm({
         defaultValues: {
             firstName: '',
             middleName: '',
@@ -127,10 +133,111 @@ export default function AddEmployee() {
         fetchOrganization();
     }, []);
 
-    const onSubmit = (data) => {
-        console.log('Employee Data:', data);
-        // TODO: Call API to save employee
-        navigate('/employees/add');
+    // Fetch employee data if in edit mode
+    useEffect(() => {
+        const fetchEmployeeData = async () => {
+            if (!isEditMode || !editEmployeeId) return;
+
+            try {
+                // Mock employee data - replace with actual API call
+                // const response = await api.get(`/employees/${editEmployeeId}`);
+                // const employee = response.data;
+
+                // For now, using mock data
+                const mockEmployee = {
+                    id: editEmployeeId,
+                    firstName: 'kishore',
+                    middleName: '',
+                    lastName: '',
+                    employeeId: '01',
+                    dateOfJoining: '2025-12-23',
+                    workEmail: 'admin@payrollpro.com',
+                    mobileNumber: '9487042778',
+                    isDirector: false,
+                    gender: 'male',
+                    workLocation: 'Head Office',
+                    designation: 'associate',
+                    department: 'Engineering',
+                    enablePortalAccess: false,
+                    professionalTax: false,
+                    annualCtc: '6000000',
+                    basicPercentOfCtc: 50,
+                    hraPercentOfBasic: 50,
+                    basicMonthly: '25000',
+                    hraMonthly: '12500',
+                    fixedAllowanceMonthly: '12500',
+                    dateOfBirth: '',
+                    age: '',
+                    fatherName: '',
+                    personalEmail: '',
+                    differentlyAbledType: 'none',
+                    addressLine1: '',
+                    addressLine2: '',
+                    city: '',
+                    state: '',
+                    pinCode: '',
+                    emergencyContact: '',
+                    emergencyContactName: '',
+                    bankName: '',
+                    accountNumber: '',
+                    ifscCode: '',
+                    paymentMethod: 'bank_transfer',
+                    panNumber: '',
+                    aadharNumber: ''
+                };
+
+                setEmployeeData(mockEmployee);
+
+                // Pre-fill form with employee data
+                Object.keys(mockEmployee).forEach(key => {
+                    if (mockEmployee[key] !== undefined && mockEmployee[key] !== null) {
+                        setValue(key, mockEmployee[key]);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error fetching employee data:', error);
+                alert('Failed to load employee data');
+            }
+        };
+
+        fetchEmployeeData();
+    }, [isEditMode, editEmployeeId, setValue]);
+
+    const onSubmit = async (data) => {
+        try {
+            const selectedOrgId = localStorage.getItem('selectedOrganizationId');
+
+            if (!selectedOrgId) {
+                alert('Please select an organization first');
+                navigate('/select-organization');
+                return;
+            }
+
+            // Prepare employee data
+            const employeeData = {
+                ...data,
+                organizationId: parseInt(selectedOrgId)
+            };
+
+            if (isEditMode) {
+                // Update existing employee
+                const response = await api.put(`/employees/${editEmployeeId}`, employeeData);
+                console.log('Employee updated:', response.data);
+                alert('Employee updated successfully!');
+                navigate(`/employees/${editEmployeeId}`);
+            } else {
+                // Create new employee
+                const response = await api.post('/employees', employeeData);
+                console.log('Employee created:', response.data);
+                alert('Employee added successfully!');
+                navigate('/employees');
+            }
+        } catch (error) {
+            console.error('Error saving employee:', error);
+            const errorMessage = error.response?.data?.error || 'Failed to save employee. Please try again.';
+            alert(errorMessage);
+        }
     };
 
     const nextStep = () => {
@@ -260,15 +367,15 @@ export default function AddEmployee() {
                                 </button>
                             )}
                             <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
-                                Add Employee
+                                {isEditMode ? 'Edit Employee' : 'Add Employee'}
                             </h1>
                         </div>
                         <div className="flex items-center gap-2">
                             {/* Close Button */}
                             <button
-                                onClick={() => navigate('/employees')}
+                                onClick={() => navigate(isEditMode ? `/employees/${editEmployeeId}` : '/employees')}
                                 className="p-2 hover:bg-pink-50 rounded-lg transition-colors"
-                                title="Close and return to employee list"
+                                title={isEditMode ? "Close and return to employee details" : "Close and return to employee list"}
                             >
                                 <X className="w-5 h-5 text-slate-600" />
                             </button>

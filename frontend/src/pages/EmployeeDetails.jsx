@@ -24,11 +24,16 @@ import {
     Building,
     User,
     AlertCircle,
-    CheckCircle
+    CheckCircle,
+    Coins,
+    ChevronDown,
+    TrendingUp,
+    TrendingDown
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/authService';
+import AddComponentModal from '../components/AddComponentModal';
 
 const TABS = [
     { id: 'overview', label: 'Overview' },
@@ -45,6 +50,9 @@ export default function EmployeeDetails() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showCompanyMenu, setShowCompanyMenu] = useState(false);
+    const [showAddMenu, setShowAddMenu] = useState(false);
+    const [showAddEarningModal, setShowAddEarningModal] = useState(false);
+    const [showAddDeductionModal, setShowAddDeductionModal] = useState(false);
     const [organization, setOrganization] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview');
@@ -288,9 +296,53 @@ export default function EmployeeDetails() {
                             </div>
                         </div>
                         <div className="flex gap-2">
-                            <Button variant="outline" size="sm" className="border-slate-300">
-                                Add
-                            </Button>
+                            {/* Add Dropdown */}
+                            <div className="relative">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-slate-300"
+                                    onClick={() => setShowAddMenu(!showAddMenu)}
+                                >
+                                    Add
+                                    <ChevronDown className="w-3 h-3 ml-1" />
+                                </Button>
+
+                                {showAddMenu && (
+                                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-pink-100 py-2 z-50">
+                                        <button
+                                            onClick={() => {
+                                                setShowAddEarningModal(true);
+                                                setShowAddMenu(false);
+                                            }}
+                                            className="w-full flex items-center gap-2 px-4 py-2 hover:bg-emerald-50 rounded-lg transition-colors mx-2 text-left"
+                                        >
+                                            <TrendingUp className="w-4 h-4 text-emerald-600" />
+                                            <span className="text-sm text-slate-700">Add Earning</span>
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowAddDeductionModal(true);
+                                                setShowAddMenu(false);
+                                            }}
+                                            className="w-full flex items-center gap-2 px-4 py-2 hover:bg-red-50 rounded-lg transition-colors mx-2 text-left"
+                                        >
+                                            <TrendingDown className="w-4 h-4 text-red-600" />
+                                            <span className="text-sm text-slate-700">Add Deduction</span>
+                                        </button>
+                                        <div className="border-t border-slate-100 my-1 mx-2"></div>
+                                        <Link
+                                            to="/salary-components"
+                                            className="flex items-center gap-2 px-4 py-2 hover:bg-pink-50 rounded-lg transition-colors mx-2"
+                                            onClick={() => setShowAddMenu(false)}
+                                        >
+                                            <Coins className="w-4 h-4 text-slate-600" />
+                                            <span className="text-sm text-slate-700">Manage Components</span>
+                                        </Link>
+                                    </div>
+                                )}
+                            </div>
+
                             <Button variant="ghost" size="sm">
                                 <MoreVertical className="w-4 h-4" />
                             </Button>
@@ -309,8 +361,8 @@ export default function EmployeeDetails() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
-                                        ? 'border-rose-500 text-rose-600'
-                                        : 'border-transparent text-slate-600 hover:text-slate-900'
+                                    ? 'border-rose-500 text-rose-600'
+                                    : 'border-transparent text-slate-600 hover:text-slate-900'
                                     }`}
                             >
                                 {tab.label}
@@ -324,6 +376,30 @@ export default function EmployeeDetails() {
                     {renderTabContent()}
                 </div>
             </div>
+
+            {/* Add Earning Modal */}
+            {showAddEarningModal && (
+                <AddComponentModal
+                    employeeId={id}
+                    type="EARNING"
+                    onClose={() => setShowAddEarningModal(false)}
+                    onSave={() => {
+                        setShowAddEarningModal(false);
+                    }}
+                />
+            )}
+
+            {/* Add Deduction Modal */}
+            {showAddDeductionModal && (
+                <AddComponentModal
+                    employeeId={id}
+                    type="DEDUCTION"
+                    onClose={() => setShowAddDeductionModal(false)}
+                    onSave={() => {
+                        setShowAddDeductionModal(false);
+                    }}
+                />
+            )}
         </div>
     );
 }

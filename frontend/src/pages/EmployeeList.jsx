@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
     Users,
     Plus,
@@ -28,15 +28,23 @@ import {
     X,
     Download,
     Upload,
-    Eye
+    Eye,
+    CheckCircle,
+    Calendar,
+    TrendingUp,
+    Gift,
+    FileText,
+    PieChart
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/authService';
+import AppHeader from '../components/AppHeader';
 
 export default function EmployeeList() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { user, logout } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -45,69 +53,34 @@ export default function EmployeeList() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Mock employee data
-    const [employees, setEmployees] = useState([
-        {
-            id: 1,
-            name: 'John Doe',
-            employeeId: 'EMP001',
-            email: 'john.doe@company.com',
-            phone: '+1 234 567 8900',
-            designation: 'Senior Developer',
-            department: 'Engineering',
-            salary: '₹80,000',
-            status: 'Active',
-            joinDate: '2023-01-15'
-        },
-        {
-            id: 2,
-            name: 'Jane Smith',
-            employeeId: 'EMP002',
-            email: 'jane.smith@company.com',
-            phone: '+1 234 567 8901',
-            designation: 'Product Manager',
-            department: 'Product',
-            salary: '₹95,000',
-            status: 'Active',
-            joinDate: '2023-02-20'
-        },
-        {
-            id: 3,
-            name: 'Mike Johnson',
-            employeeId: 'EMP003',
-            email: 'mike.johnson@company.com',
-            phone: '+1 234 567 8902',
-            designation: 'UI/UX Designer',
-            department: 'Design',
-            salary: '₹70,000',
-            status: 'Active',
-            joinDate: '2023-03-10'
-        },
-        {
-            id: 4,
-            name: 'Sarah Williams',
-            employeeId: 'EMP004',
-            email: 'sarah.williams@company.com',
-            phone: '+1 234 567 8903',
-            designation: 'HR Manager',
-            department: 'HR',
-            salary: '₹75,000',
-            status: 'Active',
-            joinDate: '2023-04-05'
-        },
-        {
-            id: 5,
-            name: 'David Brown',
-            employeeId: 'EMP005',
-            email: 'david.brown@company.com',
-            phone: '+1 234 567 8904',
-            designation: 'Sales Executive',
-            department: 'Sales',
-            salary: '₹65,000',
-            status: 'Active',
-            joinDate: '2023-05-12'
+    // Read search query from URL on mount
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const searchParam = params.get('search');
+        if (searchParam) {
+            setSearchQuery(searchParam);
         }
-    ]);
+    }, [location.search]);
+
+    // Filter states
+    const [showMoreFilters, setShowMoreFilters] = useState(false);
+    const [showViewDropdown, setShowViewDropdown] = useState(false);
+    const [showCreateCustomView, setShowCreateCustomView] = useState(false);
+    const [activeView, setActiveView] = useState('Active Employees');
+    const [filters, setFilters] = useState({
+        workLocation: '',
+        department: '',
+        designation: '',
+        investmentDeclaration: '',
+        proofOfInvestments: '',
+        flexibleBenefitPlan: '',
+        reimbursement: '',
+        onboardingStatus: '',
+        portalAccess: ''
+    });
+
+    // Employee data from database
+    const [employees, setEmployees] = useState([]);
 
     // Fetch organization data
     useEffect(() => {
@@ -140,11 +113,155 @@ export default function EmployeeList() {
         fetchOrganization();
     }, []);
 
-    const filteredEmployees = employees.filter(emp =>
-        emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Fetch employees when organization is loaded
+    useEffect(() => {
+        const fetchEmployees = async () => {
+            if (!organization) {
+                console.log('⏳ Waiting for organization to load...');
+                return;
+            }
+
+            console.log('🔄 Fetching employees for organization:', organization.id, organization.companyName);
+
+            try {
+                const response = await api.get(`/employees?organizationId=${organization.id}`);
+                console.log('✅ API Response received:', response);
+                console.log('📊 Employee count:', response.data?.length || 0);
+                console.log('📋 Raw employee data:', response.data);
+
+                // Map backend data to frontend format
+                const mappedEmployees = response.data.map(emp => {
+                    console.log('Mapping employee:', emp.employeeId, emp.fullName);
+                    return {
+                        id: emp.id,
+                        name: emp.fullName || `${emp.firstName} ${emp.lastName || ''}`.trim(),
+                        employeeId: emp.employeeId,
+                        email: emp.workEmail,
+                        phone: emp.mobileNumber,
+                        designation: emp.designation,
+                        department: emp.department,
+                        workLocation: emp.workLocation,
+                        salary: emp.annualCtc ? `₹${emp.annualCtc.toLocaleString()}` : 'N/A',
+                        status: emp.status || 'Active',
+                        joinDate: emp.dateOfJoining,
+                        onboardingStatus: emp.onboardingStatus || 'Incomplete',
+                        isProfileComplete: emp.isProfileComplete || false,
+                        profileCompletionPercentage: emp.profileCompletionPercentage || 0,
+                        portalAccess: emp.enablePortalAccess || false
+                    };
+                });
+
+                console.log('✨ Mapped employees:', mappedEmployees);
+                console.log('📌 Setting employees state with', mappedEmployees.length, 'employees');
+                setEmployees(mappedEmployees);
+            } catch (error) {
+                console.error('❌ Error fetching employees:', error);
+                console.error('Error details:', error.response?.data);
+                console.error('Error status:', error.response?.status);
+                console.error('Error message:', error.message);
+            }
+        };
+
+        fetchEmployees();
+    }, [organization]);
+
+    const filteredEmployees = employees.filter(emp => {
+        // View-based filtering
+        let matchesView = true;
+        switch (activeView) {
+            case 'All Employees':
+                matchesView = true;
+                break;
+            case 'Active Employees':
+                matchesView = emp.status === 'Active';
+                break;
+            case 'Exited Employees':
+                matchesView = emp.status === 'Exited' || emp.status === 'Inactive';
+                break;
+            case 'Incomplete Employees':
+                matchesView = emp.onboardingStatus === 'Incomplete' || emp.onboardingStatus === 'Pending';
+                break;
+            case 'Portal Enabled Employees':
+                matchesView = emp.portalAccess === true;
+                break;
+            case 'Portal Disabled Employees':
+                matchesView = emp.portalAccess === false;
+                break;
+            default:
+                matchesView = true;
+        }
+
+        // Search query filter
+        const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            emp.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            emp.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+        // Work location filter
+        const matchesWorkLocation = !filters.workLocation || emp.workLocation === filters.workLocation;
+
+        // Department filter
+        const matchesDepartment = !filters.department || emp.department === filters.department;
+
+        // Designation filter
+        const matchesDesignation = !filters.designation || emp.designation === filters.designation;
+
+        // Onboarding status filter
+        const matchesOnboardingStatus = !filters.onboardingStatus || emp.onboardingStatus === filters.onboardingStatus;
+
+        // Portal access filter
+        const matchesPortalAccess = !filters.portalAccess ||
+            (filters.portalAccess === 'enabled' && emp.portalAccess === true) ||
+            (filters.portalAccess === 'disabled' && emp.portalAccess === false);
+
+        return matchesView && matchesSearch && matchesWorkLocation && matchesDepartment &&
+            matchesDesignation && matchesOnboardingStatus && matchesPortalAccess;
+    });
+
+    // Debug logging for filtered employees
+    console.log('🔍 Filter Debug:');
+    console.log('  Total employees:', employees.length);
+    console.log('  Active view:', activeView);
+    console.log('  Search query:', searchQuery);
+    console.log('  Filters:', filters);
+    console.log('  Filtered employees:', filteredEmployees.length);
+    console.log('  Filtered employee list:', filteredEmployees);
+
+    const handleFilterChange = (filterName, value) => {
+        setFilters(prev => ({
+            ...prev,
+            [filterName]: value
+        }));
+    };
+
+    const handleApplyFilters = () => {
+        setShowMoreFilters(false);
+    };
+
+    const handleClearFilters = () => {
+        setFilters({
+            workLocation: '',
+            department: '',
+            designation: '',
+            investmentDeclaration: '',
+            proofOfInvestments: '',
+            flexibleBenefitPlan: '',
+            reimbursement: '',
+            onboardingStatus: '',
+            portalAccess: ''
+        });
+    };
+
+    const activeFilterCount = Object.values(filters).filter(v => v !== '').length;
+
+    // Predefined views
+    const predefinedViews = [
+        { name: 'All Employees', icon: Users },
+        { name: 'Active Employees', icon: Users },
+        { name: 'Exited Employees', icon: Users },
+        { name: 'Incomplete Employees', icon: Users },
+        { name: 'Portal Enabled Employees', icon: Shield },
+        { name: 'Portal Disabled Employees', icon: Shield }
+    ];
 
     return (
         <div className="h-screen bg-slate-50 flex overflow-hidden">
@@ -173,57 +290,81 @@ export default function EmployeeList() {
                         </div>
 
                         {/* Navigation */}
-                        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                            <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <LayoutDashboard className="w-5 h-5" />
-                                <span>Dashboard</span>
-                            </Link>
+                        <nav className="flex-1 p-4 space-y-6 overflow-y-auto scrollbar-hide">
+                            {/* Main Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Main</span>
+                                </div>
+                                <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <LayoutDashboard className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Dashboard</span>
+                                </Link>
 
-                            <Link to="/employees" className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md">
-                                <Users className="w-5 h-5" />
-                                <span>Employees</span>
-                            </Link>
-
-                            <div className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer">
-                                <Shield className="w-5 h-5" />
-                                <span>Approvals</span>
-                                <ChevronRight className="w-4 h-4 ml-auto" />
+                                <Link to="/employees" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30">
+                                    <Users className="w-5 h-5" />
+                                    <span className="font-medium">Employees</span>
+                                </Link>
                             </div>
 
-                            <Link to="/pay-runs" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <DollarSign className="w-5 h-5" />
-                                <span>Pay Runs</span>
-                            </Link>
+                            {/* Payroll Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Payroll</span>
+                                </div>
+                                <Link to="/pay-runs" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Calendar className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Pay Runs</span>
+                                </Link>
 
-                            <Link to="/form16" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <FileCheck className="w-5 h-5" />
-                                <span>Form 16</span>
-                            </Link>
+                                <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer group">
+                                    <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Approvals</span>
+                                    <ChevronRight className="w-4 h-4 ml-auto opacity-50" />
+                                </div>
 
-                            <Link to="/loans" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Wallet className="w-5 h-5" />
-                                <span>Loans</span>
-                            </Link>
+                                <Link to="/form16" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <FileText className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Form 16</span>
+                                </Link>
+                            </div>
 
-                            <Link to="/giving" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Heart className="w-5 h-5" />
-                                <span>Giving</span>
-                            </Link>
+                            {/* Benefits Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Benefits</span>
+                                </div>
+                                <Link to="/loans" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Wallet className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Loans</span>
+                                </Link>
 
-                            <Link to="/documents" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <FolderOpen className="w-5 h-5" />
-                                <span>Documents</span>
-                            </Link>
+                                <Link to="/giving" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Gift className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Giving</span>
+                                </Link>
+                            </div>
 
-                            <Link to="/reports" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <BarChart3 className="w-5 h-5" />
-                                <span>Reports</span>
-                            </Link>
+                            {/* Management Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Management</span>
+                                </div>
+                                <Link to="/documents" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <FolderOpen className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Documents</span>
+                                </Link>
 
-                            <Link to="/settings" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Settings className="w-5 h-5" />
-                                <span>Settings</span>
-                            </Link>
+                                <Link to="/reports" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <PieChart className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Reports</span>
+                                </Link>
+
+                                <Link to="/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Settings className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Settings</span>
+                                </Link>
+                            </div>
                         </nav>
                     </>
                 )}
@@ -235,88 +376,259 @@ export default function EmployeeList() {
                 style={{ width: sidebarOpen ? 'calc(100vw - 14rem)' : '100vw' }}
             >
                 {/* Top Bar */}
-                <div className="bg-white border-b border-slate-200 px-4 py-2 flex-shrink-0">
-                    <div className="flex items-center justify-between min-w-0">
-                        <div className="flex items-center gap-3 min-w-0">
-                            {!sidebarOpen && (
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    size="sm"
-                                    onClick={() => setSidebarOpen(true)}
-                                    className="p-1.5 hover:bg-slate-100 rounded"
-                                >
-                                    <Menu className="w-4 h-4 text-slate-600" />
-                                </Button>
-                            )}
-                            <h1 className="text-lg font-semibold text-slate-900">Employees</h1>
-                            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-medium rounded">
-                                {filteredEmployees.length} total
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => {
-                                    setShowCompanyMenu(!showCompanyMenu);
-                                    setShowProfileMenu(false);
-                                }}
-                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors border border-slate-200"
-                            >
-                                <span className="text-slate-700 font-medium text-xs">
-                                    {loading ? 'Loading...' : (organization?.companyName || 'Company')}
-                                </span>
-                                <ChevronRight className="w-3 h-3 text-slate-400" />
-                            </Button>
-
-                            <Button
-                                type="button"
-                                onClick={() => {
-                                    setShowProfileMenu(!showProfileMenu);
-                                    setShowCompanyMenu(false);
-                                }}
-                                className="w-7 h-7 bg-rose-500 rounded-full flex items-center justify-center text-white font-medium text-xs"
-                            >
-                                {user?.email?.charAt(0).toUpperCase()}
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+                <AppHeader
+                    sidebarOpen={sidebarOpen}
+                    setSidebarOpen={setSidebarOpen}
+                    showCompanyMenu={showCompanyMenu}
+                    setShowCompanyMenu={setShowCompanyMenu}
+                    showProfileMenu={showProfileMenu}
+                    setShowProfileMenu={setShowProfileMenu}
+                    organization={organization}
+                    loading={loading}
+                    user={user}
+                    logout={logout}
+                />
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-4 min-w-0">
                     <div className="max-w-full">
-                        {/* Actions Bar */}
-                        <div className="mb-3 flex items-center justify-between gap-3">
-                            <div className="flex-1 max-w-sm relative">
-                                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                <Input
-                                    type="text"
-                                    placeholder="Search employees..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-9 pr-3 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white"
-                                />
+
+
+                        {/* View Selector */}
+                        <div className="mb-4 flex items-center gap-3">
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowViewDropdown(!showViewDropdown)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors"
+                                >
+                                    <Users className="w-4 h-4 text-slate-600" />
+                                    <span className="text-sm font-medium text-slate-700">{activeView}</span>
+                                    <ChevronRight className="w-4 h-4 text-slate-400 rotate-90" />
+                                </button>
+
+                                {showViewDropdown && (
+                                    <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-lg shadow-xl border border-slate-200 z-50">
+                                        <div className="p-3 border-b border-slate-200">
+                                            <div className="relative">
+                                                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search"
+                                                    className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="max-h-96 overflow-y-auto">
+                                            {predefinedViews.map((view) => (
+                                                <button
+                                                    key={view.name}
+                                                    onClick={() => {
+                                                        setActiveView(view.name);
+                                                        setShowViewDropdown(false);
+                                                    }}
+                                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-50 transition-colors ${activeView === view.name ? 'bg-blue-50 text-blue-600' : 'text-slate-700'
+                                                        }`}
+                                                >
+                                                    {activeView === view.name && (
+                                                        <span className="text-blue-600">✓</span>
+                                                    )}
+                                                    {activeView !== view.name && (
+                                                        <span className="w-4"></span>
+                                                    )}
+                                                    <view.icon className="w-4 h-4" />
+                                                    <span className="text-sm font-medium">{view.name}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="p-3 border-t border-slate-200">
+                                            <button
+                                                onClick={() => {
+                                                    setShowViewDropdown(false);
+                                                    setShowCreateCustomView(true);
+                                                }}
+                                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                                            >
+                                                <Plus className="w-4 h-4" />
+                                                New Custom View
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                            <div className="flex gap-2">
-                                <Button type="button" variant="secondary" className="px-3 py-1.5 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors flex items-center gap-1.5">
-                                    <Filter className="w-3.5 h-3.5" />
-                                    Filter
-                                </Button>
-                                <Button type="button" variant="secondary" className="px-3 py-1.5 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors flex items-center gap-1.5">
-                                    <Download className="w-3.5 h-3.5" />
-                                    Export
-                                </Button>
+
+                            <span className="text-sm text-slate-500">
+                                {filteredEmployees.length} employee{filteredEmployees.length !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+
+                        {/* Actions Bar */}
+                        <div className="mb-4 space-y-3">
+                            {/* Search and Add Employee Row */}
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2 flex-1">
+                                    <div className="max-w-sm relative">
+                                        <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <Input
+                                            type="text"
+                                            placeholder="Search in Employee"
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white"
+                                        />
+                                    </div>
+
+                                    {/* Compact Incomplete Employee Indicator */}
+                                    {filteredEmployees.filter(e => !e.isProfileComplete).length > 0 && activeView === 'Active Employees' && (
+                                        <button
+                                            onClick={() => setActiveView('Incomplete Employees')}
+                                            className="flex items-center gap-1.5 px-3 py-2 bg-orange-50 border border-orange-200 rounded-md hover:bg-orange-100 transition-colors"
+                                        >
+                                            <span className="text-orange-600 text-sm">⚠️</span>
+                                            <span className="text-xs font-medium text-orange-700">
+                                                {filteredEmployees.filter(e => !e.isProfileComplete).length} Incomplete
+                                            </span>
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            // Export employees to CSV
+                                            const csvContent = [
+                                                ['Employee ID', 'Name', 'Email', 'Phone', 'Department', 'Designation', 'Status'].join(','),
+                                                ...filteredEmployees.map(emp =>
+                                                    [emp.employeeId, emp.name, emp.email, emp.phone, emp.department, emp.designation, emp.status].join(',')
+                                                )
+                                            ].join('\n');
+
+                                            const blob = new Blob([csvContent], { type: 'text/csv' });
+                                            const url = window.URL.createObjectURL(blob);
+                                            const a = document.createElement('a');
+                                            a.href = url;
+                                            a.download = `employees_${new Date().toISOString().split('T')[0]}.csv`;
+                                            a.click();
+                                            window.URL.revokeObjectURL(url);
+                                        }}
+                                        className="px-4 py-2 text-sm bg-white border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 transition-colors flex items-center gap-2 font-medium"
+                                    >
+                                        <Download className="w-4 h-4 text-slate-700" />
+                                        <span className="text-slate-700">Export</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            // Trigger file input for import
+                                            document.getElementById('import-employees').click();
+                                        }}
+                                        className="px-4 py-2 text-sm bg-white border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 transition-colors flex items-center gap-2 font-medium"
+                                    >
+                                        <Upload className="w-4 h-4 text-slate-700" />
+                                        <span className="text-slate-700">Import</span>
+                                    </button>
+                                    <input
+                                        id="import-employees"
+                                        type="file"
+                                        accept=".csv,.xlsx"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                                alert('Import functionality will be implemented soon. File: ' + file.name);
+                                                // TODO: Implement CSV/Excel parsing and bulk employee creation
+                                            }
+                                        }}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate('/employees/add')}
+                                        className="px-4 py-2 text-sm bg-rose-500 text-white rounded-md hover:bg-rose-600 transition-colors flex items-center gap-2 font-medium"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        <span>Add Employee</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Filters Row */}
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm text-slate-600 font-medium">FILTER BY :</span>
+
+                                {/* Work Location Filter */}
+                                <div className="relative">
+                                    <select
+                                        value={filters.workLocation}
+                                        onChange={(e) => handleFilterChange('workLocation', e.target.value)}
+                                        className="appearance-none pl-3 pr-8 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-600 cursor-pointer"
+                                    >
+                                        <option value="">Select Work Location</option>
+                                        <option value="Head Office">Head Office</option>
+                                        <option value="Branch Office">Branch Office</option>
+                                        <option value="Remote">Remote</option>
+                                    </select>
+                                    <ChevronRight className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rotate-90" />
+                                </div>
+
+                                {/* Department Filter */}
+                                <div className="relative">
+                                    <select
+                                        value={filters.department}
+                                        onChange={(e) => handleFilterChange('department', e.target.value)}
+                                        className="appearance-none pl-3 pr-8 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-600 cursor-pointer"
+                                    >
+                                        <option value="">Select Department</option>
+                                        <option value="Engineering">Engineering</option>
+                                        <option value="Product">Product</option>
+                                        <option value="Design">Design</option>
+                                        <option value="HR">HR</option>
+                                        <option value="Marketing">Marketing</option>
+                                    </select>
+                                    <ChevronRight className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rotate-90" />
+                                </div>
+
+                                {/* Designation Filter */}
+                                <div className="relative">
+                                    <select
+                                        value={filters.designation}
+                                        onChange={(e) => handleFilterChange('designation', e.target.value)}
+                                        className="appearance-none pl-3 pr-8 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-600 cursor-pointer"
+                                    >
+                                        <option value="">Select Designation</option>
+                                        <option value="Senior Developer">Senior Developer</option>
+                                        <option value="Product Manager">Product Manager</option>
+                                        <option value="UI/UX Designer">UI/UX Designer</option>
+                                        <option value="HR Manager">HR Manager</option>
+                                        <option value="Marketing Manager">Marketing Manager</option>
+                                    </select>
+                                    <ChevronRight className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rotate-90" />
+                                </div>
+
+                                {/* More Filters Button */}
                                 <Button
                                     type="button"
-                                    onClick={() => navigate('/employees/add')}
-                                    className="px-3 py-1.5 text-sm bg-rose-500 text-white rounded-md hover:bg-rose-600 transition-colors flex items-center gap-1.5 font-medium"
+                                    onClick={() => setShowMoreFilters(true)}
+                                    className="px-3 py-1.5 text-sm text-blue-600 rounded-md hover:bg-blue-50 transition-colors flex items-center gap-1.5 font-medium border-none"
                                 >
-                                    <Plus className="w-3.5 h-3.5" />
-                                    Add Employee
+                                    <Filter className="w-4 h-4" />
+                                    More Filters
+                                    {activeFilterCount > 3 && (
+                                        <span className="ml-1 px-1.5 py-0.5 bg-blue-100 text-blue-600 text-xs rounded-full">
+                                            {activeFilterCount - 3}
+                                        </span>
+                                    )}
                                 </Button>
+
+                                {/* Clear Filters */}
+                                {activeFilterCount > 0 && (
+                                    <Button
+                                        type="button"
+                                        onClick={handleClearFilters}
+                                        className="px-3 py-1.5 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors flex items-center gap-1.5"
+                                    >
+                                        <X className="w-4 h-4" />
+                                        Clear All
+                                    </Button>
+                                )}
                             </div>
                         </div>
 
@@ -344,80 +656,51 @@ export default function EmployeeList() {
                         ) : (
                             <div className="bg-white rounded-lg border border-slate-200">
                                 <div className="overflow-x-auto">
-                                    <table className="min-w-[1200px] w-full">
+                                    <table className="w-full">
                                         <thead className="bg-slate-50 border-b border-slate-200">
                                             <tr>
-                                                <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Employee</th>
-                                                <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">ID</th>
-                                                <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Department</th>
-                                                <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Designation</th>
-                                                <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Contact</th>
-                                                <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Salary</th>
-                                                <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
-                                                <th className="px-4 pr-6 py-2.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap w-32">Actions</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Name</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Email</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Department</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-200">
                                             {filteredEmployees.map((employee) => (
                                                 <tr key={employee.id} className="hover:bg-slate-50 transition-colors">
-                                                    <td className="px-4 py-3">
-                                                        <div className="flex items-center gap-2.5">
-                                                            <div className="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 font-semibold text-xs flex-shrink-0">
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 font-semibold text-sm flex-shrink-0">
                                                                 {employee.name.charAt(0)}
                                                             </div>
-                                                            <div className="min-w-0">
-                                                                <p className="text-sm font-medium text-slate-900 truncate">{employee.name}</p>
-                                                                <p className="text-xs text-slate-500 truncate">{employee.email}</p>
-                                                            </div>
+                                                            <button
+                                                                onClick={() => navigate(`/employees/${employee.id}`)}
+                                                                className="text-left hover:text-rose-600 transition-colors flex-1"
+                                                            >
+                                                                <div className="flex items-center gap-2">
+                                                                    <div>
+                                                                        <p className="text-sm font-semibold text-slate-900 hover:text-rose-600">{employee.name}</p>
+                                                                        <p className="text-xs text-slate-500">{employee.employeeId}</p>
+                                                                    </div>
+                                                                    {!employee.isProfileComplete && (
+                                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-50 text-orange-600 text-xs font-medium rounded border border-orange-200">
+                                                                            ⚠️ Incomplete ({employee.profileCompletionPercentage}%)
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </button>
                                                         </div>
                                                     </td>
-                                                    <td className="px-4 py-3">
-                                                        <span className="text-sm text-slate-600 font-mono">{employee.employeeId}</span>
+                                                    <td className="px-6 py-4">
+                                                        <span className="text-sm text-slate-600">{employee.email}</span>
                                                     </td>
-                                                    <td className="px-4 py-3">
+                                                    <td className="px-6 py-4">
                                                         <span className="text-sm text-slate-900">{employee.department}</span>
                                                     </td>
-                                                    <td className="px-4 py-3">
-                                                        <span className="text-sm text-slate-600">{employee.designation}</span>
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        <div className="text-xs text-slate-500">
-                                                            <div className="flex items-center gap-1 mb-0.5">
-                                                                <Mail className="w-3 h-3" />
-                                                                <span className="truncate max-w-[150px]">{employee.email}</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-1">
-                                                                <Phone className="w-3 h-3" />
-                                                                <span>{employee.phone}</span>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        <span className="text-sm font-semibold text-slate-900">{employee.salary}</span>
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700">
+                                                    <td className="px-6 py-4">
+                                                        <span className="inline-flex px-3 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700">
                                                             {employee.status}
                                                         </span>
-                                                    </td>
-                                                    <td className="px-4 pr-6 py-3 w-32">
-                                                        <div className="flex items-center justify-end gap-1">
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                className="p-1.5 hover:bg-slate-100 rounded"
-                                                                title="View details"
-                                                                onClick={() => navigate(`/employees/${employee.id}`)}
-                                                            >
-                                                                <Eye className="w-3.5 h-3.5 text-slate-600" />
-                                                            </Button>
-                                                            <Button type="button" variant="ghost" className="p-1.5 hover:bg-slate-100 rounded" title="Edit">
-                                                                <Edit className="w-3.5 h-3.5 text-slate-600" />
-                                                            </Button>
-                                                            <Button type="button" variant="ghost" className="p-1.5 hover:bg-slate-100 rounded" title="More options">
-                                                                <MoreVertical className="w-3.5 h-3.5 text-slate-600" />
-                                                            </Button>
-                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -429,6 +712,210 @@ export default function EmployeeList() {
                     </div>
                 </div>
             </div>
+
+            {/* More Filters Modal */}
+            {showMoreFilters && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-slate-200">
+                            <h2 className="text-xl font-bold text-slate-900">More Filters</h2>
+                            <button
+                                onClick={() => setShowMoreFilters(false)}
+                                className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+                            >
+                                <X className="w-5 h-5 text-slate-600" />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                            {/* Work Location */}
+                            <div className="grid grid-cols-3 gap-4 items-center">
+                                <label className="text-sm font-medium text-slate-700">Work Location</label>
+                                <div className="col-span-2 relative">
+                                    <select
+                                        value={filters.workLocation}
+                                        onChange={(e) => handleFilterChange('workLocation', e.target.value)}
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                    >
+                                        <option value="">Select Work Location</option>
+                                        <option value="Head Office">Head Office</option>
+                                        <option value="Branch Office">Branch Office</option>
+                                        <option value="Remote">Remote</option>
+                                    </select>
+                                    <ChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rotate-90" />
+                                </div>
+                            </div>
+
+                            {/* Department */}
+                            <div className="grid grid-cols-3 gap-4 items-center">
+                                <label className="text-sm font-medium text-slate-700">Department</label>
+                                <div className="col-span-2 relative">
+                                    <select
+                                        value={filters.department}
+                                        onChange={(e) => handleFilterChange('department', e.target.value)}
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                    >
+                                        <option value="">Select Department</option>
+                                        <option value="Engineering">Engineering</option>
+                                        <option value="Product">Product</option>
+                                        <option value="Design">Design</option>
+                                        <option value="HR">HR</option>
+                                        <option value="Marketing">Marketing</option>
+                                    </select>
+                                    <ChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rotate-90" />
+                                </div>
+                            </div>
+
+                            {/* Designation */}
+                            <div className="grid grid-cols-3 gap-4 items-center">
+                                <label className="text-sm font-medium text-slate-700">Designation</label>
+                                <div className="col-span-2 relative">
+                                    <select
+                                        value={filters.designation}
+                                        onChange={(e) => handleFilterChange('designation', e.target.value)}
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                    >
+                                        <option value="">Select Designation</option>
+                                        <option value="Senior Developer">Senior Developer</option>
+                                        <option value="Product Manager">Product Manager</option>
+                                        <option value="UI/UX Designer">UI/UX Designer</option>
+                                        <option value="HR Manager">HR Manager</option>
+                                        <option value="Marketing Manager">Marketing Manager</option>
+                                    </select>
+                                    <ChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rotate-90" />
+                                </div>
+                            </div>
+
+                            {/* Investment Declaration */}
+                            <div className="grid grid-cols-3 gap-4 items-center">
+                                <label className="text-sm font-medium text-slate-700">Investment Declaration</label>
+                                <div className="col-span-2 relative">
+                                    <select
+                                        value={filters.investmentDeclaration}
+                                        onChange={(e) => handleFilterChange('investmentDeclaration', e.target.value)}
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                    >
+                                        <option value="">Select Status</option>
+                                        <option value="Submitted">Submitted</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Not Started">Not Started</option>
+                                    </select>
+                                    <ChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rotate-90" />
+                                </div>
+                            </div>
+
+                            {/* Proof Of Investments */}
+                            <div className="grid grid-cols-3 gap-4 items-center">
+                                <label className="text-sm font-medium text-slate-700">Proof Of Investments</label>
+                                <div className="col-span-2 relative">
+                                    <select
+                                        value={filters.proofOfInvestments}
+                                        onChange={(e) => handleFilterChange('proofOfInvestments', e.target.value)}
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                    >
+                                        <option value="">Select Status</option>
+                                        <option value="Submitted">Submitted</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Not Started">Not Started</option>
+                                    </select>
+                                    <ChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rotate-90" />
+                                </div>
+                            </div>
+
+                            {/* Flexible Benefit Plan */}
+                            <div className="grid grid-cols-3 gap-4 items-center">
+                                <label className="text-sm font-medium text-slate-700">Flexible Benefit Plan</label>
+                                <div className="col-span-2 relative">
+                                    <select
+                                        value={filters.flexibleBenefitPlan}
+                                        onChange={(e) => handleFilterChange('flexibleBenefitPlan', e.target.value)}
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                    >
+                                        <option value="">Select Status</option>
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                        <option value="Pending">Pending</option>
+                                    </select>
+                                    <ChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rotate-90" />
+                                </div>
+                            </div>
+
+                            {/* Reimbursement */}
+                            <div className="grid grid-cols-3 gap-4 items-center">
+                                <label className="text-sm font-medium text-slate-700">Reimbursement</label>
+                                <div className="col-span-2 relative">
+                                    <select
+                                        value={filters.reimbursement}
+                                        onChange={(e) => handleFilterChange('reimbursement', e.target.value)}
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                    >
+                                        <option value="">Select Status</option>
+                                        <option value="Approved">Approved</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Rejected">Rejected</option>
+                                    </select>
+                                    <ChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rotate-90" />
+                                </div>
+                            </div>
+
+                            {/* Onboarding Status */}
+                            <div className="grid grid-cols-3 gap-4 items-center">
+                                <label className="text-sm font-medium text-slate-700">Onboarding Status</label>
+                                <div className="col-span-2 relative">
+                                    <select
+                                        value={filters.onboardingStatus}
+                                        onChange={(e) => handleFilterChange('onboardingStatus', e.target.value)}
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                    >
+                                        <option value="">Select Status</option>
+                                        <option value="Complete">Complete</option>
+                                        <option value="Incomplete">Incomplete</option>
+                                        <option value="Pending">Pending</option>
+                                    </select>
+                                    <ChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rotate-90" />
+                                </div>
+                            </div>
+
+                            {/* Portal Access */}
+                            <div className="grid grid-cols-3 gap-4 items-center">
+                                <label className="text-sm font-medium text-slate-700">Portal Access</label>
+                                <div className="col-span-2 relative">
+                                    <select
+                                        value={filters.portalAccess}
+                                        onChange={(e) => handleFilterChange('portalAccess', e.target.value)}
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                    >
+                                        <option value="">Select Status</option>
+                                        <option value="enabled">Enabled</option>
+                                        <option value="disabled">Disabled</option>
+                                    </select>
+                                    <ChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rotate-90" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="flex items-center justify-start gap-3 p-6 border-t border-slate-200 bg-slate-50">
+                            <Button
+                                type="button"
+                                onClick={handleApplyFilters}
+                                className="px-6 py-2.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+                            >
+                                Apply
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={() => setShowMoreFilters(false)}
+                                className="px-6 py-2.5 text-sm bg-white text-slate-700 border border-slate-300 rounded-md hover:bg-slate-50 transition-colors font-medium"
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
