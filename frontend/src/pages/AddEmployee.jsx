@@ -715,15 +715,15 @@ function BasicDetailsStep({ register, errors }) {
             </div>
 
             <div className="border-t border-pink-100 pt-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-2">Statutory Components</h3>
-                <p className="text-sm text-slate-600 mb-4">Enable the necessary benefits and tax applicable for this employee.</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Statutory Components</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Enable the necessary benefits and tax applicable for this employee.</p>
                 <div className="flex items-center gap-2 p-3 bg-pink-50 rounded-lg">
                     <Checkbox
                         {...register('professionalTax')}
                         defaultChecked
                         className="w-4 h-4 text-pink-600 border-pink-300 rounded focus:ring-pink-500"
                     />
-                    <label className="text-sm font-semibold text-slate-700">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                         Professional Tax
                     </label>
                 </div>
@@ -754,7 +754,7 @@ function SalaryDetailsStep({ register, errors, watch, setValue }) {
             <input type="hidden" {...register('hraMonthly')} value={(hraMonthlyCalc || 0).toFixed(2)} />
             <input type="hidden" {...register('fixedAllowanceMonthly')} value={(fixedAllowanceMonthlyCalc || 0).toFixed(2)} />
             <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Annual CTC <span className="text-pink-600">*</span></label>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Annual CTC <span className="text-pink-600">*</span></label>
                 <div className="flex items-center gap-2">
                     <div className="relative w-full max-w-xs">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">₹</span>
@@ -767,63 +767,63 @@ function SalaryDetailsStep({ register, errors, watch, setValue }) {
                 {errors.annualCtc && <p className="text-xs text-red-500 mt-1">{errors.annualCtc.message}</p>}
             </div>
             <div className="bg-white rounded-2xl border border-pink-100">
-                <div className="grid grid-cols-4 gap-4 px-4 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider bg-slate-50 border-b border-pink-100">
+                <div className="grid grid-cols-4 gap-4 px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider bg-slate-50 dark:bg-slate-700 border-b border-pink-100 dark:border-slate-600">
                     <div>Salary Components</div>
                     <div>Calculation Type</div>
                     <div className="text-right">Monthly Amount</div>
                     <div className="text-right">Annual Amount</div>
                 </div>
-                <div className="px-4 py-3 text-xs text-slate-500">Earnings</div>
-                <div className="divide-y divide-slate-100">
+                <div className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">Earnings</div>
+                <div className="divide-y divide-slate-100 dark:divide-slate-700">
                     <div className="grid grid-cols-4 gap-4 px-4 py-3 items-center">
-                        <div className="text-sm text-slate-900">Basic</div>
+                        <div className="text-sm text-slate-900 dark:text-white">Basic</div>
                         <div className="flex items-center gap-2">
                             <Input type="number" step="0.01" min="0" max="100" {...register('basicPercentOfCtc')} className="w-24 border-pink-200 focus:ring-pink-500 focus:border-pink-500" />
-                            <span className="text-sm text-slate-600">% of CTC</span>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">% of CTC</span>
                         </div>
                         <div className="text-right">
                             <Input readOnly value={(basicMonthlyCalc || 0).toFixed(2)} className="w-28 text-right bg-slate-50" />
                         </div>
-                        <div className="text-right">{(basicMonthlyCalc * 12).toFixed(2)}</div>
+                        <div className="text-right text-slate-900 dark:text-white">{(basicMonthlyCalc * 12).toFixed(2)}</div>
                     </div>
                     <div className="grid grid-cols-4 gap-4 px-4 py-3 items-center">
-                        <div className="text-sm text-slate-900">House Rent Allowance</div>
+                        <div className="text-sm text-slate-900 dark:text-white">House Rent Allowance</div>
                         <div className="flex items-center gap-2">
                             <Input type="number" step="0.01" min="0" max="100" {...register('hraPercentOfBasic')} className="w-24 border-pink-200 focus:ring-pink-500 focus:border-pink-500" />
-                            <span className="text-sm text-slate-600">% of Basic</span>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">% of Basic</span>
                         </div>
                         <div className="text-right">
                             <Input readOnly value={(hraMonthlyCalc || 0).toFixed(2)} className="w-28 text-right bg-slate-50" />
                         </div>
-                        <div className="text-right">{(hraMonthlyCalc * 12).toFixed(2)}</div>
+                        <div className="text-right text-slate-900 dark:text-white">{(hraMonthlyCalc * 12).toFixed(2)}</div>
                     </div>
                     <div className="grid grid-cols-4 gap-4 px-4 py-3 items-center">
-                        <div className="text-sm text-slate-900">Conveyance Allowance</div>
-                        <div className="text-sm text-slate-600">Fixed amount</div>
+                        <div className="text-sm text-slate-900 dark:text-white">Conveyance Allowance</div>
+                        <div className="text-sm text-slate-600 dark:text-slate-400">Fixed amount</div>
                         <div className="text-right">
                             <Input type="number" step="0.01" min="0" {...register('conveyanceAllowanceMonthly')} className="w-28 text-right border-pink-200 focus:ring-pink-500 focus:border-pink-500" />
                         </div>
-                        <div className="text-right">{(conveyanceAllowanceMonthly * 12).toFixed(2)}</div>
+                        <div className="text-right text-slate-900 dark:text-white">{(conveyanceAllowanceMonthly * 12).toFixed(2)}</div>
                     </div>
                     <div className="grid grid-cols-4 gap-4 px-4 py-3 items-center">
-                        <div className="text-sm text-slate-900">Fixed Allowance</div>
-                        <div className="text-sm text-slate-600">Fixed amount</div>
+                        <div className="text-sm text-slate-900 dark:text-white">Fixed Allowance</div>
+                        <div className="text-sm text-slate-600 dark:text-slate-400">Fixed amount</div>
                         <div className="text-right">
                             <Input readOnly value={(fixedAllowanceMonthlyCalc || 0).toFixed(2)} className="w-28 text-right bg-slate-50" />
                         </div>
-                        <div className="text-right">{(fixedAllowanceMonthlyCalc * 12).toFixed(2)}</div>
+                        <div className="text-right text-slate-900 dark:text-white">{(fixedAllowanceMonthlyCalc * 12).toFixed(2)}</div>
                     </div>
                 </div>
-                <div className="px-4 py-3 bg-slate-50 border-t border-pink-100 flex items-center justify-between">
-                    <div className="font-semibold text-slate-900">Cost to Company</div>
+                <div className="px-4 py-3 bg-slate-50 dark:bg-slate-700 border-t border-pink-100 dark:border-slate-600 flex items-center justify-between">
+                    <div className="font-semibold text-slate-900 dark:text-white">Cost to Company</div>
                     <div className="flex items-center gap-8">
                         <div className="text-right">
-                            <div className="text-xs text-slate-500">Monthly</div>
-                            <div className="font-semibold">₹{(monthlyCtc || 0).toFixed(2)}</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">Monthly</div>
+                            <div className="font-semibold text-slate-900 dark:text-white">₹{(monthlyCtc || 0).toFixed(2)}</div>
                         </div>
                         <div className="text-right">
-                            <div className="text-xs text-slate-500">Annual</div>
-                            <div className="font-semibold">₹{(annualCtc || 0).toFixed(2)}</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">Annual</div>
+                            <div className="font-semibold text-slate-900 dark:text-white">₹{(annualCtc || 0).toFixed(2)}</div>
                         </div>
                     </div>
                 </div>
@@ -979,8 +979,8 @@ function PaymentInformationStep({ register, errors, watch }) {
                 <label className={`flex items-start gap-4 p-4 rounded-xl border ${paymentMethod === 'direct_deposit' ? 'border-pink-400 bg-pink-50' : 'border-pink-100'} cursor-pointer`}>
                     <Radio value="direct_deposit" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
                     <div>
-                        <div className="font-semibold text-slate-900">Direct Deposit (Automated Process)</div>
-                        <div className="text-sm text-slate-600">Initiate payment in the system once the pay run is approved</div>
+                        <div className="font-semibold text-slate-900 dark:text-white">Direct Deposit (Automated Process)</div>
+                        <div className="text-sm text-slate-600 dark:text-slate-400">Initiate payment in the system once the pay run is approved</div>
                     </div>
                     <span className="ml-auto text-xs text-pink-600">Configure Now</span>
                 </label>
@@ -988,22 +988,22 @@ function PaymentInformationStep({ register, errors, watch }) {
                 <label className={`flex items-start gap-4 p-4 rounded-xl border ${paymentMethod === 'bank_transfer' ? 'border-pink-400 bg-pink-50' : 'border-pink-100'} cursor-pointer`}>
                     <Radio value="bank_transfer" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
                     <div>
-                        <div className="font-semibold text-slate-900">Bank Transfer (Manual Process)</div>
-                        <div className="text-sm text-slate-600">Download Bank Advice and process the payment through your bank's website</div>
+                        <div className="font-semibold text-slate-900 dark:text-white">Bank Transfer (Manual Process)</div>
+                        <div className="text-sm text-slate-600 dark:text-slate-400">Download Bank Advice and process the payment through your bank's website</div>
                     </div>
                 </label>
 
                 <label className={`flex items-start gap-4 p-4 rounded-xl border ${paymentMethod === 'cheque' ? 'border-pink-400 bg-pink-50' : 'border-pink-100'} cursor-pointer`}>
                     <Radio value="cheque" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
                     <div>
-                        <div className="font-semibold text-slate-900">Cheque</div>
+                        <div className="font-semibold text-slate-900 dark:text-white">Cheque</div>
                     </div>
                 </label>
 
                 <label className={`flex items-start gap-4 p-4 rounded-xl border ${paymentMethod === 'cash' ? 'border-pink-400 bg-pink-50' : 'border-pink-100'} cursor-pointer`}>
                     <Radio value="cash" {...register('paymentMethod', { required: 'Please choose a payment method' })} className="mt-1" />
                     <div>
-                        <div className="font-semibold text-slate-900">Cash</div>
+                        <div className="font-semibold text-slate-900 dark:text-white">Cash</div>
                     </div>
                 </label>
                 {errors.paymentMethod && <p className="text-xs text-red-500">{errors.paymentMethod.message}</p>}
@@ -1011,10 +1011,10 @@ function PaymentInformationStep({ register, errors, watch }) {
 
             {paymentMethod === 'bank_transfer' && (
                 <div className="border-t border-pink-100 pt-6">
-                    <h4 className="text-md font-bold text-slate-900 mb-4">Bank Details</h4>
+                    <h4 className="text-md font-bold text-slate-900 dark:text-white mb-4">Bank Details</h4>
                     <div className="grid grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">Bank Name <span className="text-pink-600">*</span></label>
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Bank Name <span className="text-pink-600">*</span></label>
                             <Input
                                 {...register('bankName', { validate: (v) => paymentMethod !== 'bank_transfer' || !!v || 'Bank name is required' })}
                                 placeholder="Enter bank name"
