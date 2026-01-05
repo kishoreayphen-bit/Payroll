@@ -463,7 +463,7 @@ export default function Dashboard() {
                                                     <span className="px-2.5 py-0.5 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 font-semibold text-xs rounded-full whitespace-nowrap">
                                                         COMPLETED
                                                     </span>
-                                                ) : (
+                                                ) : !step.comingSoon && (
                                                     <Button
                                                         variant="link"
                                                         className="text-pink-600 hover:text-pink-700 font-semibold text-xs h-auto p-0 whitespace-nowrap"
