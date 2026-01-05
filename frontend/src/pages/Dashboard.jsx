@@ -97,8 +97,7 @@ export default function Dashboard() {
             id: 3,
             title: 'Configure your Pay Schedule',
             completed: false,
-            link: '/settings/pay-schedule',
-            comingSoon: true
+            link: '/settings/pay-schedule'
         },
         {
             id: 4,

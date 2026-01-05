@@ -718,15 +718,15 @@ export default function EmployeeList() {
             {/* More Filters Modal */}
             {showMoreFilters && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-slate-200">
-                            <h2 className="text-xl font-bold text-slate-900">More Filters</h2>
+                        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white">More Filters</h2>
                             <button
                                 onClick={() => setShowMoreFilters(false)}
-                                className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+                                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                             >
-                                <X className="w-5 h-5 text-slate-600" />
+                                <X className="w-5 h-5 text-slate-600 dark:text-slate-300" />
                             </button>
                         </div>
 
@@ -734,12 +734,12 @@ export default function EmployeeList() {
                         <div className="flex-1 overflow-y-auto p-6 space-y-6">
                             {/* Work Location */}
                             <div className="grid grid-cols-3 gap-4 items-center">
-                                <label className="text-sm font-medium text-slate-700">Work Location</label>
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Work Location</label>
                                 <div className="col-span-2 relative">
                                     <select
                                         value={filters.workLocation}
                                         onChange={(e) => handleFilterChange('workLocation', e.target.value)}
-                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-700 text-slate-700 dark:text-white cursor-pointer"
                                     >
                                         <option value="">Select Work Location</option>
                                         <option value="Head Office">Head Office</option>
@@ -752,12 +752,12 @@ export default function EmployeeList() {
 
                             {/* Department */}
                             <div className="grid grid-cols-3 gap-4 items-center">
-                                <label className="text-sm font-medium text-slate-700">Department</label>
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Department</label>
                                 <div className="col-span-2 relative">
                                     <select
                                         value={filters.department}
                                         onChange={(e) => handleFilterChange('department', e.target.value)}
-                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-700 text-slate-700 dark:text-white cursor-pointer"
                                     >
                                         <option value="">Select Department</option>
                                         <option value="Engineering">Engineering</option>
@@ -772,12 +772,12 @@ export default function EmployeeList() {
 
                             {/* Designation */}
                             <div className="grid grid-cols-3 gap-4 items-center">
-                                <label className="text-sm font-medium text-slate-700">Designation</label>
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Designation</label>
                                 <div className="col-span-2 relative">
                                     <select
                                         value={filters.designation}
                                         onChange={(e) => handleFilterChange('designation', e.target.value)}
-                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-700 text-slate-700 dark:text-white cursor-pointer"
                                     >
                                         <option value="">Select Designation</option>
                                         <option value="Senior Developer">Senior Developer</option>
@@ -792,12 +792,12 @@ export default function EmployeeList() {
 
                             {/* Investment Declaration */}
                             <div className="grid grid-cols-3 gap-4 items-center">
-                                <label className="text-sm font-medium text-slate-700">Investment Declaration</label>
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Investment Declaration</label>
                                 <div className="col-span-2 relative">
                                     <select
                                         value={filters.investmentDeclaration}
                                         onChange={(e) => handleFilterChange('investmentDeclaration', e.target.value)}
-                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-700 text-slate-700 dark:text-white cursor-pointer"
                                     >
                                         <option value="">Select Status</option>
                                         <option value="Submitted">Submitted</option>
@@ -810,12 +810,12 @@ export default function EmployeeList() {
 
                             {/* Proof Of Investments */}
                             <div className="grid grid-cols-3 gap-4 items-center">
-                                <label className="text-sm font-medium text-slate-700">Proof Of Investments</label>
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Proof Of Investments</label>
                                 <div className="col-span-2 relative">
                                     <select
                                         value={filters.proofOfInvestments}
                                         onChange={(e) => handleFilterChange('proofOfInvestments', e.target.value)}
-                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-700 text-slate-700 dark:text-white cursor-pointer"
                                     >
                                         <option value="">Select Status</option>
                                         <option value="Submitted">Submitted</option>
@@ -828,12 +828,12 @@ export default function EmployeeList() {
 
                             {/* Flexible Benefit Plan */}
                             <div className="grid grid-cols-3 gap-4 items-center">
-                                <label className="text-sm font-medium text-slate-700">Flexible Benefit Plan</label>
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Flexible Benefit Plan</label>
                                 <div className="col-span-2 relative">
                                     <select
                                         value={filters.flexibleBenefitPlan}
                                         onChange={(e) => handleFilterChange('flexibleBenefitPlan', e.target.value)}
-                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-700 text-slate-700 dark:text-white cursor-pointer"
                                     >
                                         <option value="">Select Status</option>
                                         <option value="Active">Active</option>
@@ -846,12 +846,12 @@ export default function EmployeeList() {
 
                             {/* Reimbursement */}
                             <div className="grid grid-cols-3 gap-4 items-center">
-                                <label className="text-sm font-medium text-slate-700">Reimbursement</label>
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Reimbursement</label>
                                 <div className="col-span-2 relative">
                                     <select
                                         value={filters.reimbursement}
                                         onChange={(e) => handleFilterChange('reimbursement', e.target.value)}
-                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-700 text-slate-700 dark:text-white cursor-pointer"
                                     >
                                         <option value="">Select Status</option>
                                         <option value="Approved">Approved</option>
@@ -864,12 +864,12 @@ export default function EmployeeList() {
 
                             {/* Onboarding Status */}
                             <div className="grid grid-cols-3 gap-4 items-center">
-                                <label className="text-sm font-medium text-slate-700">Onboarding Status</label>
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Onboarding Status</label>
                                 <div className="col-span-2 relative">
                                     <select
                                         value={filters.onboardingStatus}
                                         onChange={(e) => handleFilterChange('onboardingStatus', e.target.value)}
-                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-700 text-slate-700 dark:text-white cursor-pointer"
                                     >
                                         <option value="">Select Status</option>
                                         <option value="Complete">Complete</option>
@@ -882,12 +882,12 @@ export default function EmployeeList() {
 
                             {/* Portal Access */}
                             <div className="grid grid-cols-3 gap-4 items-center">
-                                <label className="text-sm font-medium text-slate-700">Portal Access</label>
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Portal Access</label>
                                 <div className="col-span-2 relative">
                                     <select
                                         value={filters.portalAccess}
                                         onChange={(e) => handleFilterChange('portalAccess', e.target.value)}
-                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-700 cursor-pointer"
+                                        className="w-full appearance-none pl-3 pr-10 py-2.5 text-sm border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-700 text-slate-700 dark:text-white cursor-pointer"
                                     >
                                         <option value="">Select Status</option>
                                         <option value="enabled">Enabled</option>
@@ -899,18 +899,18 @@ export default function EmployeeList() {
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="flex items-center justify-start gap-3 p-6 border-t border-slate-200 bg-slate-50">
+                        <div className="flex items-center justify-start gap-3 p-6 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700">
                             <Button
                                 type="button"
                                 onClick={handleApplyFilters}
-                                className="px-6 py-2.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+                                className="px-6 py-2.5 text-sm bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white rounded-md transition-colors font-medium"
                             >
                                 Apply
                             </Button>
                             <Button
                                 type="button"
                                 onClick={() => setShowMoreFilters(false)}
-                                className="px-6 py-2.5 text-sm bg-white text-slate-700 border border-slate-300 rounded-md hover:bg-slate-50 transition-colors font-medium"
+                                className="px-6 py-2.5 text-sm bg-white dark:bg-slate-600 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-500 rounded-md hover:bg-slate-50 dark:hover:bg-slate-500 transition-colors font-medium"
                             >
                                 Cancel
                             </Button>

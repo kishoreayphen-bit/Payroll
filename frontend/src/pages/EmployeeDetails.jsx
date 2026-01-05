@@ -558,7 +558,7 @@ export default function EmployeeDetails() {
                 </div>
 
                 {/* Tabs */}
-                <div className="bg-white border-b border-slate-200 px-6">
+                <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6">
                     <div className="flex gap-6">
                         {TABS.map(tab => (
                             <button
@@ -566,7 +566,7 @@ export default function EmployeeDetails() {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
                                     ? 'border-rose-500 text-rose-600'
-                                    : 'border-transparent text-slate-600 hover:text-slate-900'
+                                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                                     }`}
                             >
                                 {tab.label}
@@ -816,9 +816,9 @@ function OverviewTab({ employee, onTogglePT, onEditBasicInfo, onEditPersonalInfo
             </div>
 
             {/* Basic Information */}
-            <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-bold text-slate-900">Basic Information</h2>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Basic Information</h2>
                     <Button variant="ghost" size="sm" onClick={onEditBasicInfo}>
                         <Edit className="w-4 h-4" />
                     </Button>
@@ -873,9 +873,9 @@ function OverviewTab({ employee, onTogglePT, onEditBasicInfo, onEditPersonalInfo
             </div>
 
             {/* Statutory Information */}
-            <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-bold text-slate-900">Statutory Information</h2>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Statutory Information</h2>
                     <Button variant="ghost" size="sm">
                         <Edit className="w-4 h-4" />
                     </Button>
@@ -913,9 +913,9 @@ function OverviewTab({ employee, onTogglePT, onEditBasicInfo, onEditPersonalInfo
             </div>
 
             {/* Personal Information */}
-            <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-bold text-slate-900">Personal Information</h2>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Personal Information</h2>
                     <Button variant="ghost" size="sm" onClick={onEditPersonalInfo}>
                         <Edit className="w-4 h-4" />
                     </Button>
@@ -949,9 +949,9 @@ function OverviewTab({ employee, onTogglePT, onEditBasicInfo, onEditPersonalInfo
             </div>
 
             {/* Payment Information */}
-            <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-bold text-slate-900">Payment Information</h2>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Payment Information</h2>
                     <Button variant="ghost" size="sm" onClick={onEditPaymentInfo}>
                         <Edit className="w-4 h-4" />
                     </Button>
@@ -1008,9 +1008,9 @@ function SalaryTab({ employee, salaryBreakdown, onEditSalaryInfo, onCompleteProf
             </div>
 
             {/* Compensation Overview */}
-            <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-bold text-slate-900">Compensation Overview</h2>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Compensation Overview</h2>
                     <div className="flex items-center gap-2">
                         <Button variant="ghost" size="sm" onClick={onEditSalaryInfo}>
                             <Edit className="w-4 h-4" />
@@ -1034,8 +1034,8 @@ function SalaryTab({ employee, salaryBreakdown, onEditSalaryInfo, onCompleteProf
             </div>
 
             {/* Salary Structure */}
-            <div className="bg-white rounded-lg border border-slate-200 p-6">
-                <h2 className="text-lg font-bold text-slate-900 mb-6">Salary Structure</h2>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Salary Structure</h2>
 
                 <div className="overflow-x-auto">
                     <table className="w-full">
@@ -1130,8 +1130,8 @@ function SalaryTab({ employee, salaryBreakdown, onEditSalaryInfo, onCompleteProf
             </div>
 
             {/* Perquisites */}
-            <div className="bg-white rounded-lg border border-slate-200 p-6">
-                <h2 className="text-lg font-bold text-slate-900 mb-4">Perquisites</h2>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Perquisites</h2>
                 <div>
                     <p className="text-sm text-slate-500 mb-1">Additional Benefits</p>
                     <p className="text-lg font-semibold text-slate-900">₹0.00 <button className="text-sm text-rose-600 hover:text-rose-700 ml-2">View Details ›</button></p>
@@ -1153,9 +1153,9 @@ function InvestmentsTab() {
 
     return (
         <div className="max-w-5xl space-y-6">
-            <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-bold text-slate-900">Tax Saving Investments</h2>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Tax Saving Investments</h2>
                     <Button variant="outline" className="gap-2">
                         <Edit className="w-4 h-4" />
                         Edit Declarations
@@ -1203,9 +1203,9 @@ function PayslipsTab() {
 
     return (
         <div className="max-w-5xl space-y-6">
-            <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-bold text-slate-900">Payslip History</h2>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Payslip History</h2>
                     <div className="flex gap-2">
                         <select className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-pink-500/20">
                             <option>FY 2024-25</option>
@@ -1234,9 +1234,9 @@ function PayslipsTab() {
 function LoansTab() {
     return (
         <div className="max-w-5xl space-y-6">
-            <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-bold text-slate-900">Active Loans</h2>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Active Loans</h2>
                     <Button variant="outline" className="gap-2">
                         <Plus className="w-4 h-4" />
                         New Loan Request
