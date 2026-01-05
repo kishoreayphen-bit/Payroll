@@ -252,11 +252,10 @@ public class EmployeeService {
     }
 
     private int calculateProfileCompleteness(Employee entity) {
-        int totalFields = 0;
+        int totalFields = 12; // Total required fields across all steps
         int filledFields = 0;
 
         // Basic Details (Required fields - 8)
-        totalFields += 8;
         if (entity.getFirstName() != null && !entity.getFirstName().isEmpty())
             filledFields++;
         if (entity.getLastName() != null && !entity.getLastName().isEmpty())
@@ -274,36 +273,21 @@ public class EmployeeService {
         if (entity.getDepartment() != null && !entity.getDepartment().isEmpty())
             filledFields++;
 
-        // Salary Details (Important fields - 3)
-        totalFields += 3;
-        if (entity.getAnnualCtc() != null)
-            filledFields++;
-        if (entity.getBasicMonthly() != null)
-            filledFields++;
-        if (entity.getHraMonthly() != null)
+        // Salary Details (Required field - 1)
+        if (entity.getAnnualCtc() != null && entity.getAnnualCtc().compareTo(java.math.BigDecimal.ZERO) > 0)
             filledFields++;
 
-        // Personal Details (Important fields - 4)
-        totalFields += 4;
+        // Personal Details (Required fields - 2)
         if (entity.getDateOfBirth() != null)
             filledFields++;
         if (entity.getGender() != null && !entity.getGender().isEmpty())
             filledFields++;
-        if (entity.getPersonalEmail() != null && !entity.getPersonalEmail().isEmpty())
-            filledFields++;
-        if (entity.getAddress() != null && !entity.getAddress().isEmpty())
+
+        // Payment Information (Required field - 1)
+        if (entity.getPaymentMethod() != null && !entity.getPaymentMethod().isEmpty())
             filledFields++;
 
-        // Payment Information (Critical fields - 3)
-        totalFields += 3;
-        if (entity.getBankName() != null && !entity.getBankName().isEmpty())
-            filledFields++;
-        if (entity.getAccountNumber() != null && !entity.getAccountNumber().isEmpty())
-            filledFields++;
-        if (entity.getPanNumber() != null && !entity.getPanNumber().isEmpty())
-            filledFields++;
-
-        // Calculate percentage
+        // Calculate percentage - return 100 only if all 12 required fields are filled
         return (int) ((filledFields * 100.0) / totalFields);
     }
 }

@@ -18,6 +18,7 @@ import TestOrganizations from './pages/TestOrganizations'
 import ComingSoon from './pages/ComingSoon'
 import Notifications from './pages/Notifications'
 import PayScheduleSettings from './pages/PayScheduleSettings'
+import PayRun from './pages/PayRun'
 
 function App() {
   return (
@@ -105,6 +106,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Notifications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pay-runs"
+            element={
+              <ProtectedRoute>
+                <PayRun />
               </ProtectedRoute>
             }
           />

@@ -122,7 +122,11 @@ export default function AppHeader({
                         <Bell className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                     </Link>
 
-                    <button className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors">
+                    <button 
+                        onClick={() => navigate('/settings/pay-schedule')}
+                        className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                        title="Settings"
+                    >
                         <Settings className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                     </button>
 
