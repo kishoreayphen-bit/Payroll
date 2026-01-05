@@ -34,6 +34,8 @@ import { Button } from '../components/ui/button';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/authService';
 import { Moon, Sun } from 'lucide-react';
+import Sidebar from '../components/Sidebar';
+import AppHeader from '../components/AppHeader';
 
 export default function Dashboard() {
     const { user, logout } = useAuth();
@@ -140,111 +142,8 @@ export default function Dashboard() {
 
     return (
         <div className="h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex overflow-hidden">
-            {/* Sidebar - Fixed with collapse animation */}
-            <div
-                className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col fixed left-0 top-0 h-screen transition-all duration-300 shadow-2xl ${sidebarOpen ? 'w-56' : 'w-0'
-                    }`}
-                style={{ overflow: sidebarOpen ? 'visible' : 'hidden' }}
-            >
-                {sidebarOpen && (
-                    <>
-                        {/* Logo and Close Button */}
-                        <div className="p-6 border-b border-slate-700/50 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center">
-                                    <Receipt className="w-5 h-5 text-white" />
-                                </div>
-                                <span className="text-xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">Payroll</span>
-                            </div>
-                            <button
-                                onClick={() => setSidebarOpen(false)}
-                                className="p-1.5 hover:bg-slate-700/50 rounded-lg transition-colors"
-                                title="Close sidebar"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        {/* Navigation */}
-                        <nav className="flex-1 p-4 space-y-6 overflow-y-auto scrollbar-hide">
-                            {/* Main Section */}
-                            <div className="space-y-1">
-                                <div className="px-3 mb-2">
-                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Main</span>
-                                </div>
-                                <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30">
-                                    <LayoutDashboard className="w-5 h-5" />
-                                    <span className="font-medium">Dashboard</span>
-                                </Link>
-
-                                <Link to="/employees" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
-                                    <Users className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Employees</span>
-                                </Link>
-                            </div>
-
-                            {/* Payroll Section */}
-                            <div className="space-y-1">
-                                <div className="px-3 mb-2">
-                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Payroll</span>
-                                </div>
-                                <Link to="/pay-runs" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
-                                    <Calendar className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Pay Runs</span>
-                                </Link>
-
-                                <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer group">
-                                    <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Approvals</span>
-                                    <ChevronRight className="w-4 h-4 ml-auto opacity-50" />
-                                </div>
-
-                                <Link to="/form16" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
-                                    <FileText className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Form 16</span>
-                                </Link>
-                            </div>
-
-                            {/* Benefits Section */}
-                            <div className="space-y-1">
-                                <div className="px-3 mb-2">
-                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Benefits</span>
-                                </div>
-                                <Link to="/loans" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
-                                    <Wallet className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Loans</span>
-                                </Link>
-
-                                <Link to="/giving" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
-                                    <Gift className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Giving</span>
-                                </Link>
-                            </div>
-
-                            {/* Management Section */}
-                            <div className="space-y-1">
-                                <div className="px-3 mb-2">
-                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Management</span>
-                                </div>
-                                <Link to="/documents" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
-                                    <FolderOpen className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Documents</span>
-                                </Link>
-
-                                <Link to="/reports" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
-                                    <PieChart className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Reports</span>
-                                </Link>
-
-                                <Link to="/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
-                                    <Settings className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Settings</span>
-                                </Link>
-                            </div>
-                        </nav>
-                    </>
-                )}
-            </div>
+            {/* Sidebar */}
+            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             {/* Main Content - With left margin for fixed sidebar */}
             <div className={`flex-1 flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'ml-56' : 'ml-0'}`}>

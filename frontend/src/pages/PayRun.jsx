@@ -30,15 +30,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services/authService';
 import AppHeader from '../components/AppHeader';
-
-const SIDEBAR_ITEMS = [
-    { icon: Receipt, label: 'Dashboard', path: '/dashboard' },
-    { icon: Users, label: 'Employees', path: '/employees' },
-    { icon: DollarSign, label: 'Pay Runs', path: '/pay-runs', active: true },
-    { icon: FileText, label: 'Reports', path: '/reports' },
-    { icon: Settings, label: 'Settings', path: '/settings/pay-schedule' },
-    { icon: HelpCircle, label: 'Help', path: '/help' },
-];
+import Sidebar from '../components/Sidebar';
 
 const STATUS_COLORS = {
     DRAFT: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
@@ -232,45 +224,7 @@ export default function PayRun() {
     return (
         <div className="h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex overflow-hidden">
             {/* Sidebar */}
-            <div
-                className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col fixed left-0 top-0 h-screen transition-all duration-300 shadow-2xl ${sidebarOpen ? 'w-56' : 'w-0'}`}
-                style={{ overflow: sidebarOpen ? 'visible' : 'hidden' }}
-            >
-                {sidebarOpen && (
-                    <>
-                        <div className="p-6 border-b border-slate-700/50 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center">
-                                    <Receipt className="w-5 h-5 text-white" />
-                                </div>
-                                <span className="font-bold text-lg">PayRoll</span>
-                            </div>
-                            <button
-                                onClick={() => setSidebarOpen(false)}
-                                className="p-1 hover:bg-slate-700 rounded-lg transition-colors"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-                        <nav className="flex-1 p-4 space-y-1">
-                            {SIDEBAR_ITEMS.map((item) => (
-                                <button
-                                    key={item.path}
-                                    onClick={() => navigate(item.path)}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                                        item.active
-                                            ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-lg'
-                                            : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-                                    }`}
-                                >
-                                    <item.icon className="w-5 h-5" />
-                                    <span className="font-medium">{item.label}</span>
-                                </button>
-                            ))}
-                        </nav>
-                    </>
-                )}
-            </div>
+            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             {/* Main Content */}
             <div

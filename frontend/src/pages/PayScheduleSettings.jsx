@@ -29,6 +29,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services/authService';
 import AppHeader from '../components/AppHeader';
+import Sidebar from '../components/Sidebar';
 
 const PAY_FREQUENCIES = [
     { value: 'MONTHLY', label: 'Monthly', description: 'Employees are paid once a month' },
@@ -218,68 +219,7 @@ export default function PayScheduleSettings() {
     return (
         <div className="h-screen bg-slate-50 dark:bg-slate-900 flex overflow-hidden">
             {/* Sidebar */}
-            <div
-                className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col fixed left-0 top-0 h-screen transition-all duration-300 shadow-2xl ${sidebarOpen ? 'w-56' : 'w-0'}`}
-                style={{ overflow: sidebarOpen ? 'visible' : 'hidden' }}
-            >
-                {sidebarOpen && (
-                    <>
-                        {/* Logo */}
-                        <div className="p-6 border-b border-slate-700/50 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center">
-                                    <Receipt className="w-5 h-5 text-white" />
-                                </div>
-                                <span className="text-xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">Payroll</span>
-                            </div>
-                            <button onClick={() => setSidebarOpen(false)} className="p-1.5 hover:bg-slate-700/50 rounded-lg transition-colors">
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        {/* Navigation */}
-                        <nav className="flex-1 p-4 space-y-6 overflow-y-auto scrollbar-hide">
-                            <div className="space-y-1">
-                                <div className="px-3 mb-2">
-                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Main</span>
-                                </div>
-                                <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
-                                    <LayoutDashboard className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Dashboard</span>
-                                </Link>
-                                <Link to="/employees" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
-                                    <Users className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Employees</span>
-                                </Link>
-                            </div>
-
-                            <div className="space-y-1">
-                                <div className="px-3 mb-2">
-                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Payroll</span>
-                                </div>
-                                <Link to="/pay-runs" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
-                                    <Calendar className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Pay Runs</span>
-                                </Link>
-                                <Link to="/salary-components" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
-                                    <Wallet className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Salary Components</span>
-                                </Link>
-                            </div>
-
-                            <div className="space-y-1">
-                                <div className="px-3 mb-2">
-                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Management</span>
-                                </div>
-                                <Link to="/settings/pay-schedule" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30">
-                                    <Settings className="w-5 h-5" />
-                                    <span className="font-medium">Settings</span>
-                                </Link>
-                            </div>
-                        </nav>
-                    </>
-                )}
-            </div>
+            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             {/* Main Content */}
             <div
