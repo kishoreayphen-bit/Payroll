@@ -624,16 +624,6 @@ function BasicDetailsStep({ register, errors }) {
                 </div>
             </div>
 
-            <div className="flex items-center gap-2 p-3 bg-pink-50 rounded-lg">
-                <Checkbox
-                    {...register('isDirector')}
-                    className="w-4 h-4 text-pink-600 border-pink-300 rounded focus:ring-pink-500"
-                />
-                <label className="text-sm text-slate-700">
-                    Employee is a Director/person with substantial interest in the company.
-                </label>
-            </div>
-
             <div className="grid grid-cols-2 gap-6">
                 <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-2">

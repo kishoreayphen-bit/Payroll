@@ -41,6 +41,9 @@ import { Button } from '../components/ui/button';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/authService';
 import AddComponentModal from '../components/AddComponentModal';
+import AppHeader from '../components/AppHeader';
+import { useTheme } from '../contexts/ThemeContext';
+import { ArrowLeft } from 'lucide-react';
 
 const TABS = [
     { id: 'overview', label: 'Overview' },
@@ -53,7 +56,8 @@ const TABS = [
 export default function EmployeeDetails() {
     const navigate = useNavigate();
     const { id } = useParams();
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const { darkMode } = useTheme();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showCompanyMenu, setShowCompanyMenu] = useState(false);
@@ -343,7 +347,7 @@ export default function EmployeeDetails() {
     };
 
     return (
-        <div className="h-screen bg-slate-50 flex overflow-hidden">
+        <div className="h-screen bg-slate-50 dark:bg-slate-900 flex overflow-hidden">
             {/* Sidebar */}
             <div
                 className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col fixed left-0 top-0 h-screen transition-all duration-300 shadow-2xl ${sidebarOpen ? 'w-56' : 'w-0'
@@ -454,80 +458,45 @@ export default function EmployeeDetails() {
                 className={`flex-1 min-w-0 flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'ml-56' : 'ml-0'}`}
                 style={{ width: sidebarOpen ? 'calc(100vw - 14rem)' : '100vw' }}
             >
-                {/* Top Bar */}
-                <div className="bg-white border-b border-slate-200 px-4 py-2 flex-shrink-0">
-                    <div className="flex items-center justify-between min-w-0">
-                        <div className="flex items-center gap-3 min-w-0">
-                            {!sidebarOpen && (
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setSidebarOpen(true)}
-                                    className="p-1.5"
-                                >
-                                    <Menu className="w-4 h-4 text-slate-600" />
-                                </Button>
-                            )}
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate('/employees')}
-                                className="text-slate-600 hover:text-slate-900"
-                            >
-                                ← Back to Employees
-                            </Button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                    setShowCompanyMenu(!showCompanyMenu);
-                                    setShowProfileMenu(false);
-                                }}
-                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 rounded-md hover:bg-slate-100 border border-slate-200"
-                            >
-                                <span className="text-slate-700 font-medium text-xs">
-                                    {loading ? 'Loading...' : (organization?.companyName || 'Company')}
-                                </span>
-                                <ChevronRight className="w-3 h-3 text-slate-400" />
-                            </Button>
-
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={() => {
-                                    setShowProfileMenu(!showProfileMenu);
-                                    setShowCompanyMenu(false);
-                                }}
-                                className="w-7 h-7 bg-rose-500 rounded-full flex items-center justify-center text-white font-medium text-xs p-0"
-                            >
-                                {user?.email?.charAt(0).toUpperCase()}
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+                {/* Top Bar - Using AppHeader */}
+                <AppHeader
+                    sidebarOpen={sidebarOpen}
+                    setSidebarOpen={setSidebarOpen}
+                    showCompanyMenu={showCompanyMenu}
+                    setShowCompanyMenu={setShowCompanyMenu}
+                    showProfileMenu={showProfileMenu}
+                    setShowProfileMenu={setShowProfileMenu}
+                    organization={organization}
+                    loading={loading}
+                    user={user}
+                    logout={logout}
+                />
 
                 {/* Employee Header */}
-                <div className="bg-white border-b border-slate-200 px-6 py-4">
+                <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
+                            {/* Sleek Back Button */}
+                            <button
+                                onClick={() => navigate('/employees')}
+                                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors group"
+                                title="Back to Employees"
+                            >
+                                <ArrowLeft className="w-5 h-5 text-slate-500 dark:text-slate-400 group-hover:text-pink-600 transition-colors" />
+                            </button>
                             <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 font-bold text-lg">
                                 {(employee.fullName || employee.firstName || employee.fatherName || '?').charAt(0).toUpperCase()}
                             </div>
                             <div>
                                 <div className="flex items-center gap-3">
-                                    <h1 className="text-xl font-bold text-slate-900">
+                                    <h1 className="text-xl font-bold text-slate-900 dark:text-white">
                                         {employee.employeeId} - {employee.fullName || `${employee.firstName || ''} ${employee.lastName || ''}`.trim() || employee.fatherName || 'Unknown'}
                                     </h1>
                                     <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
                                         {employee.status}
                                     </span>
                                 </div>
-                                <p className="text-sm text-slate-600">{employee.designation}</p>
+                                <p className="text-sm text-slate-600 dark:text-slate-400">{employee.designation}</p>
                             </div>
                         </div>
                         <div className="flex gap-2">
