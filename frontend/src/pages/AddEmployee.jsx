@@ -34,6 +34,7 @@ import { Checkbox } from '../components/ui/checkbox';
 import { Select } from '../components/ui/select';
 import { Radio } from '../components/ui/radio';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services/authService';
 
 const STEPS = [
@@ -46,6 +47,7 @@ const STEPS = [
 export default function AddEmployee() {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+    const { darkMode } = useTheme();
     const [searchParams] = useSearchParams();
     const editEmployeeId = searchParams.get('edit');
     const stepParam = searchParams.get('step');
@@ -283,7 +285,7 @@ export default function AddEmployee() {
     };
 
     return (
-        <div className="h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white flex overflow-hidden">
+        <div className="h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 flex overflow-hidden">
             {/* Sidebar */}
             <div
                 className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col fixed left-0 top-0 h-screen transition-all duration-300 shadow-2xl ${sidebarOpen ? 'w-56' : 'w-0'
@@ -476,7 +478,7 @@ export default function AddEmployee() {
                                                     <Icon className="w-5 h-5" />
                                                 )}
                                             </div>
-                                            <p className={`text-xs font-semibold ${isActive ? 'text-pink-600' : 'text-slate-600'}`}>
+                                            <p className={`text-xs font-semibold ${isActive ? 'text-pink-600' : 'text-slate-600 dark:text-slate-400'}`}>
                                                 {step.name}
                                             </p>
                                         </div>
@@ -492,7 +494,7 @@ export default function AddEmployee() {
 
                     {/* Form */}
                     <form onSubmit={handleSubmit(onSubmit)} className="max-w-4xl mx-auto">
-                        <div className="bg-white rounded-2xl shadow-xl border border-pink-100 p-6 mb-6">
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-pink-100 dark:border-slate-700 p-6 mb-6">
                             {renderStepContent()}
                         </div>
 
@@ -544,7 +546,7 @@ function BasicDetailsStep({ register, errors }) {
     return (
         <div className="space-y-6">
             <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
                     Employee Name <span className="text-pink-600">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-4">
@@ -746,7 +748,7 @@ function SalaryDetailsStep({ register, errors, watch, setValue }) {
     }, [annualCtc, basicPercentOfCtc, hraPercentOfBasic, conveyanceAllowanceMonthly, setValue, basicMonthlyCalc, hraMonthlyCalc, fixedAllowanceMonthlyCalc]);
     return (
         <div className="space-y-6">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Salary Details</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Salary Details</h3>
             {/* Hidden fields to submit computed values */}
             <input type="hidden" {...register('basicMonthly')} value={(basicMonthlyCalc || 0).toFixed(2)} />
             <input type="hidden" {...register('hraMonthly')} value={(hraMonthlyCalc || 0).toFixed(2)} />
@@ -971,7 +973,7 @@ function PaymentInformationStep({ register, errors, watch }) {
     const paymentMethod = watch('paymentMethod');
     return (
         <div className="space-y-6">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">How would you like to pay this employee? <span className="text-pink-600">*</span></h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">How would you like to pay this employee? <span className="text-pink-600">*</span></h3>
 
             <div className="space-y-3">
                 <label className={`flex items-start gap-4 p-4 rounded-xl border ${paymentMethod === 'direct_deposit' ? 'border-pink-400 bg-pink-50' : 'border-pink-100'} cursor-pointer`}>

@@ -17,6 +17,7 @@ import SalaryComponents from './pages/SalaryComponents'
 import TestOrganizations from './pages/TestOrganizations'
 import ComingSoon from './pages/ComingSoon'
 import Notifications from './pages/Notifications'
+import PayScheduleSettings from './pages/PayScheduleSettings'
 
 function App() {
   return (
@@ -124,10 +125,7 @@ function App() {
             path="/settings/pay-schedule"
             element={
               <ProtectedRoute>
-                <ComingSoon
-                  title="Pay Schedule Configuration"
-                  description="Configure your payroll schedule, pay periods, and payment dates for your organization."
-                />
+                <PayScheduleSettings />
               </ProtectedRoute>
             }
           />
