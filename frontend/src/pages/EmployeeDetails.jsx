@@ -826,33 +826,33 @@ function OverviewTab({ employee, onTogglePT, onEditBasicInfo, onEditPersonalInfo
                 <div className="grid grid-cols-2 gap-x-12 gap-y-4">
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Name</p>
-                        <p className="text-sm text-slate-900">
+                        <p className="text-sm text-slate-900 dark:text-white">
                             {employee.fullName || `${employee.firstName || ''} ${employee.lastName || ''}`.trim() || employee.fatherName || '-'}
                         </p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Work Location</p>
-                        <p className="text-sm text-slate-900">{employee.workLocation || '-'}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.workLocation || '-'}</p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Email Address</p>
-                        <p className="text-sm text-slate-900">{employee.workEmail || '-'}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.workEmail || '-'}</p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Designation</p>
-                        <p className="text-sm text-slate-900">{employee.designation || '-'}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.designation || '-'}</p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Mobile Number</p>
-                        <p className="text-sm text-slate-900">{employee.mobileNumber || '-'}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.mobileNumber || '-'}</p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Departments</p>
-                        <p className="text-sm text-slate-900">{employee.department || '-'}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.department || '-'}</p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Date of Joining</p>
-                        <p className="text-sm text-slate-900">
+                        <p className="text-sm text-slate-900 dark:text-white">
                             {Array.isArray(employee.dateOfJoining)
                                 ? `${employee.dateOfJoining[0]}-${String(employee.dateOfJoining[1]).padStart(2, '0')}-${String(employee.dateOfJoining[2]).padStart(2, '0')}`
                                 : employee.dateOfJoining}
@@ -860,14 +860,14 @@ function OverviewTab({ employee, onTogglePT, onEditBasicInfo, onEditPersonalInfo
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Portal Access</p>
-                        <p className="text-sm text-slate-900 flex items-center gap-1">
+                        <p className="text-sm text-slate-900 dark:text-white flex items-center gap-1">
                             <X className="w-4 h-4 text-slate-400" />
                             Disabled <button className="text-rose-600 text-xs">(Enable)</button>
                         </p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Gender</p>
-                        <p className="text-sm text-slate-900">{employee.gender}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.gender}</p>
                     </div>
                 </div>
             </div>
@@ -883,7 +883,7 @@ function OverviewTab({ employee, onTogglePT, onEditBasicInfo, onEditPersonalInfo
                 <div className="grid grid-cols-2 gap-x-12 gap-y-4">
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Professional Tax</p>
-                        <p className="text-sm text-slate-900 flex items-center gap-1">
+                        <p className="text-sm text-slate-900 dark:text-white flex items-center gap-1">
                             {employee?.professionalTax ? (
                                 <>
                                     <CheckCircle className="w-4 h-4 text-emerald-500" />
@@ -923,27 +923,27 @@ function OverviewTab({ employee, onTogglePT, onEditBasicInfo, onEditPersonalInfo
                 <div className="grid grid-cols-2 gap-x-12 gap-y-4">
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Date of Birth</p>
-                        <p className="text-sm text-slate-900">{employee.dateOfBirth}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.dateOfBirth}</p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Email Address</p>
-                        <p className="text-sm text-slate-900">{employee.personalEmail}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.personalEmail}</p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Father's Name</p>
-                        <p className="text-sm text-slate-900">{employee.fatherName}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.fatherName}</p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Residential Address</p>
-                        <p className="text-sm text-slate-900">{employee.address || '-'}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.address || '-'}</p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">PAN</p>
-                        <p className="text-sm text-slate-900">{employee.panNumber || '-'}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.panNumber || '-'}</p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Differently Abled Type</p>
-                        <p className="text-sm text-slate-900">{employee.differentlyAbledType || 'None'}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.differentlyAbledType || 'None'}</p>
                     </div>
                 </div>
             </div>
@@ -959,19 +959,19 @@ function OverviewTab({ employee, onTogglePT, onEditBasicInfo, onEditPersonalInfo
                 <div className="grid grid-cols-2 gap-x-12 gap-y-4">
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Payment Mode</p>
-                        <p className="text-sm text-slate-900">{employee.paymentMethod || '-'}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.paymentMethod || '-'}</p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Bank Name</p>
-                        <p className="text-sm text-slate-900">{employee.bankName || '-'}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.bankName || '-'}</p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">Account Number</p>
-                        <p className="text-sm text-slate-900">{employee.accountNumber || '-'}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.accountNumber || '-'}</p>
                     </div>
                     <div>
                         <p className="text-xs text-slate-500 mb-1">IFSC Code</p>
-                        <p className="text-sm text-slate-900">{employee.ifscCode || '-'}</p>
+                        <p className="text-sm text-slate-900 dark:text-white">{employee.ifscCode || '-'}</p>
                     </div>
                 </div>
             </div>
@@ -1024,11 +1024,11 @@ function SalaryTab({ employee, salaryBreakdown, onEditSalaryInfo, onCompleteProf
                 <div className="grid grid-cols-2 gap-8 mb-8">
                     <div>
                         <p className="text-sm text-slate-500 mb-1">Annual CTC</p>
-                        <p className="text-2xl font-bold text-slate-900">₹{employee.annualCtc.toLocaleString()}.00 per year</p>
+                        <p className="text-2xl font-bold text-slate-900 dark:text-white">₹{employee.annualCtc.toLocaleString()}.00 per year</p>
                     </div>
                     <div>
                         <p className="text-sm text-slate-500 mb-1">Monthly CTC</p>
-                        <p className="text-2xl font-bold text-slate-900">₹{employee.monthlyCtc.toLocaleString()}.00 per month</p>
+                        <p className="text-2xl font-bold text-slate-900 dark:text-white">₹{employee.monthlyCtc.toLocaleString()}.00 per month</p>
                     </div>
                 </div>
             </div>
@@ -1041,38 +1041,38 @@ function SalaryTab({ employee, salaryBreakdown, onEditSalaryInfo, onCompleteProf
                     <table className="w-full">
                         <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Salary Components</th>
-                                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Monthly Amount</th>
-                                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Annual Amount</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Salary Components</th>
+                                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Monthly Amount</th>
+                                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Annual Amount</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200">
                             {/* Standard Earnings */}
                             <tr>
-                                <td colSpan="3" className="px-4 py-2 text-sm font-semibold text-slate-700 bg-slate-50">Earnings</td>
+                                <td colSpan="3" className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700">Earnings</td>
                             </tr>
                             <tr>
                                 <td className="px-4 py-3">
-                                    <div className="text-sm text-slate-900">Basic</div>
+                                    <div className="text-sm text-slate-900 dark:text-white">Basic</div>
                                     <div className="text-xs text-slate-500">({employee.basicPercent}.00 % of CTC)</div>
                                 </td>
-                                <td className="px-4 py-3 text-right text-sm text-slate-900">₹{employee.basic.toLocaleString()}.00</td>
-                                <td className="px-4 py-3 text-right text-sm text-slate-900">₹{(employee.basic * 12).toLocaleString()}.00</td>
+                                <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{employee.basic.toLocaleString()}.00</td>
+                                <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{(employee.basic * 12).toLocaleString()}.00</td>
                             </tr>
                             <tr>
                                 <td className="px-4 py-3">
-                                    <div className="text-sm text-slate-900">House Rent Allowance</div>
+                                    <div className="text-sm text-slate-900 dark:text-white">House Rent Allowance</div>
                                     <div className="text-xs text-slate-500">({employee.hraPercent}.00 % of Basic Amount)</div>
                                 </td>
-                                <td className="px-4 py-3 text-right text-sm text-slate-900">₹{employee.hra.toLocaleString()}.00</td>
-                                <td className="px-4 py-3 text-right text-sm text-slate-900">₹{(employee.hra * 12).toLocaleString()}.00</td>
+                                <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{employee.hra.toLocaleString()}.00</td>
+                                <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{(employee.hra * 12).toLocaleString()}.00</td>
                             </tr>
                             <tr>
                                 <td className="px-4 py-3">
-                                    <div className="text-sm text-slate-900">Fixed Allowance</div>
+                                    <div className="text-sm text-slate-900 dark:text-white">Fixed Allowance</div>
                                 </td>
-                                <td className="px-4 py-3 text-right text-sm text-slate-900">₹{employee.fixedAllowance.toLocaleString()}.00</td>
-                                <td className="px-4 py-3 text-right text-sm text-slate-900">₹{(employee.fixedAllowance * 12).toLocaleString()}.00</td>
+                                <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{employee.fixedAllowance.toLocaleString()}.00</td>
+                                <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{(employee.fixedAllowance * 12).toLocaleString()}.00</td>
                             </tr>
 
                             {/* Additional Earnings from Breakdown */}
