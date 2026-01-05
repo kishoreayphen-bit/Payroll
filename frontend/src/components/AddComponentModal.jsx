@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Plus, TrendingUp, TrendingDown } from 'lucide-react';
+import { X, Plus, TrendingUp, TrendingDown, ChevronDown, Check } from 'lucide-react';
 import { Button } from './ui/button';
 import { api } from '../services/authService';
 
@@ -13,6 +13,7 @@ export default function AddComponentModal({ employeeId, type, onClose, onSave })
     const [effectiveFrom, setEffectiveFrom] = useState(new Date().toISOString().split('T')[0]);
     const [remarks, setRemarks] = useState('');
     const [saving, setSaving] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const isEarning = type === 'EARNING';
     const title = isEarning ? 'Add Earning Component' : 'Add Deduction Component';
@@ -121,23 +122,67 @@ export default function AddComponentModal({ employeeId, type, onClose, onSave })
                     ) : (
                         <div className="space-y-4">
                             {/* Component Selection */}
-                            <div>
+                            <div className="relative">
                                 <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Select Component <span className="text-red-500">*</span>
                                 </label>
-                                <select
-                                    value={selectedComponent}
-                                    onChange={(e) => setSelectedComponent(e.target.value)}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-                                    required
+                                <button
+                                    type="button"
+                                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg flex items-center justify-between text-left focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white"
                                 >
-                                    <option value="">Choose a component...</option>
-                                    {components.map(component => (
-                                        <option key={component.id} value={component.id}>
-                                            {component.name} ({component.code})
-                                        </option>
-                                    ))}
-                                </select>
+                                    <span className={selectedComponent ? 'text-slate-900' : 'text-slate-500'}>
+                                        {selectedComponent
+                                            ? components.find(c => c.id === parseInt(selectedComponent))?.name || 'Choose a component...'
+                                            : 'Choose a component...'}
+                                    </span>
+                                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {isDropdownOpen && (
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-10"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        />
+                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-20 max-h-60 overflow-y-auto">
+                                            {components.map(component => (
+                                                <button
+                                                    key={component.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setSelectedComponent(component.id);
+                                                        setIsDropdownOpen(false);
+                                                    }}
+                                                    className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center justify-between group"
+                                                >
+                                                    <div className="flex flex-col">
+                                                        <span className="font-medium text-slate-900">{component.name}</span>
+                                                        <span className="text-xs text-slate-500">{component.code}</span>
+                                                    </div>
+                                                    {parseInt(selectedComponent) === component.id && (
+                                                        <Check className="w-4 h-4 text-pink-500" />
+                                                    )}
+                                                </button>
+                                            ))}
+
+                                            <div className="border-t border-slate-100 my-1"></div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    navigate('/salary-components');
+                                                }}
+                                                className="w-full px-4 py-3 text-left hover:bg-rose-50 flex items-center gap-2 group transition-colors"
+                                            >
+                                                <div className="w-6 h-6 rounded-full bg-rose-100 flex items-center justify-center group-hover:bg-rose-200 transition-colors">
+                                                    <Plus className="w-3 h-3 text-rose-600" />
+                                                </div>
+                                                <span className="font-semibold text-rose-600 group-hover:text-rose-700">Create New Component</span>
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             {/* Component Details */}

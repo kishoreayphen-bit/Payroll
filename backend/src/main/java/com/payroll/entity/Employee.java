@@ -186,13 +186,17 @@ public class Employee {
 
     // Helper method to get full name
     public String getFullName() {
-        StringBuilder fullName = new StringBuilder(firstName);
+        StringBuilder fullName = new StringBuilder(firstName != null ? firstName : "");
         if (middleName != null && !middleName.isEmpty()) {
-            fullName.append(" ").append(middleName);
+            if (fullName.length() > 0)
+                fullName.append(" ");
+            fullName.append(middleName);
         }
         if (lastName != null && !lastName.isEmpty()) {
-            fullName.append(" ").append(lastName);
+            if (fullName.length() > 0)
+                fullName.append(" ");
+            fullName.append(lastName);
         }
-        return fullName.toString();
+        return fullName.toString().trim();
     }
 }

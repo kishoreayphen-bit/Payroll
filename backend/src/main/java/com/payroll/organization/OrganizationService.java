@@ -66,6 +66,12 @@ public class OrganizationService {
                 .collect(Collectors.toList());
     }
 
+    public OrganizationResponse getOrganizationById(Long id) {
+        Organization organization = organizationRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found"));
+        return mapToResponse(organization);
+    }
+
     private OrganizationResponse mapToResponse(Organization org) {
         return new OrganizationResponse(
                 org.getId(),

@@ -29,4 +29,10 @@ public class OrganizationController {
         List<OrganizationResponse> organizations = organizationService.getUserOrganizations();
         return ResponseEntity.ok(organizations);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrganizationResponse> getOrganizationById(@PathVariable Long id) {
+        OrganizationResponse response = organizationService.getOrganizationById(id);
+        return ResponseEntity.ok(response);
+    }
 }

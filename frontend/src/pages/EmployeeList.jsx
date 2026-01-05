@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 import {
     Users,
     Plus,
@@ -46,6 +47,7 @@ export default function EmployeeList() {
     const navigate = useNavigate();
     const location = useLocation();
     const { user, logout } = useAuth();
+    const { darkMode } = useTheme();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showCompanyMenu, setShowCompanyMenu] = useState(false);
@@ -264,7 +266,7 @@ export default function EmployeeList() {
     ];
 
     return (
-        <div className="h-screen bg-slate-50 flex overflow-hidden">
+        <div className="h-screen bg-slate-50 dark:bg-slate-900 flex overflow-hidden">
             {/* Sidebar */}
             <div
                 className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col fixed left-0 top-0 h-screen transition-all duration-300 shadow-2xl ${sidebarOpen ? 'w-56' : 'w-0'
@@ -399,15 +401,15 @@ export default function EmployeeList() {
                             <div className="relative">
                                 <button
                                     onClick={() => setShowViewDropdown(!showViewDropdown)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                                 >
-                                    <Users className="w-4 h-4 text-slate-600" />
-                                    <span className="text-sm font-medium text-slate-700">{activeView}</span>
+                                    <Users className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{activeView}</span>
                                     <ChevronRight className="w-4 h-4 text-slate-400 rotate-90" />
                                 </button>
 
                                 {showViewDropdown && (
-                                    <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-lg shadow-xl border border-slate-200 z-50">
+                                    <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 z-50">
                                         <div className="p-3 border-b border-slate-200">
                                             <div className="relative">
                                                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -456,7 +458,7 @@ export default function EmployeeList() {
                                 )}
                             </div>
 
-                            <span className="text-sm text-slate-500">
+                            <span className="text-sm text-slate-500 dark:text-slate-400">
                                 {filteredEmployees.length} employee{filteredEmployees.length !== 1 ? 's' : ''}
                             </span>
                         </div>
@@ -552,14 +554,14 @@ export default function EmployeeList() {
 
                             {/* Filters Row */}
                             <div className="flex items-center gap-3">
-                                <span className="text-sm text-slate-600 font-medium">FILTER BY :</span>
+                                <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">FILTER BY :</span>
 
                                 {/* Work Location Filter */}
                                 <div className="relative">
                                     <select
                                         value={filters.workLocation}
                                         onChange={(e) => handleFilterChange('workLocation', e.target.value)}
-                                        className="appearance-none pl-3 pr-8 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-600 cursor-pointer"
+                                        className="appearance-none pl-3 pr-8 py-1.5 text-sm border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
                                     >
                                         <option value="">Select Work Location</option>
                                         <option value="Head Office">Head Office</option>
@@ -574,7 +576,7 @@ export default function EmployeeList() {
                                     <select
                                         value={filters.department}
                                         onChange={(e) => handleFilterChange('department', e.target.value)}
-                                        className="appearance-none pl-3 pr-8 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-600 cursor-pointer"
+                                        className="appearance-none pl-3 pr-8 py-1.5 text-sm border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
                                     >
                                         <option value="">Select Department</option>
                                         <option value="Engineering">Engineering</option>
@@ -591,7 +593,7 @@ export default function EmployeeList() {
                                     <select
                                         value={filters.designation}
                                         onChange={(e) => handleFilterChange('designation', e.target.value)}
-                                        className="appearance-none pl-3 pr-8 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white text-slate-600 cursor-pointer"
+                                        className="appearance-none pl-3 pr-8 py-1.5 text-sm border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
                                     >
                                         <option value="">Select Designation</option>
                                         <option value="Senior Developer">Senior Developer</option>
@@ -634,12 +636,12 @@ export default function EmployeeList() {
 
                         {/* Employee Table */}
                         {filteredEmployees.length === 0 ? (
-                            <div className="text-center py-12 bg-white rounded-lg border border-slate-200">
-                                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3">
                                     <Users className="w-8 h-8 text-slate-400" />
                                 </div>
-                                <h3 className="text-base font-semibold text-slate-900 mb-1">No Employees Found</h3>
-                                <p className="text-sm text-slate-500 mb-4">
+                                <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1">No Employees Found</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
                                     {searchQuery ? 'No employees match your search.' : 'Get started by adding your first employee.'}
                                 </p>
                                 {!searchQuery && (
@@ -654,20 +656,20 @@ export default function EmployeeList() {
                                 )}
                             </div>
                         ) : (
-                            <div className="bg-white rounded-lg border border-slate-200">
+                            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
-                                        <thead className="bg-slate-50 border-b border-slate-200">
+                                        <thead className="bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
                                             <tr>
-                                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Name</th>
-                                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Email</th>
-                                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Department</th>
-                                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Name</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Email</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Department</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Status</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-slate-200">
+                                        <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                                             {filteredEmployees.map((employee) => (
-                                                <tr key={employee.id} className="hover:bg-slate-50 transition-colors">
+                                                <tr key={employee.id} className="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-3">
                                                             <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 font-semibold text-sm flex-shrink-0">
@@ -679,8 +681,8 @@ export default function EmployeeList() {
                                                             >
                                                                 <div className="flex items-center gap-2">
                                                                     <div>
-                                                                        <p className="text-sm font-semibold text-slate-900 hover:text-rose-600">{employee.name}</p>
-                                                                        <p className="text-xs text-slate-500">{employee.employeeId}</p>
+                                                                        <p className="text-sm font-semibold text-slate-900 dark:text-white hover:text-rose-600">{employee.name}</p>
+                                                                        <p className="text-xs text-slate-500 dark:text-slate-400">{employee.employeeId}</p>
                                                                     </div>
                                                                     {!employee.isProfileComplete && (
                                                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-50 text-orange-600 text-xs font-medium rounded border border-orange-200">
@@ -692,10 +694,10 @@ export default function EmployeeList() {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className="text-sm text-slate-600">{employee.email}</span>
+                                                        <span className="text-sm text-slate-600 dark:text-slate-300">{employee.email}</span>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className="text-sm text-slate-900">{employee.department}</span>
+                                                        <span className="text-sm text-slate-900 dark:text-slate-200">{employee.department}</span>
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <span className="inline-flex px-3 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700">

@@ -56,25 +56,25 @@ public class SalaryComponentController {
     }
 
     @PostMapping
-    public ResponseEntity<SalaryComponentDTO> createComponent(
+    public ResponseEntity<?> createComponent(
             @RequestBody SalaryComponentDTO componentDTO) {
         try {
             SalaryComponentDTO created = salaryComponentService.createComponent(componentDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(java.util.Collections.singletonMap("message", e.getMessage()));
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SalaryComponentDTO> updateComponent(
+    public ResponseEntity<?> updateComponent(
             @PathVariable Long id,
             @RequestBody SalaryComponentDTO componentDTO) {
         try {
             SalaryComponentDTO updated = salaryComponentService.updateComponent(id, componentDTO);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(java.util.Collections.singletonMap("message", e.getMessage()));
         }
     }
 

@@ -30,6 +30,7 @@ public class EmployeeSalaryService {
     private final EmployeeSalaryComponentRepository employeeSalaryComponentRepository;
     private final SalaryComponentRepository salaryComponentRepository;
     private final EmployeeRepository employeeRepository;
+    private final ProfessionalTaxService professionalTaxService;
 
     @Transactional(readOnly = true)
     public List<EmployeeSalaryComponentDTO> getEmployeeComponents(Long employeeId) {
@@ -157,9 +158,52 @@ public class EmployeeSalaryService {
         breakdown.setDeductions(deductions);
 
         // Calculate totals
-        BigDecimal totalEarnings = earnings.stream()
+        // Calculate totals from COMPONENTS only
+        BigDecimal componentsEarnings = earnings.stream()
                 .map(SalaryBreakdownDTO.ComponentBreakdown::getCalculatedAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Calculate REAL Gross Salary (Base Structure + Components)
+        BigDecimal baseStructureEarnings = (employee.getBasicMonthly() != null ? employee.getBasicMonthly()
+                : BigDecimal.ZERO)
+                .add(employee.getHraMonthly() != null ? employee.getHraMonthly() : BigDecimal.ZERO)
+                .add(employee.getFixedAllowanceMonthly() != null ? employee.getFixedAllowanceMonthly()
+                        : BigDecimal.ZERO);
+
+        BigDecimal grossSalary = baseStructureEarnings.add(componentsEarnings);
+
+        // Calculate Professional Tax
+        // Check if PT was found in components and Remove it (to replace with
+        // Virtual/Verified one)
+        deductions.removeIf(d -> {
+            String cCode = d.getComponentCode() != null ? d.getComponentCode().toLowerCase() : "";
+            String cName = d.getComponentName() != null ? d.getComponentName().toLowerCase() : "";
+            return cCode.equals("pt") || cCode.equals("ptax") || cCode.equals("prof_tax")
+                    || cName.contains("professional tax");
+        });
+
+        // Always add Virtual PT if enabled (Forces correct view)
+        if (employee.getProfessionalTax() != null && employee.getProfessionalTax()) {
+            // Virtual: Calculate and add
+            BigDecimal ptAmount = professionalTaxService.calculatePT(employee, grossSalary);
+
+            // Allow 0 value execution so user sees it is enabled
+            if (ptAmount != null && ptAmount.compareTo(BigDecimal.ZERO) >= 0) {
+                SalaryBreakdownDTO.ComponentBreakdown virtualPt = new SalaryBreakdownDTO.ComponentBreakdown();
+                virtualPt.setComponentName("Professional Tax (Virtual)");
+                virtualPt.setComponentCode("PT");
+                virtualPt.setCalculationType("FIXED");
+                virtualPt.setValue(ptAmount);
+                virtualPt.setCalculatedAmount(ptAmount);
+                virtualPt.setBaseAmount(grossSalary);
+                virtualPt.setIsTaxable(false);
+                virtualPt.setIsStatutory(true);
+
+                deductions.add(virtualPt);
+            }
+        }
+
+        BigDecimal totalEarnings = componentsEarnings; // Keep legacy variable
 
         BigDecimal totalDeductions = deductions.stream()
                 .map(SalaryBreakdownDTO.ComponentBreakdown::getCalculatedAmount)
@@ -167,8 +211,8 @@ public class EmployeeSalaryService {
 
         breakdown.setTotalEarnings(totalEarnings);
         breakdown.setTotalDeductions(totalDeductions);
-        breakdown.setGrossSalary(totalEarnings);
-        breakdown.setNetSalary(totalEarnings.subtract(totalDeductions));
+        breakdown.setGrossSalary(grossSalary);
+        breakdown.setNetSalary(grossSalary.subtract(totalDeductions));
 
         return breakdown;
     }
@@ -215,5 +259,102 @@ public class EmployeeSalaryService {
         dto.setIsActive(empComponent.getIsActive());
         dto.setRemarks(empComponent.getRemarks());
         return dto;
+    }
+
+    @Transactional
+    public void syncProfessionalTax(Employee employee) {
+        // 1. Calculate Gross Salary (without Virtual PT)
+        SalaryBreakdownDTO breakdown = calculateSalaryBreakdown(employee.getId());
+        BigDecimal grossSalary = breakdown.getGrossSalary();
+
+        // 2. Calculate Statutory PT Amount
+        BigDecimal ptAmount = professionalTaxService.calculatePT(employee, grossSalary);
+
+        // 3. Cleanup & Sync: Find ALL Active Components for Employee
+        // Use repo method to find all, then filter in memory to identify PT variants
+        List<EmployeeSalaryComponent> allComponents = employeeSalaryComponentRepository
+                .findByEmployeeIdAndIsActiveTrue(employee.getId());
+
+        boolean isEnabled = employee.getProfessionalTax() != null && employee.getProfessionalTax();
+        boolean ptUpdated = false;
+
+        // Iterate to find any component that looks like PT
+        for (EmployeeSalaryComponent esc : allComponents) {
+            SalaryComponent sc = esc.getComponent();
+            String name = sc.getName() != null ? sc.getName().trim().toLowerCase() : "";
+            String code = sc.getCode() != null ? sc.getCode().trim().toLowerCase() : "";
+            boolean isPT = code.equals("pt") || code.equals("ptax") || code.equals("prof_tax")
+                    || name.equals("professional tax") || name.contains("professional tax");
+
+            if (isPT) {
+                if (isEnabled) {
+                    if (!ptUpdated) {
+                        // Update the first valid PT found to the correct amount
+                        esc.setValue(ptAmount);
+                        employeeSalaryComponentRepository.save(esc);
+                        ptUpdated = true;
+                    } else {
+                        // Deactivate duplicates
+                        esc.setIsActive(false);
+                        employeeSalaryComponentRepository.save(esc);
+                    }
+                } else {
+                    // Disable: User disabled PT, so remove this component
+                    esc.setIsActive(false);
+                    employeeSalaryComponentRepository.save(esc);
+                }
+            }
+        }
+
+        // 4. If Enabled and NO PT component existed, create/assign the Standard One
+        if (isEnabled && !ptUpdated) {
+            // Find Master Component by Code "PT" or Name "Professional Tax" or from
+            // Statutory list
+            java.util.Optional<SalaryComponent> ptMasterOpt = java.util.Optional.empty();
+            List<SalaryComponent> statutoryComponents = salaryComponentRepository
+                    .findByOrganizationIdAndIsStatutoryTrueAndIsActiveTrue(employee.getOrganization().getId());
+
+            for (SalaryComponent sc : statutoryComponents) {
+                String cName = sc.getName() != null ? sc.getName().trim().toLowerCase() : "";
+                String cCode = sc.getCode() != null ? sc.getCode().trim().toLowerCase() : "";
+                if (cCode.equals("pt") || cCode.equals("ptax") || cCode.equals("prof_tax")
+                        || cName.equals("professional tax") || cName.contains("professional tax")) {
+                    ptMasterOpt = java.util.Optional.of(sc);
+                    break;
+                }
+            }
+
+            if (!ptMasterOpt.isPresent()) {
+                // Check specifically by code if not found in statutory (edge case)
+                ptMasterOpt = salaryComponentRepository
+                        .findByOrganizationIdAndCode(employee.getOrganization().getId(), "PT");
+            }
+
+            if (!ptMasterOpt.isPresent()) {
+                // Create standard PT component if missing
+                SalaryComponent newPt = new SalaryComponent();
+                newPt.setName("Professional Tax");
+                newPt.setCode("PT");
+                newPt.setOrganization(employee.getOrganization());
+                newPt.setType(ComponentType.DEDUCTION);
+                newPt.setCalculationType(CalculationType.FIXED);
+                newPt.setIsTaxable(false);
+                newPt.setIsStatutory(true);
+                newPt.setIsActive(true);
+                newPt = salaryComponentRepository.save(newPt);
+                ptMasterOpt = java.util.Optional.of(newPt);
+            }
+
+            SalaryComponent ptMaster = ptMasterOpt.get();
+
+            // Create new assignment
+            EmployeeSalaryComponent esc = new EmployeeSalaryComponent();
+            esc.setEmployee(employee);
+            esc.setComponent(ptMaster);
+            esc.setEffectiveFrom(LocalDate.now());
+            esc.setIsActive(true);
+            esc.setValue(ptAmount);
+            employeeSalaryComponentRepository.save(esc);
+        }
     }
 }

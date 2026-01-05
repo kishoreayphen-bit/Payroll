@@ -27,6 +27,9 @@ public class EmployeeService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EmployeeSalaryService employeeSalaryService;
+
     @Transactional
     public EmployeeResponseDTO createEmployee(EmployeeRequestDTO requestDTO, String userEmail) {
         // Validate organization exists
@@ -56,7 +59,11 @@ public class EmployeeService {
         employee.setCreatedBy(currentUser);
 
         // Save employee
+        // Save employee
         Employee savedEmployee = employeeRepository.save(employee);
+
+        // Sync Professional Tax Component
+        employeeSalaryService.syncProfessionalTax(savedEmployee);
 
         return mapEntityToDTO(savedEmployee);
     }
@@ -99,6 +106,9 @@ public class EmployeeService {
 
         mapDTOToEntity(requestDTO, employee);
         Employee updatedEmployee = employeeRepository.save(employee);
+
+        // Sync Professional Tax Component
+        employeeSalaryService.syncProfessionalTax(updatedEmployee);
 
         return mapEntityToDTO(updatedEmployee);
     }

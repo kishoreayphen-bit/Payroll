@@ -24,7 +24,9 @@ import {
     Bell,
     LogOut,
     Building,
-    FileCheck
+    FileCheck,
+    Calendar,
+    PieChart
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -136,63 +138,76 @@ export default function AddEmployee() {
     // Fetch employee data if in edit mode
     useEffect(() => {
         const fetchEmployeeData = async () => {
-            if (!isEditMode || !editEmployeeId) return;
+            if (!isEditMode || !editEmployeeId || editEmployeeId === 'undefined' || editEmployeeId === 'null') {
+                console.warn('Invalid Edit ID:', editEmployeeId);
+                return;
+            }
+
+            console.log('Fetching data for employee:', editEmployeeId);
 
             try {
-                // Mock employee data - replace with actual API call
-                // const response = await api.get(`/employees/${editEmployeeId}`);
-                // const employee = response.data;
+                const response = await api.get(`/employees/${editEmployeeId}`);
+                const employee = response.data;
 
-                // For now, using mock data
-                const mockEmployee = {
-                    id: editEmployeeId,
-                    firstName: 'kishore',
-                    middleName: '',
-                    lastName: '',
-                    employeeId: '01',
-                    dateOfJoining: '2025-12-23',
-                    workEmail: 'admin@payrollpro.com',
-                    mobileNumber: '9487042778',
-                    isDirector: false,
-                    gender: 'male',
-                    workLocation: 'Head Office',
-                    designation: 'associate',
-                    department: 'Engineering',
-                    enablePortalAccess: false,
-                    professionalTax: false,
-                    annualCtc: '6000000',
-                    basicPercentOfCtc: 50,
-                    hraPercentOfBasic: 50,
-                    basicMonthly: '25000',
-                    hraMonthly: '12500',
-                    fixedAllowanceMonthly: '12500',
-                    dateOfBirth: '',
-                    age: '',
-                    fatherName: '',
-                    personalEmail: '',
-                    differentlyAbledType: 'none',
-                    addressLine1: '',
-                    addressLine2: '',
-                    city: '',
-                    state: '',
-                    pinCode: '',
-                    emergencyContact: '',
-                    emergencyContactName: '',
-                    bankName: '',
-                    accountNumber: '',
-                    ifscCode: '',
-                    paymentMethod: 'bank_transfer',
-                    panNumber: '',
-                    aadharNumber: ''
+                // Fetch salary breakdown to get component details if needed
+                // const breakdownRes = await api.get(`/employees/${editEmployeeId}/salary-breakdown`);
+
+                const mappedData = {
+                    firstName: employee.firstName || '',
+                    middleName: employee.middleName || '',
+                    lastName: employee.lastName || '',
+                    employeeId: employee.employeeId || '',
+                    dateOfJoining: employee.dateOfJoining || '',
+                    workEmail: employee.workEmail || '',
+                    mobileNumber: employee.mobileNumber || '',
+                    isDirector: employee.isDirector || false,
+                    gender: employee.gender || '',
+                    workLocation: employee.workLocation || '',
+                    designation: employee.designation || '',
+                    department: employee.department || '',
+                    enablePortalAccess: employee.enablePortalAccess || false,
+                    professionalTax: employee.professionalTax !== undefined ? employee.professionalTax : true,
+
+                    // Salary
+                    annualCtc: employee.annualCtc || '',
+                    basicPercentOfCtc: employee.basicPercentOfCtc || 50,
+                    hraPercentOfBasic: employee.hraPercentOfBasic || 50,
+                    conveyanceAllowanceMonthly: employee.conveyanceAllowanceMonthly || '',
+                    basicMonthly: employee.basicMonthly || '',
+                    hraMonthly: employee.hraMonthly || '',
+                    fixedAllowanceMonthly: employee.fixedAllowanceMonthly || '',
+
+                    // Personal
+                    dateOfBirth: employee.dateOfBirth || '',
+                    age: employee.age || '',
+                    fatherName: employee.fatherName || '',
+                    personalEmail: employee.personalEmail || '',
+                    differentlyAbledType: employee.differentlyAbledType || 'none',
+                    address: employee.address || '',
+                    addressLine1: employee.addressLine1 || '',
+                    addressLine2: employee.addressLine2 || '',
+                    city: employee.city || '',
+                    state: employee.state || '',
+                    pinCode: employee.pinCode || '',
+
+                    // Emergency
+                    emergencyContact: employee.emergencyContact || '',
+                    emergencyContactName: employee.emergencyContactName || '',
+
+                    // Payment
+                    bankName: employee.bankName || '',
+                    accountNumber: employee.accountNumber || '',
+                    ifscCode: employee.ifscCode || '',
+                    paymentMethod: employee.paymentMethod || 'bank_transfer',
+                    panNumber: employee.panNumber || '',
+                    aadharNumber: employee.aadharNumber || ''
                 };
 
-                setEmployeeData(mockEmployee);
+                setEmployeeData(mappedData);
 
-                // Pre-fill form with employee data
-                Object.keys(mockEmployee).forEach(key => {
-                    if (mockEmployee[key] !== undefined && mockEmployee[key] !== null) {
-                        setValue(key, mockEmployee[key]);
-                    }
+                // Pre-fill form
+                Object.keys(mappedData).forEach(key => {
+                    setValue(key, mappedData[key]);
                 });
 
             } catch (error) {
@@ -295,57 +310,81 @@ export default function AddEmployee() {
                         </div>
 
                         {/* Navigation */}
-                        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                            <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <LayoutDashboard className="w-5 h-5" />
-                                <span>Dashboard</span>
-                            </Link>
+                        <nav className="flex-1 p-4 space-y-6 overflow-y-auto scrollbar-hide">
+                            {/* Main Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Main</span>
+                                </div>
+                                <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <LayoutDashboard className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Dashboard</span>
+                                </Link>
 
-                            <Link to="/employees" className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md">
-                                <Users className="w-5 h-5" />
-                                <span>Employees</span>
-                            </Link>
-
-                            <Link to="/pay-runs" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <DollarSign className="w-5 h-5" />
-                                <span>Pay Runs</span>
-                            </Link>
-
-                            <div className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer">
-                                <Shield className="w-5 h-5" />
-                                <span>Approvals</span>
-                                <ChevronRight className="w-4 h-4 ml-auto" />
+                                <Link to="/employees" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30">
+                                    <Users className="w-5 h-5" />
+                                    <span className="font-medium">Employees</span>
+                                </Link>
                             </div>
 
-                            <Link to="/form16" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <FileCheck className="w-5 h-5" />
-                                <span>Form 16</span>
-                            </Link>
+                            {/* Payroll Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Payroll</span>
+                                </div>
+                                <Link to="/pay-runs" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Calendar className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Pay Runs</span>
+                                </Link>
 
-                            <Link to="/loans" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Wallet className="w-5 h-5" />
-                                <span>Loans</span>
-                            </Link>
+                                <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer group">
+                                    <Shield className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Approvals</span>
+                                    <ChevronRight className="w-4 h-4 ml-auto opacity-50" />
+                                </div>
 
-                            <Link to="/giving" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Heart className="w-5 h-5" />
-                                <span>Giving</span>
-                            </Link>
+                                <Link to="/form16" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <FileCheck className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Form 16</span>
+                                </Link>
+                            </div>
 
-                            <Link to="/documents" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <FolderOpen className="w-5 h-5" />
-                                <span>Documents</span>
-                            </Link>
+                            {/* Benefits Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Benefits</span>
+                                </div>
+                                <Link to="/loans" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Wallet className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Loans</span>
+                                </Link>
 
-                            <Link to="/reports" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <BarChart3 className="w-5 h-5" />
-                                <span>Reports</span>
-                            </Link>
+                                <Link to="/giving" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Heart className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Giving</span>
+                                </Link>
+                            </div>
 
-                            <Link to="/settings" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Settings className="w-5 h-5" />
-                                <span>Settings</span>
-                            </Link>
+                            {/* Management Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Management</span>
+                                </div>
+                                <Link to="/documents" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <FolderOpen className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Documents</span>
+                                </Link>
+
+                                <Link to="/reports" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <PieChart className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Reports</span>
+                                </Link>
+
+                                <Link to="/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Settings className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Settings</span>
+                                </Link>
+                            </div>
                         </nav>
                     </>
                 )}

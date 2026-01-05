@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 import {
     Users,
     DollarSign,
@@ -32,9 +33,11 @@ import {
 import { Button } from '../components/ui/button';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/authService';
+import { Moon, Sun } from 'lucide-react';
 
 export default function Dashboard() {
     const { user, logout } = useAuth();
+    const { darkMode, toggleDarkMode } = useTheme();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showCompanyMenu, setShowCompanyMenu] = useState(false);
@@ -137,7 +140,7 @@ export default function Dashboard() {
     const progressPercentage = (completedSteps / totalSteps) * 100;
 
     return (
-        <div className="h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white flex overflow-hidden">
+        <div className="h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex overflow-hidden">
             {/* Sidebar - Fixed with collapse animation */}
             <div
                 className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col fixed left-0 top-0 h-screen transition-all duration-300 shadow-2xl ${sidebarOpen ? 'w-56' : 'w-0'
@@ -247,25 +250,25 @@ export default function Dashboard() {
             {/* Main Content - With left margin for fixed sidebar */}
             <div className={`flex-1 flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'ml-56' : 'ml-0'}`}>
                 {/* Top Bar - Fixed */}
-                <div className="bg-white/80 backdrop-blur-md border-b border-pink-100 px-6 py-4 flex-shrink-0 shadow-sm">
+                <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-pink-100 dark:border-slate-700 px-6 py-4 flex-shrink-0 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1">
                             {/* Menu button to open sidebar when closed */}
                             {!sidebarOpen && (
                                 <button
                                     onClick={() => setSidebarOpen(true)}
-                                    className="p-2 hover:bg-pink-50 rounded-xl transition-colors"
+                                    className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
                                     title="Open sidebar"
                                 >
-                                    <Menu className="w-5 h-5 text-slate-600" />
+                                    <Menu className="w-5 h-5 text-slate-600 dark:text-slate-300" />
                                 </button>
                             )}
                             <div className="relative flex-1 max-w-md">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
                                 <input
                                     type="text"
                                     placeholder="Search employees..."
-                                    className="w-full pl-10 pr-4 py-2 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white"
+                                    className="w-full pl-10 pr-4 py-2 border border-pink-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white dark:bg-slate-800 dark:text-white dark:placeholder-slate-400"
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && e.target.value.trim()) {
                                             window.location.href = `/employees?search=${encodeURIComponent(e.target.value.trim())}`;
@@ -275,9 +278,7 @@ export default function Dashboard() {
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Button className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white shadow-lg shadow-pink-500/30 text-xs px-3 py-1.5 h-auto">
-                                Upgrade
-                            </Button>
+
 
                             {/* Company Dropdown */}
                             <div className="relative">
@@ -325,12 +326,25 @@ export default function Dashboard() {
                                 )}
                             </div>
 
-                            <Link to="/notifications" className="p-2 hover:bg-pink-50 rounded-xl transition-colors block">
-                                <Bell className="w-4 h-4 text-slate-600" />
+                            {/* Dark Mode Toggle */}
+                            <button
+                                onClick={toggleDarkMode}
+                                className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                                title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                            >
+                                {darkMode ? (
+                                    <Sun className="w-4 h-4 text-yellow-500" />
+                                ) : (
+                                    <Moon className="w-4 h-4 text-slate-600" />
+                                )}
+                            </button>
+
+                            <Link to="/notifications" className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors block">
+                                <Bell className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                             </Link>
 
-                            <button className="p-2 hover:bg-pink-50 rounded-xl transition-colors">
-                                <Settings className="w-4 h-4 text-slate-600" />
+                            <button className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors">
+                                <Settings className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                             </button>
 
                             {/* Profile Dropdown */}
@@ -392,11 +406,11 @@ export default function Dashboard() {
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent mb-2">
                             Welcome {user?.email?.split('@')[0] || 'User'}! 👋
                         </h1>
-                        <p className="text-slate-600 text-lg">Set up your organisation before you run your first payroll.</p>
+                        <p className="text-slate-600 dark:text-slate-300 text-lg">Set up your organisation before you run your first payroll.</p>
                     </div>
 
                     {/* Getting Started Card - Redesigned */}
-                    <div className="bg-white rounded-xl shadow-xl border border-pink-100 overflow-hidden">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-pink-100 dark:border-slate-700 overflow-hidden">
                         {/* Header with gradient */}
                         <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 text-white p-5">
                             <div className="flex items-center gap-2.5 mb-3">
@@ -425,7 +439,7 @@ export default function Dashboard() {
                         <div className="p-5 space-y-3">
                             {steps.map((step, index) => (
                                 <div key={step.id} className="group">
-                                    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-pink-50/50 transition-all">
+                                    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-pink-50/50 dark:hover:bg-slate-700/50 transition-all">
                                         <div className="flex-shrink-0 mt-0.5">
                                             {step.completed ? (
                                                 <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30">
@@ -443,7 +457,7 @@ export default function Dashboard() {
                                                     to={step.link}
                                                     className="flex items-center gap-2 group/link hover:text-pink-600 transition-colors"
                                                 >
-                                                    <h3 className="font-semibold text-slate-900 text-sm group-hover/link:text-pink-600">{step.id}. {step.title}</h3>
+                                                    <h3 className="font-semibold text-slate-900 dark:text-white text-sm group-hover/link:text-pink-600">{step.id}. {step.title}</h3>
                                                     <ArrowRight className="w-4 h-4 text-pink-500 opacity-0 group-hover/link:opacity-100 transition-opacity" />
                                                 </Link>
                                                 {step.completed ? (
@@ -461,7 +475,7 @@ export default function Dashboard() {
                                                 )}
                                             </div>
                                             {step.subItems && (
-                                                <div className="mt-2 ml-2.5 space-y-1.5 p-2.5 bg-slate-50 rounded-lg">
+                                                <div className="mt-2 ml-2.5 space-y-1.5 p-2.5 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
                                                     {step.subItems.map((subItem, idx) => (
                                                         <div key={idx} className="flex items-center gap-2">
                                                             {subItem.completed ? (
@@ -469,7 +483,7 @@ export default function Dashboard() {
                                                             ) : (
                                                                 <Circle className="w-4 h-4 text-slate-300 flex-shrink-0" />
                                                             )}
-                                                            <span className="text-slate-700 flex-1 text-xs">
+                                                            <span className="text-slate-700 dark:text-slate-300 flex-1 text-xs">
                                                                 {subItem.name}
                                                                 {subItem.note && <span className="text-slate-500 ml-1">{subItem.note}</span>}
                                                             </span>
@@ -489,29 +503,29 @@ export default function Dashboard() {
                         </div>
 
                         {/* Additional Features */}
-                        <div className="bg-gradient-to-br from-pink-50 to-rose-50 p-8 border-t border-pink-100">
-                            <h3 className="font-bold text-slate-900 mb-6 text-xl">ADDITIONAL NOTABLE FEATURES</h3>
+                        <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-slate-700 dark:to-slate-800 p-8 border-t border-pink-100 dark:border-slate-700">
+                            <h3 className="font-bold text-slate-900 dark:text-white mb-6 text-xl">ADDITIONAL NOTABLE FEATURES</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <div className="bg-white p-6 rounded-2xl border border-pink-100 shadow-sm hover:shadow-md transition-all group">
+                                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-pink-100 dark:border-slate-600 shadow-sm hover:shadow-md transition-all group">
                                     <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                         <DollarSign className="w-6 h-6 text-white" />
                                     </div>
-                                    <h4 className="font-bold text-slate-900 mb-2">Automated Payroll</h4>
-                                    <p className="text-sm text-slate-600">Run payroll automatically every month</p>
+                                    <h4 className="font-bold text-slate-900 dark:text-white mb-2">Automated Payroll</h4>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400">Run payroll automatically every month</p>
                                 </div>
-                                <div className="bg-white p-6 rounded-2xl border border-pink-100 shadow-sm hover:shadow-md transition-all group">
+                                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-pink-100 dark:border-slate-600 shadow-sm hover:shadow-md transition-all group">
                                     <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                         <Shield className="w-6 h-6 text-white" />
                                     </div>
-                                    <h4 className="font-bold text-slate-900 mb-2">Tax Compliance</h4>
-                                    <p className="text-sm text-slate-600">Stay compliant with all tax regulations</p>
+                                    <h4 className="font-bold text-slate-900 dark:text-white mb-2">Tax Compliance</h4>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400">Stay compliant with all tax regulations</p>
                                 </div>
-                                <div className="bg-white p-6 rounded-2xl border border-pink-100 shadow-sm hover:shadow-md transition-all group">
+                                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-pink-100 dark:border-slate-600 shadow-sm hover:shadow-md transition-all group">
                                     <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                         <Users className="w-6 h-6 text-white" />
                                     </div>
-                                    <h4 className="font-bold text-slate-900 mb-2">Employee Self-Service</h4>
-                                    <p className="text-sm text-slate-600">Let employees access their payslips</p>
+                                    <h4 className="font-bold text-slate-900 dark:text-white mb-2">Employee Self-Service</h4>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400">Let employees access their payslips</p>
                                 </div>
                             </div>
                         </div>

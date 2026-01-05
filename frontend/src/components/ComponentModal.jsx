@@ -76,16 +76,32 @@ export default function ComponentModal({ component, onClose, onSave, organizatio
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!organizationId) {
+            alert('Organization context is missing. Please select an organization or refresh the page.');
+            return;
+        }
+
         if (!validate()) {
             return;
         }
 
         setSaving(true);
         try {
+            // Ensure organizationId is a number
+            const orgId = typeof organizationId === 'string' ? parseInt(organizationId, 10) : organizationId;
+            
             const payload = {
-                ...formData,
-                organizationId,
-                baseComponentId: formData.baseComponentId || null,
+                name: formData.name,
+                code: formData.code.toUpperCase(),
+                type: formData.type,
+                calculationType: formData.calculationType,
+                isTaxable: formData.isTaxable,
+                isStatutory: formData.isStatutory,
+                isActive: true,
+                displayOrder: parseInt(formData.displayOrder) || 0,
+                description: formData.description || null,
+                organizationId: orgId,
+                baseComponentId: formData.baseComponentId ? parseInt(formData.baseComponentId, 10) : null,
                 formula: formData.formula || null
             };
 
@@ -113,7 +129,7 @@ export default function ComponentModal({ component, onClose, onSave, organizatio
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-pink-600 to-rose-600 px-6 py-4 flex items-center justify-between">
                     <h2 className="text-xl font-bold text-white">
@@ -132,7 +148,7 @@ export default function ComponentModal({ component, onClose, onSave, organizatio
                     <div className="space-y-4">
                         {/* Component Name */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
                                 Component Name <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -140,7 +156,7 @@ export default function ComponentModal({ component, onClose, onSave, organizatio
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
-                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 ${errors.name ? 'border-red-500' : 'border-slate-300'
+                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white dark:bg-slate-700 dark:text-white ${errors.name ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'
                                     }`}
                                 placeholder="e.g., Basic Salary, House Rent Allowance"
                             />
@@ -149,7 +165,7 @@ export default function ComponentModal({ component, onClose, onSave, organizatio
 
                         {/* Component Code */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
                                 Component Code <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -157,26 +173,26 @@ export default function ComponentModal({ component, onClose, onSave, organizatio
                                 name="code"
                                 value={formData.code}
                                 onChange={handleChange}
-                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 font-mono ${errors.code ? 'border-red-500' : 'border-slate-300'
+                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 font-mono bg-white dark:bg-slate-700 dark:text-white ${errors.code ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'
                                     }`}
                                 placeholder="e.g., BASIC, HRA, PF"
                                 style={{ textTransform: 'uppercase' }}
                             />
                             {errors.code && <p className="text-red-500 text-xs mt-1">{errors.code}</p>}
-                            <p className="text-xs text-slate-500 mt-1">Use uppercase letters and underscores only</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Use uppercase letters and underscores only</p>
                         </div>
 
                         {/* Type and Calculation Type */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
                                     Type <span className="text-red-500">*</span>
                                 </label>
                                 <select
                                     name="type"
                                     value={formData.type}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white dark:bg-slate-700 dark:text-white"
                                 >
                                     <option value="EARNING">Earning</option>
                                     <option value="DEDUCTION">Deduction</option>
@@ -184,14 +200,14 @@ export default function ComponentModal({ component, onClose, onSave, organizatio
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
                                     Calculation Type <span className="text-red-500">*</span>
                                 </label>
                                 <select
                                     name="calculationType"
                                     value={formData.calculationType}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white dark:bg-slate-700 dark:text-white"
                                 >
                                     <option value="FIXED">Fixed Amount</option>
                                     <option value="PERCENTAGE">Percentage</option>
@@ -253,7 +269,7 @@ export default function ComponentModal({ component, onClose, onSave, organizatio
                                     onChange={handleChange}
                                     className="w-4 h-4 text-pink-600 border-slate-300 rounded focus:ring-pink-500"
                                 />
-                                <label className="ml-2 text-sm text-slate-700">
+                                <label className="ml-2 text-sm text-slate-700 dark:text-slate-200">
                                     Taxable
                                 </label>
                             </div>
@@ -266,7 +282,7 @@ export default function ComponentModal({ component, onClose, onSave, organizatio
                                     onChange={handleChange}
                                     className="w-4 h-4 text-pink-600 border-slate-300 rounded focus:ring-pink-500"
                                 />
-                                <label className="ml-2 text-sm text-slate-700">
+                                <label className="ml-2 text-sm text-slate-700 dark:text-slate-200">
                                     Statutory (PF, ESI, PT, etc.)
                                 </label>
                             </div>
@@ -274,7 +290,7 @@ export default function ComponentModal({ component, onClose, onSave, organizatio
 
                         {/* Display Order */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
                                 Display Order
                             </label>
                             <input
@@ -282,15 +298,15 @@ export default function ComponentModal({ component, onClose, onSave, organizatio
                                 name="displayOrder"
                                 value={formData.displayOrder}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white dark:bg-slate-700 dark:text-white"
                                 min="0"
                             />
-                            <p className="text-xs text-slate-500 mt-1">Order in which component appears in lists</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Order in which component appears in lists</p>
                         </div>
 
                         {/* Description */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
                                 Description
                             </label>
                             <textarea
@@ -298,14 +314,14 @@ export default function ComponentModal({ component, onClose, onSave, organizatio
                                 value={formData.description}
                                 onChange={handleChange}
                                 rows={3}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white dark:bg-slate-700 dark:text-white"
                                 placeholder="Brief description of this component"
                             />
                         </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-3 mt-6 pt-6 border-t border-slate-200">
+                    <div className="flex gap-3 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
                         <Button
                             type="button"
                             onClick={onClose}

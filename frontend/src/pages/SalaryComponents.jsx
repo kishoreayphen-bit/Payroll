@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 import {
     Search,
     Bell,
@@ -23,16 +24,23 @@ import {
     Edit,
     Trash2,
     Filter,
-    X
+    X,
+    FileText,
+    CheckCircle,
+    Calendar,
+    PieChart,
+    Gift
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import ComponentModal from '../components/ComponentModal';
 import { api } from '../services/authService';
+import { Moon, Sun } from 'lucide-react';
 
 export default function SalaryComponents() {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+    const { darkMode, toggleDarkMode } = useTheme();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showCompanyMenu, setShowCompanyMenu] = useState(false);
@@ -58,13 +66,30 @@ export default function SalaryComponents() {
 
     const fetchOrganization = async () => {
         try {
-            const selectedOrgId = localStorage.getItem('selectedOrganizationId');
-            if (selectedOrgId) {
-                const response = await api.get(`/organizations/${selectedOrgId}`);
+            let selectedOrgId = localStorage.getItem('selectedOrganizationId');
+
+            if (!selectedOrgId) {
+                // Fetch all organizations to set a default
+                const orgResponse = await api.get('/organizations');
+                if (orgResponse.data && orgResponse.data.length > 0) {
+                    const defaultOrg = orgResponse.data[0];
+                    selectedOrgId = String(defaultOrg.id);
+                    localStorage.setItem('selectedOrganizationId', selectedOrgId);
+                    setOrganization(defaultOrg);
+                } else {
+                    // No organizations found
+                    return;
+                }
+            } else {
+                const response = await api.get(`/organizations/${parseInt(selectedOrgId, 10)}`);
                 setOrganization(response.data);
             }
         } catch (error) {
             console.error('Error fetching organization:', error);
+            // If 401/403, user may need to re-login
+            if (error.response?.status === 401 || error.response?.status === 403) {
+                console.warn('Authentication issue - user may need to login');
+            }
         } finally {
             setLoading(false);
         }
@@ -74,11 +99,15 @@ export default function SalaryComponents() {
         try {
             const selectedOrgId = localStorage.getItem('selectedOrganizationId');
             if (selectedOrgId) {
-                const response = await api.get(`/salary-components?organizationId=${selectedOrgId}`);
-                setComponents(response.data);
+                const orgId = parseInt(selectedOrgId, 10);
+                const response = await api.get(`/salary-components?organizationId=${orgId}`);
+                setComponents(response.data || []);
             }
         } catch (error) {
             console.error('Error fetching components:', error);
+            if (error.response?.status === 401 || error.response?.status === 403) {
+                console.warn('Authentication issue fetching components');
+            }
         }
     };
 
@@ -117,7 +146,7 @@ export default function SalaryComponents() {
     const deductions = filteredComponents.filter(c => c.type === 'DEDUCTION');
 
     return (
-        <div className="h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white flex overflow-hidden">
+        <div className="h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex overflow-hidden">
             {/* Sidebar */}
             <div
                 className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col fixed left-0 top-0 h-screen transition-all duration-300 shadow-2xl ${sidebarOpen ? 'w-56' : 'w-0'}`}
@@ -141,58 +170,82 @@ export default function SalaryComponents() {
                             </button>
                         </div>
 
-                        {/* Navigation - NO Salary Components link */}
-                        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                            <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <LayoutDashboard className="w-5 h-5" />
-                                <span>Dashboard</span>
-                            </Link>
+                        {/* Navigation */}
+                        <nav className="flex-1 p-4 space-y-6 overflow-y-auto scrollbar-hide">
+                            {/* Main Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Main</span>
+                                </div>
+                                <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <LayoutDashboard className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Dashboard</span>
+                                </Link>
 
-                            <Link to="/employees" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Users className="w-5 h-5" />
-                                <span>Employees</span>
-                            </Link>
-
-                            <Link to="/pay-runs" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <DollarSign className="w-5 h-5" />
-                                <span>Pay Runs</span>
-                            </Link>
-
-                            <div className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer">
-                                <Shield className="w-5 h-5" />
-                                <span>Approvals</span>
-                                <ChevronRight className="w-4 h-4 ml-auto" />
+                                <Link to="/employees" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Users className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Employees</span>
+                                </Link>
                             </div>
 
-                            <Link to="/form16" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <FileCheck className="w-5 h-5" />
-                                <span>Form 16</span>
-                            </Link>
+                            {/* Payroll Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Payroll</span>
+                                </div>
+                                <Link to="/pay-runs" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Calendar className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Pay Runs</span>
+                                </Link>
 
-                            <Link to="/loans" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Wallet className="w-5 h-5" />
-                                <span>Loans</span>
-                            </Link>
+                                <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer group">
+                                    <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Approvals</span>
+                                    <ChevronRight className="w-4 h-4 ml-auto opacity-50" />
+                                </div>
 
-                            <Link to="/giving" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Heart className="w-5 h-5" />
-                                <span>Giving</span>
-                            </Link>
+                                <Link to="/form16" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <FileText className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Form 16</span>
+                                </Link>
+                            </div>
 
-                            <Link to="/documents" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <FolderOpen className="w-5 h-5" />
-                                <span>Documents</span>
-                            </Link>
+                            {/* Benefits Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Benefits</span>
+                                </div>
+                                <Link to="/loans" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Wallet className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Loans</span>
+                                </Link>
 
-                            <Link to="/reports" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <BarChart3 className="w-5 h-5" />
-                                <span>Reports</span>
-                            </Link>
+                                <Link to="/giving" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <Gift className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Giving</span>
+                                </Link>
+                            </div>
 
-                            <Link to="/settings" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all">
-                                <Settings className="w-5 h-5" />
-                                <span>Settings</span>
-                            </Link>
+                            {/* Management Section */}
+                            <div className="space-y-1">
+                                <div className="px-3 mb-2">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Management</span>
+                                </div>
+                                <Link to="/documents" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <FolderOpen className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Documents</span>
+                                </Link>
+
+                                <Link to="/reports" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
+                                    <PieChart className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Reports</span>
+                                </Link>
+
+                                <Link to="/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30">
+                                    <Settings className="w-5 h-5" />
+                                    <span className="font-medium">Settings</span>
+                                </Link>
+                            </div>
                         </nav>
                     </>
                 )}
@@ -201,25 +254,34 @@ export default function SalaryComponents() {
             {/* Main Content */}
             <div className={`flex-1 flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'ml-56' : 'ml-0'}`}>
                 {/* Header */}
-                <div className="bg-white/80 backdrop-blur-md border-b border-pink-100 px-6 py-4 flex-shrink-0 shadow-sm">
+                <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-pink-100 dark:border-slate-700 px-6 py-4 flex-shrink-0 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1">
                             {!sidebarOpen && (
                                 <button
                                     onClick={() => setSidebarOpen(true)}
-                                    className="p-2 hover:bg-pink-50 rounded-xl transition-colors"
+                                    className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
                                 >
-                                    <Menu className="w-5 h-5 text-slate-600" />
+                                    <Menu className="w-5 h-5 text-slate-600 dark:text-slate-300" />
                                 </button>
                             )}
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => navigate(-1)}
+                                className="text-slate-600 hover:text-slate-900"
+                            >
+                                ← Back
+                            </Button>
                             <div className="relative flex-1 max-w-md">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
                                 <input
                                     type="text"
                                     placeholder="Search components..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white"
+                                    className="w-full pl-10 pr-4 py-2 border border-pink-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white dark:bg-slate-800 dark:text-white dark:placeholder-slate-400"
                                 />
                             </div>
                         </div>
@@ -231,21 +293,34 @@ export default function SalaryComponents() {
                                         setShowCompanyMenu(!showCompanyMenu);
                                         setShowProfileMenu(false);
                                     }}
-                                    className="flex items-center gap-2 px-3 py-1.5 bg-pink-50 rounded-xl hover:bg-pink-100 transition-colors"
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-pink-50 dark:bg-slate-800 rounded-xl hover:bg-pink-100 dark:hover:bg-slate-700 transition-colors"
                                 >
-                                    <span className="text-slate-700 font-medium text-xs">
+                                    <span className="text-slate-700 dark:text-slate-200 font-medium text-xs">
                                         {loading ? 'Loading...' : (organization?.companyName || 'No Company')}
                                     </span>
-                                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                                 </button>
                             </div>
 
-                            <Link to="/notifications" className="p-2 hover:bg-pink-50 rounded-xl transition-colors block">
-                                <Bell className="w-4 h-4 text-slate-600" />
+                            {/* Dark Mode Toggle */}
+                            <button
+                                onClick={toggleDarkMode}
+                                className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                                title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                            >
+                                {darkMode ? (
+                                    <Sun className="w-4 h-4 text-yellow-500" />
+                                ) : (
+                                    <Moon className="w-4 h-4 text-slate-600" />
+                                )}
+                            </button>
+
+                            <Link to="/notifications" className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors block">
+                                <Bell className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                             </Link>
 
-                            <button className="p-2 hover:bg-pink-50 rounded-xl transition-colors">
-                                <Settings className="w-4 h-4 text-slate-600" />
+                            <button className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors">
+                                <Settings className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                             </button>
 
                             {/* Profile Dropdown */}
@@ -308,20 +383,20 @@ export default function SalaryComponents() {
                             <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent mb-2">
                                 Salary Components
                             </h1>
-                            <p className="text-slate-600">Manage earnings and deductions for your organization</p>
+                            <p className="text-slate-600 dark:text-slate-300">Manage earnings and deductions for your organization</p>
                         </div>
 
                         {/* Actions Bar */}
-                        <div className="bg-white rounded-xl border border-pink-100 p-4 mb-6 shadow-sm">
+                        <div className="bg-white dark:bg-slate-800 rounded-xl border border-pink-100 dark:border-slate-700 p-4 mb-6 shadow-sm">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <Filter className="w-4 h-4 text-slate-400" />
-                                    <span className="text-sm text-slate-600 mr-2">Filter:</span>
+                                    <Filter className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                                    <span className="text-sm text-slate-600 dark:text-slate-300 mr-2">Filter:</span>
                                     <button
                                         onClick={() => setFilterType('ALL')}
                                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filterType === 'ALL'
-                                                ? 'bg-pink-500 text-white'
-                                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                            ? 'bg-pink-500 text-white'
+                                            : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600'
                                             }`}
                                     >
                                         All ({components.length})
@@ -329,8 +404,8 @@ export default function SalaryComponents() {
                                     <button
                                         onClick={() => setFilterType('EARNING')}
                                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filterType === 'EARNING'
-                                                ? 'bg-emerald-500 text-white'
-                                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                            ? 'bg-emerald-500 text-white'
+                                            : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600'
                                             }`}
                                     >
                                         Earnings ({components.filter(c => c.type === 'EARNING').length})
@@ -338,8 +413,8 @@ export default function SalaryComponents() {
                                     <button
                                         onClick={() => setFilterType('DEDUCTION')}
                                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filterType === 'DEDUCTION'
-                                                ? 'bg-red-500 text-white'
-                                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                            ? 'bg-red-500 text-white'
+                                            : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600'
                                             }`}
                                     >
                                         Deductions ({components.filter(c => c.type === 'DEDUCTION').length})
@@ -361,7 +436,7 @@ export default function SalaryComponents() {
                         {/* Components Grid */}
                         {filterType === 'ALL' || filterType === 'EARNING' ? (
                             <div className="mb-8">
-                                <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                                     <div className="w-2 h-6 bg-gradient-to-b from-emerald-500 to-emerald-600 rounded-full"></div>
                                     Earnings
                                 </h2>
@@ -378,7 +453,7 @@ export default function SalaryComponents() {
                                         />
                                     ))}
                                     {earnings.length === 0 && (
-                                        <div className="col-span-3 text-center py-12 text-slate-500">
+                                        <div className="col-span-3 text-center py-12 text-slate-500 dark:text-slate-400">
                                             No earning components found
                                         </div>
                                     )}
@@ -388,7 +463,7 @@ export default function SalaryComponents() {
 
                         {filterType === 'ALL' || filterType === 'DEDUCTION' ? (
                             <div>
-                                <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                                     <div className="w-2 h-6 bg-gradient-to-b from-red-500 to-red-600 rounded-full"></div>
                                     Deductions
                                 </h2>
@@ -405,7 +480,7 @@ export default function SalaryComponents() {
                                         />
                                     ))}
                                     {deductions.length === 0 && (
-                                        <div className="col-span-3 text-center py-12 text-slate-500">
+                                        <div className="col-span-3 text-center py-12 text-slate-500 dark:text-slate-400">
                                             No deduction components found
                                         </div>
                                     )}
@@ -429,7 +504,7 @@ export default function SalaryComponents() {
                         setEditingComponent(null);
                         fetchComponents();
                     }}
-                    organizationId={organization?.id}
+                    organizationId={organization?.id || localStorage.getItem('selectedOrganizationId')}
                     components={components}
                 />
             )}
@@ -442,20 +517,20 @@ function ComponentCard({ component, onEdit, onDelete }) {
     const isEarning = component.type === 'EARNING';
 
     return (
-        <div className={`bg-white rounded-xl border-2 ${isEarning ? 'border-emerald-200' : 'border-red-200'} p-4 hover:shadow-lg transition-all`}>
+        <div className={`bg-white dark:bg-slate-800 rounded-xl border-2 ${isEarning ? 'border-emerald-200 dark:border-emerald-700' : 'border-red-200 dark:border-red-700'} p-4 hover:shadow-lg transition-all`}>
             <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-slate-900">{component.name}</h3>
+                        <h3 className="font-semibold text-slate-900 dark:text-white">{component.name}</h3>
                         {component.isStatutory && (
-                            <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                            <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
                                 Statutory
                             </span>
                         )}
                     </div>
-                    <p className="text-xs text-slate-500 font-mono">{component.code}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">{component.code}</p>
                 </div>
-                <div className={`px-2 py-1 rounded-lg text-xs font-medium ${isEarning ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                <div className={`px-2 py-1 rounded-lg text-xs font-medium ${isEarning ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300'
                     }`}>
                     {component.type}
                 </div>
@@ -463,17 +538,17 @@ function ComponentCard({ component, onEdit, onDelete }) {
 
             <div className="space-y-2 mb-4">
                 <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-600">Calculation:</span>
-                    <span className="font-medium text-slate-900">{component.calculationType}</span>
+                    <span className="text-slate-600 dark:text-slate-400">Calculation:</span>
+                    <span className="font-medium text-slate-900 dark:text-white">{component.calculationType}</span>
                 </div>
                 {component.baseComponentName && (
                     <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-600">Based on:</span>
-                        <span className="font-medium text-slate-900">{component.baseComponentName}</span>
+                        <span className="text-slate-600 dark:text-slate-400">Based on:</span>
+                        <span className="font-medium text-slate-900 dark:text-white">{component.baseComponentName}</span>
                     </div>
                 )}
                 <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-600">Taxable:</span>
+                    <span className="text-slate-600 dark:text-slate-400">Taxable:</span>
                     <span className={`font-medium ${component.isTaxable ? 'text-orange-600' : 'text-slate-400'}`}>
                         {component.isTaxable ? 'Yes' : 'No'}
                     </span>
@@ -481,20 +556,20 @@ function ComponentCard({ component, onEdit, onDelete }) {
             </div>
 
             {component.description && (
-                <p className="text-xs text-slate-500 mb-4 line-clamp-2">{component.description}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">{component.description}</p>
             )}
 
             <div className="flex gap-2">
                 <button
                     onClick={onEdit}
-                    className="flex-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1"
                 >
                     <Edit className="w-3.5 h-3.5" />
                     Edit
                 </button>
                 <button
                     onClick={onDelete}
-                    className="flex-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1"
                 >
                     <Trash2 className="w-3.5 h-3.5" />
                     Delete
