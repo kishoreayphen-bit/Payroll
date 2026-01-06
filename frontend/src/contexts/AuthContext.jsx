@@ -22,11 +22,18 @@ export const AuthProvider = ({ children }) => {
             const token = authService.getToken();
             const userData = authService.getUser();
 
+            console.log('AuthContext init - Token exists:', !!token);
+            console.log('AuthContext init - User data:', userData);
+            console.log('AuthContext init - isAuthenticated:', authService.isAuthenticated());
+
             if (token && authService.isAuthenticated()) {
                 setUser(userData);
                 setIsAuthenticated(true);
             } else {
-                authService.logout();
+                // Only logout if there's no token at all
+                if (!token) {
+                    authService.logout();
+                }
             }
             setLoading(false);
         };
