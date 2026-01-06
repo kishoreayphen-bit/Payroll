@@ -44,7 +44,7 @@ const STATUS_COLORS = {
 
 export default function PayRun() {
     const navigate = useNavigate();
-    const { user, logout } = useAuth();
+    const { user: authUser, logout } = useAuth();
     const { darkMode } = useTheme();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [showCompanyMenu, setShowCompanyMenu] = useState(false);
@@ -57,13 +57,14 @@ export default function PayRun() {
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
 
+    // Get user from localStorage if authUser is not available
+    const user = authUser || JSON.parse(localStorage.getItem('user') || 'null');
+
     useEffect(() => {
-        // Only fetch data if user is authenticated
-        if (user) {
-            fetchOrganization();
-            fetchPayRuns();
-        }
-    }, [user]);
+        // Fetch data on mount
+        fetchOrganization();
+        fetchPayRuns();
+    }, []);
 
     const fetchOrganization = async () => {
         try {
