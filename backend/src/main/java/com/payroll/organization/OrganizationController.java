@@ -35,4 +35,14 @@ public class OrganizationController {
         OrganizationResponse response = organizationService.getOrganizationById(id);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/current")
+    public ResponseEntity<OrganizationResponse> getCurrentOrganization() {
+        // Get the first organization for the current user
+        List<OrganizationResponse> organizations = organizationService.getUserOrganizations();
+        if (organizations.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(organizations.get(0));
+    }
 }
