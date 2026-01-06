@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/payslips")
+@RequestMapping("/api/v1/payslips")
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "*")
