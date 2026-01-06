@@ -58,9 +58,12 @@ export default function PayRun() {
     const [actionLoading, setActionLoading] = useState(false);
 
     useEffect(() => {
-        fetchOrganization();
-        fetchPayRuns();
-    }, []);
+        // Only fetch data if user is authenticated
+        if (user) {
+            fetchOrganization();
+            fetchPayRuns();
+        }
+    }, [user]);
 
     const fetchOrganization = async () => {
         try {

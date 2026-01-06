@@ -39,9 +39,14 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // Token expired or invalid
-            authService.logout();
-            window.location.href = '/login';
+            // Only redirect to login if we have a token (meaning it expired)
+            // If no token, the ProtectedRoute will handle the redirect
+            const token = localStorage.getItem('token');
+            if (token) {
+                // Token expired or invalid
+                authService.logout();
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }
