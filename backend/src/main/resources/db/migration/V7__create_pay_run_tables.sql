@@ -1,6 +1,6 @@
 -- Pay Runs table
 CREATE TABLE pay_runs (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     pay_run_number VARCHAR(50) UNIQUE,
     tenant_id BIGINT NOT NULL,
     pay_period_start DATE NOT NULL,
@@ -18,15 +18,16 @@ CREATE TABLE pay_runs (
     approved_by BIGINT,
     approved_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_pay_runs_tenant (tenant_id),
-    INDEX idx_pay_runs_status (status),
-    INDEX idx_pay_runs_period (pay_period_start, pay_period_end)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX idx_pay_runs_tenant ON pay_runs(tenant_id);
+CREATE INDEX idx_pay_runs_status ON pay_runs(status);
+CREATE INDEX idx_pay_runs_period ON pay_runs(pay_period_start, pay_period_end);
 
 -- Pay Run Employees table
 CREATE TABLE pay_run_employees (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     pay_run_id BIGINT NOT NULL,
     employee_id BIGINT NOT NULL,
     basic_salary DECIMAL(15,2) DEFAULT 0,
@@ -55,17 +56,18 @@ CREATE TABLE pay_run_employees (
     payslip_sent BOOLEAN DEFAULT FALSE,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (pay_run_id) REFERENCES pay_runs(id) ON DELETE CASCADE,
     FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
-    INDEX idx_pre_pay_run (pay_run_id),
-    INDEX idx_pre_employee (employee_id),
-    UNIQUE KEY uk_pay_run_employee (pay_run_id, employee_id)
+    CONSTRAINT uk_pay_run_employee UNIQUE (pay_run_id, employee_id)
 );
+
+CREATE INDEX idx_pre_pay_run ON pay_run_employees(pay_run_id);
+CREATE INDEX idx_pre_employee ON pay_run_employees(employee_id);
 
 -- Payslips table
 CREATE TABLE payslips (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     payslip_number VARCHAR(50) UNIQUE,
     pay_run_employee_id BIGINT NOT NULL,
     employee_id BIGINT NOT NULL,
@@ -96,10 +98,11 @@ CREATE TABLE payslips (
     email_sent_at TIMESTAMP,
     status VARCHAR(20) DEFAULT 'GENERATED',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (pay_run_employee_id) REFERENCES pay_run_employees(id) ON DELETE CASCADE,
-    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
-    INDEX idx_payslips_tenant (tenant_id),
-    INDEX idx_payslips_employee (employee_id),
-    INDEX idx_payslips_period (pay_period_start, pay_period_end)
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
 );
+
+CREATE INDEX idx_payslips_tenant ON payslips(tenant_id);
+CREATE INDEX idx_payslips_employee ON payslips(employee_id);
+CREATE INDEX idx_payslips_period ON payslips(pay_period_start, pay_period_end);
