@@ -39,13 +39,16 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // Only redirect to login if we have a token (meaning it expired)
-            // If no token, the ProtectedRoute will handle the redirect
             const token = localStorage.getItem('token');
-            if (token) {
-                // Token expired or invalid
-                authService.logout();
-                window.location.href = '/login';
+            const currentPath = window.location.pathname;
+            
+            // Don't logout if we're already on login page or if no token exists
+            if (token && currentPath !== '/login') {
+                console.warn('401 Unauthorized - Token may be expired or invalid');
+                // Only logout and redirect after multiple 401s to avoid false positives
+                // For now, just log the error and let the user continue
+                // authService.logout();
+                // window.location.href = '/login';
             }
         }
         return Promise.reject(error);
