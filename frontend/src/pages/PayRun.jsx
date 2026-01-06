@@ -93,6 +93,13 @@ export default function PayRun() {
     const handleCreatePayRun = async (data) => {
         try {
             setActionLoading(true);
+            
+            // Debug: Check authentication state
+            const token = localStorage.getItem('token');
+            console.log('Creating pay run with token:', token ? 'exists' : 'missing');
+            console.log('User:', user);
+            console.log('Organization ID:', organization?.id || localStorage.getItem('organizationId'));
+            
             const response = await api.post('/pay-runs', data, {
                 headers: {
                     'X-Tenant-ID': organization?.id || localStorage.getItem('organizationId'),
@@ -103,6 +110,7 @@ export default function PayRun() {
             setShowCreateModal(false);
         } catch (error) {
             console.error('Failed to create pay run:', error);
+            console.error('Error response:', error.response);
             alert(error.response?.data?.error || 'Failed to create pay run');
         } finally {
             setActionLoading(false);
