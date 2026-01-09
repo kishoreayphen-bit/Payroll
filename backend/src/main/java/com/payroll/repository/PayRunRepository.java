@@ -33,4 +33,9 @@ public interface PayRunRepository extends JpaRepository<PayRun, Long> {
 
     @Query("SELECT COUNT(p) FROM PayRun p WHERE p.tenantId = :tenantId AND YEAR(p.payPeriodStart) = :year")
     Long countByTenantIdAndYear(@Param("tenantId") Long tenantId, @Param("year") int year);
+
+    @Query("SELECT p FROM PayRun p WHERE p.tenantId = :tenantId AND p.payPeriodStart >= :startDate AND p.payPeriodStart <= :endDate ORDER BY p.payPeriodStart")
+    List<PayRun> findByTenantIdAndPayPeriodStartBetween(@Param("tenantId") Long tenantId, 
+                                                         @Param("startDate") LocalDate startDate, 
+                                                         @Param("endDate") LocalDate endDate);
 }

@@ -23,6 +23,9 @@ public interface PayslipRepository extends JpaRepository<Payslip, Long> {
 
     Optional<Payslip> findByPayRunEmployeeId(Long payRunEmployeeId);
 
+    @Query("SELECT p FROM Payslip p WHERE p.payRunEmployee.payRun.id = :payRunId ORDER BY p.employee.id")
+    List<Payslip> findByPayRunIdOrderByEmployeeIdAsc(@Param("payRunId") Long payRunId);
+
     @Query("SELECT p FROM Payslip p WHERE p.employee.id = :employeeId AND YEAR(p.payPeriodStart) = :year ORDER BY p.payPeriodStart")
     List<Payslip> findByEmployeeIdAndYear(@Param("employeeId") Long employeeId, @Param("year") int year);
 

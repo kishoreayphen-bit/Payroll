@@ -40,7 +40,6 @@ import {
 import { Button } from '../components/ui/button';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/authService';
-import AddComponentModal from '../components/AddComponentModal';
 import AppHeader from '../components/AppHeader';
 import { useTheme } from '../contexts/ThemeContext';
 import { ArrowLeft } from 'lucide-react';
@@ -61,9 +60,6 @@ export default function EmployeeDetails() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showCompanyMenu, setShowCompanyMenu] = useState(false);
-    const [showAddMenu, setShowAddMenu] = useState(false);
-    const [showAddEarningModal, setShowAddEarningModal] = useState(false);
-    const [showAddDeductionModal, setShowAddDeductionModal] = useState(false);
     const [showEditBasicInfoModal, setShowEditBasicInfoModal] = useState(false);
     const [showEditPersonalInfoModal, setShowEditPersonalInfoModal] = useState(false);
     const [showEditPaymentInfoModal, setShowEditPaymentInfoModal] = useState(false);
@@ -338,7 +334,7 @@ export default function EmployeeDetails() {
             case 'investments':
                 return <InvestmentsTab />;
             case 'payslips':
-                return <PayslipsTab />;
+                return <PayslipsTab employee={employee} organization={organization} />;
             case 'loans':
                 return <LoansTab />;
             default:
@@ -500,53 +496,6 @@ export default function EmployeeDetails() {
                             </div>
                         </div>
                         <div className="flex gap-2">
-                            {/* Add Dropdown */}
-                            <div className="relative">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="border-slate-300"
-                                    onClick={() => setShowAddMenu(!showAddMenu)}
-                                >
-                                    Add
-                                    <ChevronDown className="w-3 h-3 ml-1" />
-                                </Button>
-
-                                {showAddMenu && (
-                                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-pink-100 py-2 z-50">
-                                        <button
-                                            onClick={() => {
-                                                setShowAddEarningModal(true);
-                                                setShowAddMenu(false);
-                                            }}
-                                            className="w-full flex items-center gap-2 px-4 py-2 hover:bg-emerald-50 rounded-lg transition-colors mx-2 text-left"
-                                        >
-                                            <TrendingUp className="w-4 h-4 text-emerald-600" />
-                                            <span className="text-sm text-slate-700">Add Earning</span>
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setShowAddDeductionModal(true);
-                                                setShowAddMenu(false);
-                                            }}
-                                            className="w-full flex items-center gap-2 px-4 py-2 hover:bg-red-50 rounded-lg transition-colors mx-2 text-left"
-                                        >
-                                            <TrendingDown className="w-4 h-4 text-red-600" />
-                                            <span className="text-sm text-slate-700">Add Deduction</span>
-                                        </button>
-                                        <div className="border-t border-slate-100 my-1 mx-2"></div>
-                                        <Link
-                                            to="/salary-components"
-                                            className="flex items-center gap-2 px-4 py-2 hover:bg-pink-50 rounded-lg transition-colors mx-2"
-                                            onClick={() => setShowAddMenu(false)}
-                                        >
-                                            <Coins className="w-4 h-4 text-slate-600" />
-                                            <span className="text-sm text-slate-700">Manage Components</span>
-                                        </Link>
-                                    </div>
-                                )}
-                            </div>
-
                             <Button variant="ghost" size="sm">
                                 <MoreVertical className="w-4 h-4" />
                             </Button>
@@ -580,30 +529,6 @@ export default function EmployeeDetails() {
                     {renderTabContent()}
                 </div>
             </div>
-
-            {/* Add Earning Modal */}
-            {showAddEarningModal && (
-                <AddComponentModal
-                    employeeId={id}
-                    type="EARNING"
-                    onClose={() => setShowAddEarningModal(false)}
-                    onSave={() => {
-                        setShowAddEarningModal(false);
-                    }}
-                />
-            )}
-
-            {/* Add Deduction Modal */}
-            {showAddDeductionModal && (
-                <AddComponentModal
-                    employeeId={id}
-                    type="DEDUCTION"
-                    onClose={() => setShowAddDeductionModal(false)}
-                    onSave={() => {
-                        setShowAddDeductionModal(false);
-                    }}
-                />
-            )}
 
             {/* Edit Basic Info Modal */}
             {showEditBasicInfoModal && (
@@ -1206,10 +1131,79 @@ function InvestmentsTab() {
 }
 
 // Payslips Tab
-function PayslipsTab() {
-    const payslips = [
-        // Mock Data
-    ];
+function PayslipsTab({ employee, organization }) {
+    const [payslips, setPayslips] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+    useEffect(() => {
+        if (employee?.id && organization?.id) {
+            fetchPayslips();
+        }
+    }, [employee?.id, organization?.id, selectedYear]);
+
+    const fetchPayslips = async () => {
+        if (!employee?.id || !organization?.id) {
+            console.error('Employee ID or Organization ID not available');
+            return;
+        }
+        try {
+            setLoading(true);
+            const response = await api.get(`/payslips/employee/${employee.id}/year/${selectedYear}`, {
+                headers: {
+                    'X-Tenant-ID': organization.id
+                }
+            });
+            setPayslips(response.data);
+        } catch (error) {
+            console.error('Failed to fetch payslips:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDownloadPayslip = async (payslipId) => {
+        if (!employee?.id) {
+            alert('Employee ID not available');
+            return;
+        }
+        try {
+            const response = await api.get(`/payslips/${payslipId}/download`, {
+                headers: {
+                    'X-Employee-ID': employee.id
+                },
+                responseType: 'blob'
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `payslip-${payslipId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('Failed to download payslip:', error);
+            alert('Failed to download payslip: ' + (error.response?.data?.error || error.message));
+        }
+    };
+
+    const formatCurrency = (amount) => {
+        if (!amount) return '₹0.00';
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 2
+        }).format(amount);
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '-';
+        return new Date(dateString).toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        });
+    };
 
     return (
         <div className="max-w-5xl space-y-6">
@@ -1217,22 +1211,73 @@ function PayslipsTab() {
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-lg font-bold text-slate-900 dark:text-white">Payslip History</h2>
                     <div className="flex gap-2">
-                        <select className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-pink-500/20">
-                            <option>FY 2024-25</option>
-                            <option>FY 2023-24</option>
+                        <select 
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                            className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/20"
+                        >
+                            <option value={2026}>FY 2025-26</option>
+                            <option value={2025}>FY 2024-25</option>
+                            <option value={2024}>FY 2023-24</option>
                         </select>
                     </div>
                 </div>
 
-                {payslips.length > 0 ? (
-                    <table className="w-full">
-                        {/* Table Header */}
-                    </table>
+                {loading ? (
+                    <div className="text-center py-12">
+                        <p className="text-slate-600 dark:text-slate-400">Loading payslips...</p>
+                    </div>
+                ) : payslips.length > 0 ? (
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-slate-50 dark:bg-slate-700/30">
+                                <tr>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">Payslip #</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">Period</th>
+                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">Gross Pay</th>
+                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">Deductions</th>
+                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">Net Pay</th>
+                                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 dark:text-slate-300">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                                {payslips.map((payslip) => (
+                                    <tr key={payslip.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                                        <td className="px-4 py-3 text-sm text-slate-900 dark:text-white">{payslip.payslipNumber}</td>
+                                        <td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">
+                                            {formatDate(payslip.payPeriodStart)} - {formatDate(payslip.payPeriodEnd)}
+                                        </td>
+                                        <td className="px-4 py-3 text-right text-sm text-slate-700 dark:text-slate-300">
+                                            {formatCurrency(payslip.grossSalary)}
+                                        </td>
+                                        <td className="px-4 py-3 text-right text-sm text-red-600 dark:text-red-400">
+                                            {formatCurrency(payslip.totalDeductions)}
+                                        </td>
+                                        <td className="px-4 py-3 text-right text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                                            {formatCurrency(payslip.netSalary)}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => handleDownloadPayslip(payslip.id)}
+                                                    title="Download PDF"
+                                                >
+                                                    <Download className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 ) : (
-                    <div className="text-center py-12 bg-slate-50/50 rounded-lg border border-slate-100 border-dashed">
-                        <Receipt className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                        <h3 className="text-slate-900 font-medium mb-1">No Payslips Generated</h3>
-                        <p className="text-slate-500 text-sm">Payslips will appear here once payroll is run.</p>
+                    <div className="text-center py-12 bg-slate-50/50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-700 border-dashed">
+                        <Receipt className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                        <h3 className="text-slate-900 dark:text-white font-medium mb-1">No Payslips Generated</h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">Payslips will appear here once payroll is run.</p>
                     </div>
                 )}
             </div>

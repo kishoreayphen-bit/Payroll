@@ -30,6 +30,15 @@ public class PayslipController {
         return ResponseEntity.ok(payslips);
     }
 
+    @GetMapping("/pay-run/{payRunId}")
+    public ResponseEntity<List<PayslipDTO>> getPayRunPayslips(
+            @PathVariable Long payRunId,
+            @RequestHeader("X-Tenant-ID") Long tenantId) {
+        log.info("Getting payslips for pay run: {}", payRunId);
+        List<PayslipDTO> payslips = payslipService.getPayRunPayslips(payRunId, tenantId);
+        return ResponseEntity.ok(payslips);
+    }
+
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<List<PayslipDTO>> getEmployeePayslips(
             @PathVariable Long employeeId) {
@@ -41,8 +50,9 @@ public class PayslipController {
     @GetMapping("/employee/{employeeId}/year/{year}")
     public ResponseEntity<List<PayslipDTO>> getEmployeePayslipsByYear(
             @PathVariable Long employeeId,
-            @PathVariable int year) {
-        log.info("Getting payslips for employee: {} year: {}", employeeId, year);
+            @PathVariable int year,
+            @RequestHeader("X-Tenant-ID") Long tenantId) {
+        log.info("Getting payslips for employee: {} year: {} tenant: {}", employeeId, year, tenantId);
         List<PayslipDTO> payslips = payslipService.getEmployeePayslipsByYear(employeeId, year);
         return ResponseEntity.ok(payslips);
     }

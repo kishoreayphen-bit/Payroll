@@ -24,8 +24,11 @@ const authApi = axios.create({
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
+        console.log('API Request to:', config.url);
+        console.log('Token exists:', !!token);
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+            console.log('Authorization header set:', `Bearer ${token.substring(0, 20)}...`);
         }
         return config;
     },
@@ -38,18 +41,29 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
-            const token = localStorage.getItem('token');
-            const currentPath = window.location.pathname;
-            
-            // Don't logout if we're already on login page or if no token exists
-            if (token && currentPath !== '/login') {
-                console.warn('401 Unauthorized - Token may be expired or invalid');
-                // Only logout and redirect after multiple 401s to avoid false positives
-                // For now, just log the error and let the user continue
-                // authService.logout();
-                // window.location.href = '/login';
+        const status = error.response?.status;
+        const currentPath = window.location.pathname;
+        const token = localStorage.getItem('token');
+        
+        // Only redirect on 401 if it's a true auth failure (not just missing endpoint)
+        // Check if the error message indicates token/auth issue specifically
+        const isAuthError = error.response?.data?.message?.toLowerCase()?.includes('token') ||
+                           error.response?.data?.message?.toLowerCase()?.includes('unauthorized') ||
+                           error.response?.data?.message?.toLowerCase()?.includes('expired') ||
+                           error.response?.data?.error?.toLowerCase()?.includes('jwt');
+        
+        if (status === 401 && isAuthError) {
+            // Don't logout if we're already on login/signup page or if no token exists
+            if (token && currentPath !== '/login' && currentPath !== '/signup') {
+                console.warn('401 Unauthorized - Auth error, redirecting to login...');
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('selectedOrganizationId');
+                window.location.href = '/login';
             }
+        } else if (status === 401) {
+            // Log but don't redirect - might be endpoint-specific auth issue
+            console.warn('401 received but not redirecting - may be endpoint-specific:', error.config?.url);
         }
         return Promise.reject(error);
     }

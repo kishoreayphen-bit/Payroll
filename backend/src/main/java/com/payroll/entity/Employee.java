@@ -151,6 +151,16 @@ public class Employee {
     @Column(name = "aadhar_number", length = 20)
     private String aadharNumber;
 
+    // Statutory Information
+    @Column(name = "uan", length = 20)
+    private String uan;
+
+    @Column(name = "pf_number", length = 30)
+    private String pfNumber;
+
+    @Column(name = "esi_number", length = 20)
+    private String esiNumber;
+
     // Status and Metadata
     @Column(name = "status", length = 20)
     private String status = "Active";

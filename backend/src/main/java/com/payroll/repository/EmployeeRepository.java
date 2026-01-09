@@ -36,4 +36,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     // Count active employees by organization
     long countByOrganizationIdAndStatus(Long organizationId, String status);
+
+    // Find employees by tenant ID (using organization_id as tenant)
+    default List<Employee> findByTenantId(Long tenantId) {
+        return findByOrganizationId(tenantId);
+    }
 }

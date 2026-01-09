@@ -28,14 +28,14 @@ const SIDEBAR_SECTIONS = [
         title: 'Payroll',
         items: [
             { path: '/pay-runs', label: 'Pay Runs', icon: Calendar },
-            { path: '/approvals', label: 'Approvals', icon: CheckCircle, hasSubmenu: true },
+            { path: '/attendance', label: 'Attendance', icon: CheckCircle },
             { path: '/form16', label: 'Form 16', icon: FileText }
         ]
     },
     {
         title: 'Benefits',
         items: [
-            { path: '/loans', label: 'Loans', icon: Wallet },
+            { path: '/benefits', label: 'Employee Benefits', icon: Wallet },
             { path: '/giving', label: 'Giving', icon: Gift }
         ]
     },
@@ -44,7 +44,8 @@ const SIDEBAR_SECTIONS = [
         items: [
             { path: '/documents', label: 'Documents', icon: FolderOpen },
             { path: '/reports', label: 'Reports', icon: PieChart },
-            { path: '/settings/pay-schedule', label: 'Settings', icon: Settings }
+            { path: '/settings/statutory', label: 'Statutory', icon: CheckCircle },
+            { path: '/settings', label: 'Settings', icon: Settings }
         ]
     }
 ];
@@ -59,7 +60,7 @@ export default function Sidebar({ isOpen, onClose }) {
         if (path === '/employees') {
             return location.pathname === '/employees' || location.pathname.startsWith('/employees/');
         }
-        if (path === '/settings/pay-schedule') {
+        if (path === '/settings') {
             return location.pathname.startsWith('/settings');
         }
         return location.pathname === path || location.pathname.startsWith(path + '/');

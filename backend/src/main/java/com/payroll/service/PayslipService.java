@@ -7,6 +7,7 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
@@ -197,7 +198,7 @@ public class PayslipService {
                     .setMarginBottom(20));
 
             // Employee details table
-            Table empTable = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1, 1}))
+            Table empTable = new Table(UnitValue.createPercentArray(new float[]{1, 2, 1, 2}))
                     .useAllAvailableWidth()
                     .setMarginBottom(20);
 
@@ -213,8 +214,9 @@ public class PayslipService {
             document.add(empTable);
 
             // Earnings and Deductions
-            Table salaryTable = new Table(UnitValue.createPercentArray(new float[]{2, 1, 2, 1}))
-                    .useAllAvailableWidth();
+            Table salaryTable = new Table(UnitValue.createPercentArray(new float[]{3, 2, 3, 2}))
+                    .useAllAvailableWidth()
+                    .setMarginTop(10);
 
             // Headers
             salaryTable.addHeaderCell(createHeaderCell("EARNINGS"));
@@ -262,17 +264,7 @@ public class PayslipService {
             netPayTable.addCell(netPayValueCell);
             document.add(netPayTable);
 
-            // Footer
-            document.add(new Paragraph("\n\n"));
-            document.add(new Paragraph("This is a system generated payslip and does not require a signature.")
-                    .setFontSize(9)
-                    .setFontColor(ColorConstants.GRAY)
-                    .setTextAlignment(TextAlignment.CENTER));
-
-            document.add(new Paragraph("Generated on: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm")))
-                    .setFontSize(9)
-                    .setFontColor(ColorConstants.GRAY)
-                    .setTextAlignment(TextAlignment.CENTER));
+            // Footer - removed as per user request
         }
 
         return filePath;
@@ -282,11 +274,11 @@ public class PayslipService {
         table.addCell(new Cell()
                 .add(new Paragraph(label).setFontSize(9).setFontColor(ColorConstants.GRAY))
                 .setBorder(Border.NO_BORDER)
-                .setPaddingBottom(2));
+                .setPadding(5));
         table.addCell(new Cell()
                 .add(new Paragraph(value != null ? value : "-").setFontSize(10).setBold())
                 .setBorder(Border.NO_BORDER)
-                .setPaddingBottom(8));
+                .setPadding(5));
     }
 
     private Cell createHeaderCell(String text) {
@@ -298,12 +290,28 @@ public class PayslipService {
     }
 
     private void addSalaryRow(Table table, String earning, BigDecimal earningAmt, String deduction, BigDecimal deductionAmt) {
-        table.addCell(new Cell().add(new Paragraph(earning).setFontSize(10)).setPadding(6).setBorder(Border.NO_BORDER));
+        table.addCell(new Cell().add(new Paragraph(earning).setFontSize(10)).setPadding(8)
+                .setBorderTop(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f))
+                .setBorderBottom(Border.NO_BORDER)
+                .setBorderLeft(Border.NO_BORDER)
+                .setBorderRight(Border.NO_BORDER));
         table.addCell(new Cell().add(new Paragraph(earningAmt != null ? formatAmount(earningAmt) : "").setFontSize(10))
-                .setPadding(6).setTextAlignment(TextAlignment.RIGHT).setBorder(Border.NO_BORDER));
-        table.addCell(new Cell().add(new Paragraph(deduction).setFontSize(10)).setPadding(6).setBorder(Border.NO_BORDER));
+                .setPadding(8).setTextAlignment(TextAlignment.RIGHT)
+                .setBorderTop(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f))
+                .setBorderBottom(Border.NO_BORDER)
+                .setBorderLeft(Border.NO_BORDER)
+                .setBorderRight(Border.NO_BORDER));
+        table.addCell(new Cell().add(new Paragraph(deduction).setFontSize(10)).setPadding(8)
+                .setBorderTop(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f))
+                .setBorderBottom(Border.NO_BORDER)
+                .setBorderLeft(Border.NO_BORDER)
+                .setBorderRight(Border.NO_BORDER));
         table.addCell(new Cell().add(new Paragraph(deductionAmt != null ? formatAmount(deductionAmt) : "").setFontSize(10))
-                .setPadding(6).setTextAlignment(TextAlignment.RIGHT).setBorder(Border.NO_BORDER));
+                .setPadding(8).setTextAlignment(TextAlignment.RIGHT)
+                .setBorderTop(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f))
+                .setBorderBottom(Border.NO_BORDER)
+                .setBorderLeft(Border.NO_BORDER)
+                .setBorderRight(Border.NO_BORDER));
     }
 
     private Cell createTotalCell(String text) {
@@ -414,6 +422,15 @@ public class PayslipService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<PayslipDTO> getPayRunPayslips(Long payRunId, Long tenantId) {
+        return payslipRepository.findByPayRunIdOrderByEmployeeIdAsc(payRunId)
+                .stream()
+                .map(p -> convertToDTO(p, null))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public List<PayslipDTO> getEmployeePayslips(Long employeeId) {
         return payslipRepository.findByEmployeeIdOrderByPayPeriodEndDesc(employeeId)
                 .stream()
@@ -421,6 +438,7 @@ public class PayslipService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PayslipDTO> getEmployeePayslipsByYear(Long employeeId, int year) {
         return payslipRepository.findByEmployeeIdAndYear(employeeId, year)
                 .stream()

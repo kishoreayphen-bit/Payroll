@@ -61,14 +61,20 @@ export default function PayRun() {
     const user = authUser || JSON.parse(localStorage.getItem('user') || 'null');
 
     useEffect(() => {
-        // Fetch data on mount
+        // Fetch organization first, then pay runs
         fetchOrganization();
-        fetchPayRuns();
     }, []);
+
+    useEffect(() => {
+        // Fetch pay runs when organization is loaded
+        if (organization?.id) {
+            fetchPayRuns();
+        }
+    }, [organization]);
 
     const fetchOrganization = async () => {
         try {
-            const response = await api.get('/organization/current');
+            const response = await api.get('/organizations/current');
             setOrganization(response.data);
         } catch (error) {
             console.error('Failed to fetch organization:', error);
@@ -80,7 +86,7 @@ export default function PayRun() {
             setLoading(true);
             const response = await api.get('/pay-runs', {
                 headers: {
-                    'X-Tenant-ID': organization?.id || localStorage.getItem('organizationId')
+                    'X-Tenant-ID': organization.id
                 }
             });
             setPayRuns(response.data);
@@ -179,6 +185,58 @@ export default function PayRun() {
         }
     };
 
+    const handleCancel = async (payRunId) => {
+        if (!confirm('Are you sure you want to cancel this pay run? This action cannot be undone.')) {
+            return;
+        }
+        try {
+            setActionLoading(true);
+            await api.post(`/pay-runs/${payRunId}/cancel`, {}, {
+                headers: {
+                    'X-Tenant-ID': organization?.id || localStorage.getItem('organizationId')
+                }
+            });
+            // Refresh pay runs list
+            fetchPayRuns();
+            if (selectedPayRun?.id === payRunId) {
+                setShowDetailsModal(false);
+                setSelectedPayRun(null);
+            }
+            alert('Pay run cancelled successfully');
+        } catch (error) {
+            console.error('Failed to cancel pay run:', error);
+            alert(error.response?.data?.error || 'Failed to cancel pay run');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleDelete = async (payRunId) => {
+        if (!confirm('Are you sure you want to delete this pay run? This action cannot be undone.')) {
+            return;
+        }
+        try {
+            setActionLoading(true);
+            await api.delete(`/pay-runs/${payRunId}`, {
+                headers: {
+                    'X-Tenant-ID': organization?.id || localStorage.getItem('organizationId')
+                }
+            });
+            // Remove from list
+            setPayRuns(payRuns.filter(pr => pr.id !== payRunId));
+            if (selectedPayRun?.id === payRunId) {
+                setShowDetailsModal(false);
+                setSelectedPayRun(null);
+            }
+            alert('Pay run deleted successfully');
+        } catch (error) {
+            console.error('Failed to delete pay run:', error);
+            alert(error.response?.data?.error || 'Failed to delete pay run');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     const handleGeneratePayslips = async (payRunId) => {
         try {
             setActionLoading(true);
@@ -199,20 +257,28 @@ export default function PayRun() {
 
     const fetchPayRunDetails = async (payRunId) => {
         try {
+            const tenantId = organization?.id;
+            if (!tenantId) {
+                console.error('Organization ID not available');
+                alert('Unable to fetch pay run details. Please refresh the page.');
+                return;
+            }
+            
             const response = await api.get(`/pay-runs/${payRunId}/details`, {
                 headers: {
-                    'X-Tenant-ID': organization?.id || localStorage.getItem('organizationId')
+                    'X-Tenant-ID': tenantId
                 }
             });
             setSelectedPayRun(response.data);
+            setShowDetailsModal(true);
         } catch (error) {
             console.error('Failed to fetch pay run details:', error);
+            alert('Failed to fetch pay run details: ' + (error.response?.data?.error || error.message));
         }
     };
 
     const openDetails = async (payRun) => {
         await fetchPayRunDetails(payRun.id);
-        setShowDetailsModal(true);
     };
 
     const formatCurrency = (amount) => {
@@ -495,6 +561,7 @@ export default function PayRun() {
             {showDetailsModal && selectedPayRun && (
                 <PayRunDetailsModal
                     payRun={selectedPayRun}
+                    organization={organization}
                     onClose={() => {
                         setShowDetailsModal(false);
                         setSelectedPayRun(null);
@@ -502,6 +569,8 @@ export default function PayRun() {
                     onCalculate={() => handleCalculate(selectedPayRun.id)}
                     onApprove={() => handleApprove(selectedPayRun.id)}
                     onComplete={() => handleComplete(selectedPayRun.id)}
+                    onCancel={() => handleCancel(selectedPayRun.id)}
+                    onDelete={() => handleDelete(selectedPayRun.id)}
                     onGeneratePayslips={() => handleGeneratePayslips(selectedPayRun.id)}
                     loading={actionLoading}
                     formatCurrency={formatCurrency}
@@ -615,7 +684,77 @@ function CreatePayRunModal({ onClose, onCreate, loading }) {
     );
 }
 
-function PayRunDetailsModal({ payRun, onClose, onCalculate, onApprove, onComplete, onGeneratePayslips, loading, formatCurrency, formatDate }) {
+function PayRunDetailsModal({ payRun, organization, onClose, onCalculate, onApprove, onComplete, onCancel, onDelete, onGeneratePayslips, loading, formatCurrency, formatDate }) {
+    const [payslips, setPayslips] = React.useState([]);
+    const [loadingPayslips, setLoadingPayslips] = React.useState(false);
+    const [activeTab, setActiveTab] = React.useState('employees');
+
+    React.useEffect(() => {
+        if ((payRun.status === 'COMPLETED' || payRun.status === 'APPROVED') && organization?.id) {
+            fetchPayslips();
+        }
+    }, [payRun.id, organization?.id]);
+
+    const fetchPayslips = async () => {
+        if (!organization?.id) {
+            console.error('Organization ID not available');
+            return;
+        }
+        try {
+            setLoadingPayslips(true);
+            const response = await api.get(`/payslips/pay-run/${payRun.id}`, {
+                headers: {
+                    'X-Tenant-ID': organization.id
+                }
+            });
+            setPayslips(response.data);
+        } catch (error) {
+            console.error('Failed to fetch payslips:', error);
+        } finally {
+            setLoadingPayslips(false);
+        }
+    };
+
+    const handleDownloadPayslip = async (payslipId, employeeId) => {
+        try {
+            const response = await api.get(`/payslips/${payslipId}/download`, {
+                headers: {
+                    'X-Employee-ID': employeeId
+                },
+                responseType: 'blob'
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `payslip-${payslipId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('Failed to download payslip:', error);
+            alert('Failed to download payslip: ' + (error.response?.data?.error || error.message));
+        }
+    };
+
+    const handleEmailPayslip = async (payslipId) => {
+        if (!organization?.id) {
+            alert('Organization ID not available');
+            return;
+        }
+        try {
+            await api.post(`/payslips/${payslipId}/send-email`, {}, {
+                headers: {
+                    'X-Tenant-ID': organization.id
+                }
+            });
+            alert('Payslip email sent successfully!');
+            fetchPayslips(); // Refresh to update email sent status
+        } catch (error) {
+            console.error('Failed to send payslip email:', error);
+            alert('Failed to send email: ' + (error.response?.data?.error || error.message));
+        }
+    };
+
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -657,8 +796,34 @@ function PayRunDetailsModal({ payRun, onClose, onCalculate, onApprove, onComplet
                         </div>
                     </div>
 
+                    {/* Tabs */}
+                    {(payRun.status === 'COMPLETED' || payRun.status === 'APPROVED') && (
+                        <div className="flex gap-2 mb-4 border-b border-slate-200 dark:border-slate-700">
+                            <button
+                                onClick={() => setActiveTab('employees')}
+                                className={`px-4 py-2 font-medium text-sm transition-colors ${
+                                    activeTab === 'employees'
+                                        ? 'text-pink-600 dark:text-pink-400 border-b-2 border-pink-600 dark:border-pink-400'
+                                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                }`}
+                            >
+                                Employee Breakdown
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('payslips')}
+                                className={`px-4 py-2 font-medium text-sm transition-colors ${
+                                    activeTab === 'payslips'
+                                        ? 'text-pink-600 dark:text-pink-400 border-b-2 border-pink-600 dark:border-pink-400'
+                                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                }`}
+                            >
+                                Payslips {payslips.length > 0 ? `(${payslips.length})` : ''}
+                            </button>
+                        </div>
+                    )}
+
                     {/* Employee Breakdown */}
-                    {payRun.employees && payRun.employees.length > 0 && (
+                    {activeTab === 'employees' && payRun.employees && payRun.employees.length > 0 && (
                         <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
                             <div className="bg-slate-50 dark:bg-slate-700/50 px-4 py-3">
                                 <h3 className="font-semibold text-slate-900 dark:text-white">Employee Breakdown</h3>
@@ -669,10 +834,11 @@ function PayRunDetailsModal({ payRun, onClose, onCalculate, onApprove, onComplet
                                         <tr>
                                             <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">Employee</th>
                                             <th className="px-4 py-2 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">Gross</th>
+                                            <th className="px-4 py-2 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">LOP</th>
                                             <th className="px-4 py-2 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">PF</th>
                                             <th className="px-4 py-2 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">ESI</th>
                                             <th className="px-4 py-2 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">PT</th>
-                                            <th className="px-4 py-2 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">Deductions</th>
+                                            <th className="px-4 py-2 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">Total Ded.</th>
                                             <th className="px-4 py-2 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">Net Pay</th>
                                         </tr>
                                     </thead>
@@ -684,6 +850,7 @@ function PayRunDetailsModal({ payRun, onClose, onCalculate, onApprove, onComplet
                                                     <div className="text-xs text-slate-500 dark:text-slate-400">{emp.employeeNumber}</div>
                                                 </td>
                                                 <td className="px-4 py-2 text-right text-sm text-slate-700 dark:text-slate-300">{formatCurrency(emp.grossSalary)}</td>
+                                                <td className="px-4 py-2 text-right text-sm text-orange-600 dark:text-orange-400">{formatCurrency(emp.lopDeduction || 0)}</td>
                                                 <td className="px-4 py-2 text-right text-sm text-slate-700 dark:text-slate-300">{formatCurrency(emp.pfEmployee)}</td>
                                                 <td className="px-4 py-2 text-right text-sm text-slate-700 dark:text-slate-300">{formatCurrency(emp.esiEmployee)}</td>
                                                 <td className="px-4 py-2 text-right text-sm text-slate-700 dark:text-slate-300">{formatCurrency(emp.professionalTax)}</td>
@@ -696,49 +863,145 @@ function PayRunDetailsModal({ payRun, onClose, onCalculate, onApprove, onComplet
                             </div>
                         </div>
                     )}
+
+                    {/* Payslips Tab */}
+                    {activeTab === 'payslips' && (
+                        <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                            <div className="bg-slate-50 dark:bg-slate-700/50 px-4 py-3">
+                                <h3 className="font-semibold text-slate-900 dark:text-white">Generated Payslips</h3>
+                            </div>
+                            {loadingPayslips ? (
+                                <div className="p-8 text-center text-slate-600 dark:text-slate-400">
+                                    Loading payslips...
+                                </div>
+                            ) : payslips.length === 0 ? (
+                                <div className="p-8 text-center text-slate-600 dark:text-slate-400">
+                                    No payslips generated yet
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-slate-50 dark:bg-slate-700/30">
+                                            <tr>
+                                                <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">Payslip #</th>
+                                                <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">Employee</th>
+                                                <th className="px-4 py-2 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">Net Pay</th>
+                                                <th className="px-4 py-2 text-center text-xs font-semibold text-slate-600 dark:text-slate-300">Email Sent</th>
+                                                <th className="px-4 py-2 text-center text-xs font-semibold text-slate-600 dark:text-slate-300">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                                            {payslips.map((payslip) => (
+                                                <tr key={payslip.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                                                    <td className="px-4 py-3 text-sm text-slate-900 dark:text-white">{payslip.payslipNumber}</td>
+                                                    <td className="px-4 py-3">
+                                                        <div className="text-sm font-medium text-slate-900 dark:text-white">{payslip.employeeName}</div>
+                                                        <div className="text-xs text-slate-500 dark:text-slate-400">{payslip.employeeNumber}</div>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-right text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                                                        {formatCurrency(payslip.netSalary)}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-center">
+                                                        {payslip.emailSent ? (
+                                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                                                                <CheckCircle className="w-3 h-3 mr-1" />
+                                                                Sent
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300">
+                                                                Pending
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={() => handleDownloadPayslip(payslip.id, payslip.employeeId)}
+                                                                title="Download PDF"
+                                                            >
+                                                                <Download className="w-4 h-4" />
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={() => handleEmailPayslip(payslip.id)}
+                                                                title="Send Email"
+                                                            >
+                                                                <Send className="w-4 h-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
-                    {payRun.status === 'DRAFT' && (
-                        <Button onClick={onCalculate} disabled={loading} className="gap-2">
-                            <Calculator className="w-4 h-4" />
-                            Calculate Payroll
-                        </Button>
-                    )}
-                    {payRun.status === 'PENDING_APPROVAL' && (
-                        <>
-                            <Button onClick={onCalculate} disabled={loading} variant="outline" className="gap-2">
-                                <RefreshCw className="w-4 h-4" />
-                                Recalculate
+                <div className="flex items-center justify-between gap-3 p-6 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
+                    <div className="flex items-center gap-2">
+                        {/* Cancel button - show for DRAFT and PENDING_APPROVAL */}
+                        {(payRun.status === 'DRAFT' || payRun.status === 'PENDING_APPROVAL') && (
+                            <Button onClick={onCancel} disabled={loading} variant="outline" className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50">
+                                <X className="w-4 h-4" />
+                                Cancel Pay Run
                             </Button>
-                            <Button onClick={onApprove} disabled={loading} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
-                                <Check className="w-4 h-4" />
-                                Approve
+                        )}
+                        {/* Delete button - show for DRAFT, CANCELLED, and COMPLETED */}
+                        {(payRun.status === 'DRAFT' || payRun.status === 'CANCELLED' || payRun.status === 'COMPLETED') && (
+                            <Button onClick={onDelete} disabled={loading} variant="outline" className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50">
+                                <X className="w-4 h-4" />
+                                Delete Pay Run
                             </Button>
-                        </>
-                    )}
-                    {payRun.status === 'APPROVED' && (
-                        <>
-                            <Button onClick={onGeneratePayslips} disabled={loading} variant="outline" className="gap-2">
+                        )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                        {payRun.status === 'DRAFT' && (
+                            <Button onClick={onCalculate} disabled={loading} className="gap-2">
+                                <Calculator className="w-4 h-4" />
+                                Calculate Payroll
+                            </Button>
+                        )}
+                        {payRun.status === 'PENDING_APPROVAL' && (
+                            <>
+                                <Button onClick={onCalculate} disabled={loading} variant="outline" className="gap-2">
+                                    <RefreshCw className="w-4 h-4" />
+                                    Recalculate
+                                </Button>
+                                <Button onClick={onApprove} disabled={loading} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
+                                    <Check className="w-4 h-4" />
+                                    Approve
+                                </Button>
+                            </>
+                        )}
+                        {payRun.status === 'APPROVED' && (
+                            <>
+                                <Button onClick={onGeneratePayslips} disabled={loading} variant="outline" className="gap-2">
+                                    <FileText className="w-4 h-4" />
+                                    Generate Payslips
+                                </Button>
+                                <Button onClick={onComplete} disabled={loading} className="gap-2 bg-green-600 hover:bg-green-700 text-white">
+                                    <CheckCircle className="w-4 h-4" />
+                                    Mark Complete
+                                </Button>
+                            </>
+                        )}
+                        {payRun.status === 'COMPLETED' && (
+                            <Button onClick={onGeneratePayslips} disabled={loading} className="gap-2">
                                 <FileText className="w-4 h-4" />
                                 Generate Payslips
                             </Button>
-                            <Button onClick={onComplete} disabled={loading} className="gap-2 bg-green-600 hover:bg-green-700 text-white">
-                                <CheckCircle className="w-4 h-4" />
-                                Mark Complete
-                            </Button>
-                        </>
-                    )}
-                    {payRun.status === 'COMPLETED' && (
-                        <Button onClick={onGeneratePayslips} disabled={loading} className="gap-2">
-                            <FileText className="w-4 h-4" />
-                            Generate Payslips
+                        )}
+                        <Button onClick={onClose} variant="outline">
+                            Close
                         </Button>
-                    )}
-                    <Button onClick={onClose} variant="outline">
-                        Close
-                    </Button>
+                    </div>
                 </div>
             </div>
         </div>

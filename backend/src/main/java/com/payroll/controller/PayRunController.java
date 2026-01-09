@@ -84,6 +84,24 @@ public class PayRunController {
         return ResponseEntity.ok(payRun);
     }
 
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<Map<String, String>> cancelPayRun(
+            @PathVariable Long id,
+            @RequestHeader("X-Tenant-ID") Long tenantId) {
+        log.info("Cancelling pay run: {} for tenant: {}", id, tenantId);
+        payRunService.cancelPayRun(id, tenantId);
+        return ResponseEntity.ok(Map.of("message", "Pay run cancelled successfully"));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> deletePayRun(
+            @PathVariable Long id,
+            @RequestHeader("X-Tenant-ID") Long tenantId) {
+        log.info("Deleting pay run: {} for tenant: {}", id, tenantId);
+        payRunService.deletePayRun(id, tenantId);
+        return ResponseEntity.ok(Map.of("message", "Pay run deleted successfully"));
+    }
+
     @PutMapping("/{payRunId}/employees/{employeeId}")
     public ResponseEntity<PayRunEmployeeDTO> updatePayRunEmployee(
             @PathVariable Long payRunId,

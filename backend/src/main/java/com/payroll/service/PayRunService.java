@@ -29,6 +29,7 @@ public class PayRunService {
     private final PayRunEmployeeRepository payRunEmployeeRepository;
     private final EmployeeRepository employeeRepository;
     private final PayslipRepository payslipRepository;
+    private final AttendanceService attendanceService;
 
     // Statutory rates (can be made configurable)
     private static final BigDecimal PF_RATE = new BigDecimal("0.12"); // 12%
@@ -38,12 +39,14 @@ public class PayRunService {
 
     @Transactional
     public PayRunDTO createPayRun(Long tenantId, PayRunDTO.CreatePayRunRequest request, Long userId) {
-        log.info("Creating pay run for tenant: {} period: {} to {}", tenantId, request.getPayPeriodStart(), request.getPayPeriodEnd());
+        log.info("Creating pay run for tenant: {} period: {} to {}", tenantId, request.getPayPeriodStart(),
+                request.getPayPeriodEnd());
 
         // Check for existing pay run for the same period
         payRunRepository.findByTenantIdAndPayPeriod(tenantId, request.getPayPeriodStart(), request.getPayPeriodEnd())
                 .ifPresent(existing -> {
-                    throw new RuntimeException("A pay run already exists for this period: " + existing.getPayRunNumber());
+                    throw new RuntimeException(
+                            "A pay run already exists for this period: " + existing.getPayRunNumber());
                 });
 
         // Create pay run
@@ -67,7 +70,7 @@ public class PayRunService {
         if (request.getEmployeeIds() != null && !request.getEmployeeIds().isEmpty()) {
             employees = employeeRepository.findAllById(request.getEmployeeIds());
         } else {
-            employees = employeeRepository.findByStatusAndOrganizationId("ACTIVE", tenantId);
+            employees = employeeRepository.findByStatusAndOrganizationId("Active", tenantId);
         }
 
         // Create pay run employees
@@ -76,19 +79,37 @@ public class PayRunService {
             pre.setPayRun(payRun);
             pre.setEmployee(employee);
             pre.setStatus(PayRunEmployeeStatus.PENDING);
-            
+
             // Set basic salary components from employee
             pre.setBasicSalary(employee.getBasicMonthly() != null ? employee.getBasicMonthly() : BigDecimal.ZERO);
             pre.setHra(employee.getHraMonthly() != null ? employee.getHraMonthly() : BigDecimal.ZERO);
-            pre.setConveyanceAllowance(employee.getConveyanceAllowanceMonthly() != null ? employee.getConveyanceAllowanceMonthly() : BigDecimal.ZERO);
-            pre.setFixedAllowance(employee.getFixedAllowanceMonthly() != null ? employee.getFixedAllowanceMonthly() : BigDecimal.ZERO);
-            
-            // Set working days based on pay period
-            int workingDays = calculateWorkingDays(request.getPayPeriodStart(), request.getPayPeriodEnd());
+            pre.setConveyanceAllowance(
+                    employee.getConveyanceAllowanceMonthly() != null ? employee.getConveyanceAllowanceMonthly()
+                            : BigDecimal.ZERO);
+            pre.setFixedAllowance(employee.getFixedAllowanceMonthly() != null ? employee.getFixedAllowanceMonthly()
+                    : BigDecimal.ZERO);
+
+            // Calculate working days and LOP from attendance
+            int month = request.getPayPeriodStart().getMonthValue();
+            int year = request.getPayPeriodStart().getYear();
+
+            log.info("=== PAY RUN: Calculating for Employee {} (ID: {}) - Month: {}, Year: {} ===", 
+                    employee.getEmployeeId(), employee.getId(), month, year);
+
+            int workingDays = attendanceService.calculateWorkingDaysInMonth(month, year);
+            double lopDays = attendanceService.calculateLopDays(employee.getId(), month, year);
+            double daysWorked = attendanceService.calculateDaysWorked(employee.getId(), month, year);
+
+            log.info("=== PAY RUN: Employee {} - Raw LOP Days returned: {} ===", 
+                    employee.getEmployeeId(), lopDays);
+
             pre.setWorkingDays(workingDays);
-            pre.setDaysWorked(workingDays); // Default to all days worked
-            pre.setLopDays(0);
-            
+            pre.setDaysWorked((int) Math.round(daysWorked));
+            pre.setLopDays((int) Math.ceil(lopDays)); // Round up LOP days
+
+            log.info("=== PAY RUN: Employee {} - Final values: Working Days={}, Days Worked={}, LOP Days={} ===",
+                    employee.getEmployeeId(), workingDays, daysWorked, pre.getLopDays());
+
             payRunEmployeeRepository.save(pre);
         }
 
@@ -151,11 +172,16 @@ public class PayRunService {
                 .add(pre.getFixedAllowance())
                 .add(pre.getOtherEarnings() != null ? pre.getOtherEarnings() : BigDecimal.ZERO);
 
-        // Apply LOP deduction
+        // Apply LOP deduction (Loss of Pay for absent days)
         if (pre.getLopDays() != null && pre.getLopDays() > 0 && pre.getWorkingDays() > 0) {
+            // Calculate per-day salary rate
             BigDecimal dailyRate = gross.divide(BigDecimal.valueOf(pre.getWorkingDays()), 2, RoundingMode.HALF_UP);
-            pre.setLopDeduction(dailyRate.multiply(BigDecimal.valueOf(pre.getLopDays())));
-            gross = gross.subtract(pre.getLopDeduction());
+            BigDecimal lopDeduction = dailyRate.multiply(BigDecimal.valueOf(pre.getLopDays()));
+            pre.setLopDeduction(lopDeduction);
+            gross = gross.subtract(lopDeduction);
+
+            log.info("Employee {}: Daily Rate={}, LOP Days={}, LOP Deduction={}",
+                    employee.getEmployeeId(), dailyRate, pre.getLopDays(), lopDeduction);
         } else {
             pre.setLopDeduction(BigDecimal.ZERO);
         }
@@ -255,6 +281,46 @@ public class PayRunService {
         return convertToDTO(payRun);
     }
 
+    @Transactional
+    public void cancelPayRun(Long payRunId, Long tenantId) {
+        log.info("Cancelling pay run: {}", payRunId);
+
+        PayRun payRun = payRunRepository.findByIdAndTenantId(payRunId, tenantId)
+                .orElseThrow(() -> new RuntimeException("Pay run not found"));
+
+        // Can only cancel DRAFT or PENDING_APPROVAL pay runs
+        if (payRun.getStatus() != PayRunStatus.DRAFT && payRun.getStatus() != PayRunStatus.PENDING_APPROVAL) {
+            throw new RuntimeException("Can only cancel pay runs in DRAFT or PENDING_APPROVAL status");
+        }
+
+        payRun.setStatus(PayRunStatus.CANCELLED);
+        payRun = payRunRepository.save(payRun);
+
+        log.info("Pay run {} cancelled successfully", payRunId);
+    }
+
+    @Transactional
+    public void deletePayRun(Long payRunId, Long tenantId) {
+        log.info("Deleting pay run: {}", payRunId);
+
+        PayRun payRun = payRunRepository.findByIdAndTenantId(payRunId, tenantId)
+                .orElseThrow(() -> new RuntimeException("Pay run not found"));
+
+        // Can only delete DRAFT, CANCELLED, or COMPLETED pay runs
+        if (payRun.getStatus() == PayRunStatus.APPROVED || payRun.getStatus() == PayRunStatus.CALCULATING) {
+            throw new RuntimeException("Cannot delete pay runs in APPROVED or CALCULATING status. Cancel it first.");
+        }
+
+        // Delete all pay run employees first
+        List<PayRunEmployee> employees = payRunEmployeeRepository.findByPayRunId(payRunId);
+        payRunEmployeeRepository.deleteAll(employees);
+
+        // Delete the pay run
+        payRunRepository.delete(payRun);
+
+        log.info("Pay run {} deleted successfully", payRunId);
+    }
+
     public List<PayRunDTO> getPayRuns(Long tenantId) {
         return payRunRepository.findByTenantIdOrderByCreatedAtDesc(tenantId)
                 .stream()
@@ -268,22 +334,24 @@ public class PayRunService {
         return convertToDTO(payRun);
     }
 
+    @Transactional(readOnly = true)
     public PayRunDTO getPayRunWithEmployees(Long payRunId, Long tenantId) {
         PayRun payRun = payRunRepository.findByIdAndTenantId(payRunId, tenantId)
                 .orElseThrow(() -> new RuntimeException("Pay run not found"));
-        
+
         PayRunDTO dto = convertToDTO(payRun);
-        
+
         List<PayRunEmployee> employees = payRunEmployeeRepository.findByPayRunIdOrderByEmployeeName(payRunId);
         dto.setEmployees(employees.stream()
                 .map(this::convertToEmployeeDTO)
                 .collect(Collectors.toList()));
-        
+
         return dto;
     }
 
     @Transactional
-    public PayRunEmployeeDTO updatePayRunEmployee(Long payRunId, Long employeeId, PayRunEmployeeDTO.UpdateRequest request, Long tenantId) {
+    public PayRunEmployeeDTO updatePayRunEmployee(Long payRunId, Long employeeId,
+            PayRunEmployeeDTO.UpdateRequest request, Long tenantId) {
         PayRun payRun = payRunRepository.findByIdAndTenantId(payRunId, tenantId)
                 .orElseThrow(() -> new RuntimeException("Pay run not found"));
 

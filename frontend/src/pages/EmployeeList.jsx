@@ -311,11 +311,12 @@ export default function EmployeeList() {
                                     <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 z-50">
                                         <div className="p-3 border-b border-slate-200">
                                             <div className="relative">
-                                                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
                                                 <input
                                                     type="text"
                                                     placeholder="Search"
-                                                    className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500"
+                                                    className="w-full pr-3 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500"
+                                                    style={{ paddingLeft: '2rem' }}
                                                 />
                                             </div>
                                         </div>
@@ -368,13 +369,14 @@ export default function EmployeeList() {
                             <div className="flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-2 flex-1">
                                     <div className="max-w-sm relative">
-                                        <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
                                         <Input
                                             type="text"
                                             placeholder="Search in Employee"
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white"
+                                            className="pr-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white"
+                                            style={{ paddingLeft: '2rem' }}
                                         />
                                     </div>
 

@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class JwtService {
 
     @Value("${app.security.jwt.secret}")
@@ -27,15 +29,27 @@ public class JwtService {
     private long expirationMinutes;
 
     public String extractUsername(String token) {
-        return extractAllClaims(token).getSubject();
+        try {
+            String username = extractAllClaims(token).getSubject();
+            log.debug("Extracted username from token: {}", username);
+            return username;
+        } catch (Exception e) {
+            log.error("Error extracting username from token", e);
+            throw e;
+        }
     }
 
     public Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            log.error("Error parsing JWT token", e);
+            throw e;
+        }
     }
 
     public String generateToken(UserDetails userDetails) {
@@ -59,12 +73,30 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equalsIgnoreCase(userDetails.getUsername()) && !isTokenExpired(token));
+        try {
+            final String username = extractUsername(token);
+            boolean usernameMatches = username.equalsIgnoreCase(userDetails.getUsername());
+            boolean notExpired = !isTokenExpired(token);
+            
+            log.debug("Token validation - Username matches: {}, Not expired: {}", usernameMatches, notExpired);
+            
+            return usernameMatches && notExpired;
+        } catch (Exception e) {
+            log.error("Error validating token", e);
+            return false;
+        }
     }
 
     private boolean isTokenExpired(String token) {
-        return extractAllClaims(token).getExpiration().before(new Date());
+        try {
+            Date expiration = extractAllClaims(token).getExpiration();
+            boolean expired = expiration.before(new Date());
+            log.debug("Token expiration: {}, Is expired: {}", expiration, expired);
+            return expired;
+        } catch (Exception e) {
+            log.error("Error checking token expiration", e);
+            return true;
+        }
     }
 
     private Key getSigningKey() {

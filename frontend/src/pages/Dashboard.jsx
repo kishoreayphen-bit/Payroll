@@ -1,430 +1,569 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext';
-import {
-    Users,
-    DollarSign,
-    Settings,
-    Heart,
-    CheckCircle2,
-    Circle,
-    ChevronRight,
-    Search,
-    Bell,
-    User,
-    Menu,
-    LayoutDashboard,
-    Receipt,
-    Shield,
-    FileCheck,
-    Wallet,
-    FolderOpen,
-    BarChart3,
-    X,
-    ArrowRight,
-    LogOut,
-    Building,
-    CheckCircle,
-    Calendar,
-    Gift,
-    FileText,
-    PieChart
-} from 'lucide-react';
-import { Button } from '../components/ui/button';
-import { useAuth } from '../contexts/AuthContext';
-import { api } from '../services/authService';
-import { Moon, Sun } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import AppHeader from '../components/AppHeader';
+import { api } from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
+import {
+    Users, DollarSign, Calendar, TrendingUp, TrendingDown,
+    CheckCircle, XCircle, Clock, AlertCircle, FileText,
+    UserPlus, PlayCircle, Download, Eye, BarChart3,
+    PieChart, Activity, Briefcase, Coffee, Heart,
+    ArrowUpRight, ArrowDownRight, Plus, ChevronRight,
+    CalendarDays, Wallet, Receipt, Bell, RefreshCw, Shield
+} from 'lucide-react';
+import { Button } from '../components/ui/button';
 
-export default function Dashboard() {
-    const { user, logout } = useAuth();
-    const { darkMode, toggleDarkMode } = useTheme();
+export default function DashboardNew() {
+    const navigate = useNavigate();
+    const { user } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [showProfileMenu, setShowProfileMenu] = useState(false);
-    const [showCompanyMenu, setShowCompanyMenu] = useState(false);
     const [organization, setOrganization] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [dashboardData, setDashboardData] = useState({
+        employees: { total: 0, active: 0, onLeave: 0, newThisMonth: 0 },
+        payroll: { currentMonth: 0, lastMonth: 0, totalYTD: 0, avgSalary: 0 },
+        attendance: { present: 0, absent: 0, onLeave: 0, rate: 0 },
+        leaves: { pending: 0, approved: 0, rejected: 0 },
+        payRuns: { total: 0, pending: 0, completed: 0, recent: [] },
+        recentActivity: []
+    });
 
-    // Fetch organization data
     useEffect(() => {
-        const fetchOrganization = async () => {
-            try {
-                const selectedOrgId = localStorage.getItem('selectedOrganizationId');
-
-                if (!selectedOrgId) {
-                    // No organization selected, redirect to selection page
-                    window.location.href = '/select-organization';
-                    return;
-                }
-
-                const response = await api.get('/organizations');
-                if (response.data && response.data.length > 0) {
-                    // Find the selected organization
-                    const selectedOrg = response.data.find(org => org.id === parseInt(selectedOrgId));
-                    if (selectedOrg) {
-                        setOrganization(selectedOrg);
-                    } else {
-                        // Selected org not found, use first one
-                        setOrganization(response.data[0]);
-                        localStorage.setItem('selectedOrganizationId', response.data[0].id);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching organization:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchOrganization();
+        loadDashboardData();
     }, []);
 
-    // Getting started steps
-    const steps = [
-        {
-            id: 1,
-            title: 'Add Organisation Details',
-            completed: true,
-            link: '/tenant/register'
-        },
-        {
-            id: 2,
-            title: 'Provide your Tax Details',
-            completed: false,
-            link: '/settings/tax-details',
-            comingSoon: true
-        },
-        {
-            id: 3,
-            title: 'Configure your Pay Schedule',
-            completed: false,
-            link: '/settings/pay-schedule'
-        },
-        {
-            id: 4,
-            title: 'Set up Statutory Components',
-            completed: false,
-            subItems: [
-                { name: "Employees' Provident Fund", completed: false },
-                { name: "Employees' State Insurance", completed: false },
-                { name: "Labour Welfare Fund", completed: false },
-                { name: "Professional Tax", completed: true, note: '(Configured based on Work Location)' }
-            ],
-            link: '/settings/statutory',
-            comingSoon: true
-        },
-        {
-            id: 5,
-            title: 'Set up Salary Components',
-            completed: false,
-            link: '/settings/salary-components',
-            comingSoon: true
-        },
-        {
-            id: 6,
-            title: 'Add Employees',
-            completed: true,
-            link: '/employees'
-        },
-        {
-            id: 7,
-            title: 'Configure Prior Payroll',
-            completed: false,
-            link: '/settings/prior-payroll',
-            comingSoon: true
-        }
-    ];
+    const loadDashboardData = async () => {
+        try {
+            const orgId = localStorage.getItem('selectedOrganizationId');
+            if (!orgId) {
+                navigate('/select-organization');
+                return;
+            }
 
-    const completedSteps = steps.filter(s => s.completed).length;
-    const totalSteps = steps.length;
-    const progressPercentage = (completedSteps / totalSteps) * 100;
+            const orgRes = await api.get('/organizations');
+            const org = orgRes.data?.find(o => o.id === parseInt(orgId));
+            setOrganization(org);
+
+            // Fetch all dashboard data in parallel
+            const [employeesRes, payRunsRes, attendanceRes, leavesRes] = await Promise.all([
+                api.get(`/employees?organizationId=${orgId}`, { headers: { 'X-Tenant-ID': orgId } }),
+                api.get('/pay-runs', { headers: { 'X-Tenant-ID': orgId } }),
+                api.get(`/attendance/summary/organization?date=${new Date().toISOString().split('T')[0]}`, { 
+                    headers: { 'X-Tenant-ID': orgId } 
+                }).catch(() => ({ data: {} })),
+                api.get('/leave/requests', { headers: { 'X-Tenant-ID': orgId } }).catch(() => ({ data: [] }))
+            ]);
+
+            const employees = employeesRes.data || [];
+            const payRuns = payRunsRes.data || [];
+            const attendanceSummary = attendanceRes.data || {};
+            const leaveRequests = leavesRes.data || [];
+
+            // Calculate metrics
+            const activeEmployees = employees.filter(e => e.status === 'ACTIVE').length;
+            const currentMonth = new Date().getMonth();
+            const newThisMonth = employees.filter(e => {
+                const joinDate = new Date(e.dateOfJoining);
+                return joinDate.getMonth() === currentMonth;
+            }).length;
+
+            // Payroll calculations
+            const currentMonthPayRuns = payRuns.filter(pr => {
+                const prDate = new Date(pr.payPeriodEnd);
+                return prDate.getMonth() === currentMonth;
+            });
+            const currentMonthPayroll = currentMonthPayRuns.reduce((sum, pr) => sum + (pr.totalNetPay || 0), 0);
+            
+            const lastMonthPayRuns = payRuns.filter(pr => {
+                const prDate = new Date(pr.payPeriodEnd);
+                return prDate.getMonth() === currentMonth - 1;
+            });
+            const lastMonthPayroll = lastMonthPayRuns.reduce((sum, pr) => sum + (pr.totalNetPay || 0), 0);
+
+            const totalYTD = payRuns.reduce((sum, pr) => sum + (pr.totalNetPay || 0), 0);
+            const avgSalary = activeEmployees > 0 ? currentMonthPayroll / activeEmployees : 0;
+
+            // Leave statistics
+            const pendingLeaves = leaveRequests.filter(l => l.status === 'PENDING').length;
+            const approvedLeaves = leaveRequests.filter(l => l.status === 'APPROVED').length;
+            const rejectedLeaves = leaveRequests.filter(l => l.status === 'REJECTED').length;
+
+            // Pay run statistics
+            const pendingPayRuns = payRuns.filter(pr => pr.status === 'PENDING_APPROVAL' || pr.status === 'DRAFT').length;
+            const completedPayRuns = payRuns.filter(pr => pr.status === 'COMPLETED').length;
+            const recentPayRuns = payRuns.slice(0, 5);
+
+            setDashboardData({
+                employees: {
+                    total: employees.length,
+                    active: activeEmployees,
+                    onLeave: attendanceSummary.onLeave || 0,
+                    newThisMonth
+                },
+                payroll: {
+                    currentMonth: currentMonthPayroll,
+                    lastMonth: lastMonthPayroll,
+                    totalYTD,
+                    avgSalary
+                },
+                attendance: {
+                    present: attendanceSummary.present || 0,
+                    absent: attendanceSummary.absent || 0,
+                    onLeave: attendanceSummary.onLeave || 0,
+                    rate: attendanceSummary.attendanceRate || 0
+                },
+                leaves: {
+                    pending: pendingLeaves,
+                    approved: approvedLeaves,
+                    rejected: rejectedLeaves
+                },
+                payRuns: {
+                    total: payRuns.length,
+                    pending: pendingPayRuns,
+                    completed: completedPayRuns,
+                    recent: recentPayRuns
+                },
+                recentActivity: []
+            });
+
+        } catch (error) {
+            console.error('Error loading dashboard:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 0
+        }).format(amount || 0);
+    };
+
+    const getPayrollTrend = () => {
+        const diff = dashboardData.payroll.currentMonth - dashboardData.payroll.lastMonth;
+        const percentChange = dashboardData.payroll.lastMonth > 0 
+            ? ((diff / dashboardData.payroll.lastMonth) * 100).toFixed(1)
+            : 0;
+        return { diff, percentChange, isPositive: diff >= 0 };
+    };
+
+    const payrollTrend = getPayrollTrend();
+
+    if (loading) {
+        return (
+            <div className="h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+                <RefreshCw className="w-8 h-8 animate-spin text-pink-500" />
+            </div>
+        );
+    }
 
     return (
-        <div className="h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex overflow-hidden">
-            {/* Sidebar */}
+        <div className="h-screen bg-slate-50 dark:bg-slate-900 flex overflow-hidden">
             <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-            {/* Main Content - With left margin for fixed sidebar */}
             <div className={`flex-1 flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'ml-56' : 'ml-0'}`}>
-                {/* Top Bar - Fixed */}
-                <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-pink-100 dark:border-slate-700 px-6 py-4 flex-shrink-0 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 flex-1">
-                            {/* Menu button to open sidebar when closed */}
-                            {!sidebarOpen && (
-                                <button
-                                    onClick={() => setSidebarOpen(true)}
-                                    className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
-                                    title="Open sidebar"
-                                >
-                                    <Menu className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-                                </button>
-                            )}
-                            <div className="relative flex-1 max-w-md">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
-                                <input
-                                    type="text"
-                                    placeholder="Search employees..."
-                                    className="w-full pl-10 pr-4 py-2 border border-pink-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white dark:bg-slate-800 dark:text-white dark:placeholder-slate-400"
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && e.target.value.trim()) {
-                                            window.location.href = `/employees?search=${encodeURIComponent(e.target.value.trim())}`;
-                                        }
-                                    }}
-                                />
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
+                <AppHeader 
+                    sidebarOpen={sidebarOpen} 
+                    setSidebarOpen={setSidebarOpen}
+                    organization={organization}
+                />
 
-
-                            {/* Company Dropdown */}
-                            <div className="relative">
-                                <button
-                                    onClick={() => {
-                                        setShowCompanyMenu(!showCompanyMenu);
-                                        setShowProfileMenu(false);
-                                    }}
-                                    className="flex items-center gap-2 px-3 py-1.5 bg-pink-50 rounded-xl hover:bg-pink-100 transition-colors"
-                                >
-                                    <span className="text-slate-700 font-medium text-xs">
-                                        {loading ? 'Loading...' : (organization?.companyName || 'No Company')}
-                                    </span>
-                                    <ChevronRight className="w-4 h-4 text-slate-400" />
-                                </button>
-
-                                {showCompanyMenu && (
-                                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-pink-100 py-2 z-50">
-                                        <div className="px-4 py-3 border-b border-slate-100">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center">
-                                                    <Building className="w-5 h-5 text-white" />
-                                                </div>
-                                                <div>
-                                                    <p className="font-semibold text-slate-900 text-sm">
-                                                        {organization?.companyName || 'No Company'}
-                                                    </p>
-                                                    <p className="text-xs text-slate-500">
-                                                        {organization?.industry || 'Not specified'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="px-2 py-1">
-                                            <Link to="/company/settings" className="flex items-center gap-2 px-3 py-2 hover:bg-pink-50 rounded-lg transition-colors">
-                                                <Settings className="w-4 h-4 text-slate-600" />
-                                                <span className="text-sm text-slate-700">Company Settings</span>
-                                            </Link>
-                                            <Link to="/company/profile" className="flex items-center gap-2 px-3 py-2 hover:bg-pink-50 rounded-lg transition-colors">
-                                                <Building className="w-4 h-4 text-slate-600" />
-                                                <span className="text-sm text-slate-700">Company Profile</span>
-                                            </Link>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Dark Mode Toggle */}
-                            <button
-                                onClick={toggleDarkMode}
-                                className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
-                                title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-                            >
-                                {darkMode ? (
-                                    <Sun className="w-4 h-4 text-yellow-500" />
-                                ) : (
-                                    <Moon className="w-4 h-4 text-slate-600" />
-                                )}
-                            </button>
-
-                            <Link to="/notifications" className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors block">
-                                <Bell className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-                            </Link>
-
-                            <button className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors">
-                                <Settings className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-                            </button>
-
-                            {/* Profile Dropdown */}
-                            <div className="relative">
-                                <button
-                                    onClick={() => {
-                                        setShowProfileMenu(!showProfileMenu);
-                                        setShowCompanyMenu(false);
-                                    }}
-                                    className="w-8 h-8 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg hover:shadow-xl transition-shadow"
-                                >
-                                    K
-                                </button>
-
-                                {showProfileMenu && (
-                                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-pink-100 py-2 z-50">
-                                        <div className="px-4 py-3 border-b border-slate-100">
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                                                    K
-                                                </div>
-                                                <div>
-                                                    <p className="font-semibold text-slate-900 text-sm">{user?.email?.split('@')[0] || 'User'}</p>
-                                                    <p className="text-xs text-slate-500">{user?.email || 'user@example.com'}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="px-2 py-1">
-                                            <Link to="/profile" className="flex items-center gap-2 px-3 py-2 hover:bg-pink-50 rounded-lg transition-colors">
-                                                <User className="w-4 h-4 text-slate-600" />
-                                                <span className="text-sm text-slate-700">My Profile</span>
-                                            </Link>
-                                            <Link to="/settings" className="flex items-center gap-2 px-3 py-2 hover:bg-pink-50 rounded-lg transition-colors">
-                                                <Settings className="w-4 h-4 text-slate-600" />
-                                                <span className="text-sm text-slate-700">Account Settings</span>
-                                            </Link>
-                                            <button
-                                                onClick={() => {
-                                                    logout();
-                                                    window.location.href = '/login';
-                                                }}
-                                                className="w-full flex items-center gap-2 px-3 py-2 hover:bg-red-50 rounded-lg transition-colors text-left"
-                                            >
-                                                <LogOut className="w-4 h-4 text-red-600" />
-                                                <span className="text-sm text-red-600">Logout</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Page Content */}
-                <div className="flex-1 overflow-y-auto p-8">
-                    {/* Welcome Section */}
-                    <div className="mb-8">
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent mb-2">
-                            Welcome {user?.email?.split('@')[0] || 'User'}! 👋
+                <div className="flex-1 overflow-y-auto p-4">
+                    {/* Header */}
+                    <div className="mb-4">
+                        <h1 className="text-xl font-bold text-slate-900 dark:text-white mb-1">
+                            Dashboard Overview
                         </h1>
-                        <p className="text-slate-600 dark:text-slate-300 text-lg">Set up your organisation before you run your first payroll.</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                            Welcome back, {user?.email?.split('@')[0]}! Here's what's happening today.
+                        </p>
                     </div>
 
-                    {/* Getting Started Card - Redesigned */}
-                    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-pink-100 dark:border-slate-700 overflow-hidden">
-                        {/* Header with gradient */}
-                        <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 text-white p-5">
-                            <div className="flex items-center gap-2.5 mb-3">
-                                <div className="w-9 h-9 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <CheckCircle2 className="w-5 h-5" />
+                    {/* Key Metrics Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                        {/* Total Employees */}
+                        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3 hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded flex items-center justify-center">
+                                    <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                 </div>
-                                <div>
-                                    <h2 className="text-xl font-bold">Get started with Payroll</h2>
-                                    <p className="text-pink-100 text-xs mt-0.5">Complete the following steps to have a hassle-free payroll experience</p>
-                                </div>
+                                <span className="text-[10px] font-medium text-green-600 dark:text-green-400 flex items-center gap-0.5">
+                                    <ArrowUpRight className="w-2.5 h-2.5" />
+                                    {dashboardData.employees.newThisMonth} new
+                                </span>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <div className="flex-1 bg-white/20 backdrop-blur-sm rounded-full h-2">
-                                    <div
-                                        className="bg-white h-2 rounded-full transition-all duration-500 shadow-lg"
-                                        style={{ width: `${progressPercentage}%` }}
-                                    />
-                                </div>
-                                <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                                    <span className="font-bold text-sm">{completedSteps}/{totalSteps} Completed</span>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                {dashboardData.employees.total}
+                            </h3>
+                            <p className="text-xs text-slate-600 dark:text-slate-400">Total Employees</p>
+                            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+                                <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-slate-600 dark:text-slate-400">Active</span>
+                                    <span className="font-semibold text-slate-900 dark:text-white">{dashboardData.employees.active}</span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Steps List */}
-                        <div className="p-5 space-y-3">
-                            {steps.map((step, index) => (
-                                <div key={step.id} className="group">
-                                    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-pink-50/50 dark:hover:bg-slate-700/50 transition-all">
-                                        <div className="flex-shrink-0 mt-0.5">
-                                            {step.completed ? (
-                                                <div className="w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30">
-                                                    <CheckCircle2 className="w-4 h-4 text-white" />
+                        {/* Current Month Payroll */}
+                        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3 hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded flex items-center justify-center">
+                                    <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
+                                </div>
+                                <span className={`text-[10px] font-medium flex items-center gap-0.5 ${
+                                    payrollTrend.isPositive 
+                                        ? 'text-green-600 dark:text-green-400' 
+                                        : 'text-red-600 dark:text-red-400'
+                                }`}>
+                                    {payrollTrend.isPositive ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+                                    {Math.abs(payrollTrend.percentChange)}%
+                                </span>
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                {formatCurrency(dashboardData.payroll.currentMonth)}
+                            </h3>
+                            <p className="text-xs text-slate-600 dark:text-slate-400">Current Month Payroll</p>
+                            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+                                <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-slate-600 dark:text-slate-400">Avg Salary</span>
+                                    <span className="font-semibold text-slate-900 dark:text-white">{formatCurrency(dashboardData.payroll.avgSalary)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Attendance Rate */}
+                        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3 hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded flex items-center justify-center">
+                                    <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                                </div>
+                                <span className="text-[10px] font-medium text-purple-600 dark:text-purple-400">
+                                    Today
+                                </span>
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                {dashboardData.attendance.rate.toFixed(1)}%
+                            </h3>
+                            <p className="text-xs text-slate-600 dark:text-slate-400">Attendance Rate</p>
+                            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+                                <div className="flex items-center gap-3 text-[10px]">
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                                        <span className="text-slate-600 dark:text-slate-400">{dashboardData.attendance.present} Present</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                                        <span className="text-slate-600 dark:text-slate-400">{dashboardData.attendance.absent} Absent</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Pending Approvals */}
+                        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3 hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded flex items-center justify-center">
+                                    <Clock className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                                </div>
+                                {dashboardData.leaves.pending > 0 && (
+                                    <span className="w-5 h-5 bg-orange-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold">
+                                        {dashboardData.leaves.pending}
+                                    </span>
+                                )}
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                {dashboardData.leaves.pending}
+                            </h3>
+                            <p className="text-xs text-slate-600 dark:text-slate-400">Pending Leave Requests</p>
+                            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+                                <Link to="/attendance?tab=leave-requests" className="text-[10px] text-orange-600 dark:text-orange-400 hover:underline font-medium">
+                                    Review requests →
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-4">
+                        {/* Quick Actions */}
+                        <div className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-lg shadow-sm border border-slate-200/60 dark:border-slate-700/60 p-3">
+                            <h2 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
+                                Quick Actions
+                            </h2>
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    onClick={() => navigate('/pay-runs')}
+                                    className="flex flex-col items-center justify-center gap-1 p-2.5 bg-gradient-to-br from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white rounded-lg text-xs transition-all shadow-sm hover:shadow-md h-20"
+                                >
+                                    <PlayCircle className="w-4 h-4 flex-shrink-0" />
+                                    <span className="font-medium text-[11px]">Run Payroll</span>
+                                </button>
+                                <button
+                                    onClick={() => navigate('/employees/add')}
+                                    className="flex flex-col items-center justify-center gap-1 p-2.5 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-lg text-xs transition-all border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow-md h-20"
+                                >
+                                    <UserPlus className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                                    <span className="font-medium text-[11px]">Add Employee</span>
+                                </button>
+                                <button
+                                    onClick={() => navigate('/attendance')}
+                                    className="flex flex-col items-center justify-center gap-1 p-2.5 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-lg text-xs transition-all border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow-md h-20"
+                                >
+                                    <CalendarDays className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                                    <span className="font-medium text-[11px]">Attendance</span>
+                                </button>
+                                <button
+                                    onClick={() => navigate('/reports')}
+                                    className="flex flex-col items-center justify-center gap-1 p-2.5 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-lg text-xs transition-all border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow-md h-20"
+                                >
+                                    <BarChart3 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                                    <span className="font-medium text-[11px]">Reports</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Payroll Summary */}
+                        <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-3">
+                            <div className="flex items-center justify-between mb-3">
+                                <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <Wallet className="w-4 h-4 text-pink-600" />
+                                    Payroll Summary
+                                </h2>
+                                <Link to="/pay-runs" className="text-xs text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1">
+                                    View All <ChevronRight className="w-3 h-3" />
+                                </Link>
+                            </div>
+                            
+                            <div className="grid grid-cols-3 gap-2 mb-3">
+                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded p-2">
+                                    <p className="text-[10px] text-slate-600 dark:text-slate-400">Total Pay Runs</p>
+                                    <p className="text-lg font-bold text-slate-900 dark:text-white">{dashboardData.payRuns.total}</p>
+                                </div>
+                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded p-2">
+                                    <p className="text-[10px] text-slate-600 dark:text-slate-400">Pending</p>
+                                    <p className="text-lg font-bold text-orange-600">{dashboardData.payRuns.pending}</p>
+                                </div>
+                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded p-2">
+                                    <p className="text-[10px] text-slate-600 dark:text-slate-400">Completed</p>
+                                    <p className="text-lg font-bold text-green-600">{dashboardData.payRuns.completed}</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Recent Pay Runs</h3>
+                                {dashboardData.payRuns.recent.length > 0 ? (
+                                    dashboardData.payRuns.recent.map((payRun) => (
+                                        <div key={payRun.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                                    payRun.status === 'COMPLETED' ? 'bg-green-100 dark:bg-green-900/30' :
+                                                    payRun.status === 'PENDING_APPROVAL' ? 'bg-orange-100 dark:bg-orange-900/30' :
+                                                    'bg-blue-100 dark:bg-blue-900/30'
+                                                }`}>
+                                                    <Receipt className={`w-5 h-5 ${
+                                                        payRun.status === 'COMPLETED' ? 'text-green-600' :
+                                                        payRun.status === 'PENDING_APPROVAL' ? 'text-orange-600' :
+                                                        'text-blue-600'
+                                                    }`} />
                                                 </div>
-                                            ) : (
-                                                <div className="w-6 h-6 border-2 border-pink-300 rounded-full flex items-center justify-center group-hover:border-pink-500 transition-colors">
-                                                    <Circle className="w-3 h-3 text-pink-300 group-hover:text-pink-500" />
+                                                <div>
+                                                    <p className="font-medium text-slate-900 dark:text-white text-sm">
+                                                        {new Date(payRun.payPeriodStart).toLocaleDateString()} - {new Date(payRun.payPeriodEnd).toLocaleDateString()}
+                                                    </p>
+                                                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                                                        {payRun.employeeCount || 0} employees
+                                                    </p>
                                                 </div>
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between mb-1.5">
-                                                <Link
-                                                    to={step.link}
-                                                    className="flex items-center gap-2 group/link hover:text-pink-600 transition-colors"
-                                                >
-                                                    <h3 className="font-semibold text-slate-900 dark:text-white text-sm group-hover/link:text-pink-600">{step.id}. {step.title}</h3>
-                                                    <ArrowRight className="w-4 h-4 text-pink-500 opacity-0 group-hover/link:opacity-100 transition-opacity" />
-                                                </Link>
-                                                {step.completed ? (
-                                                    <span className="px-2.5 py-0.5 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 font-semibold text-xs rounded-full whitespace-nowrap">
-                                                        COMPLETED
-                                                    </span>
-                                                ) : !step.comingSoon && (
-                                                    <Button
-                                                        variant="link"
-                                                        className="text-pink-600 hover:text-pink-700 font-semibold text-xs h-auto p-0 whitespace-nowrap"
-                                                        onClick={() => window.location.href = step.link}
-                                                    >
-                                                        Complete Now →
-                                                    </Button>
-                                                )}
                                             </div>
-                                            {step.subItems && (
-                                                <div className="mt-2 ml-2.5 space-y-1.5 p-2.5 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
-                                                    {step.subItems.map((subItem, idx) => (
-                                                        <div key={idx} className="flex items-center gap-2">
-                                                            {subItem.completed ? (
-                                                                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
-                                                            ) : (
-                                                                <Circle className="w-4 h-4 text-slate-300 flex-shrink-0" />
-                                                            )}
-                                                            <span className="text-slate-700 dark:text-slate-300 flex-1 text-xs">
-                                                                {subItem.name}
-                                                                {subItem.note && <span className="text-slate-500 ml-1">{subItem.note}</span>}
-                                                            </span>
-                                                            {!subItem.completed && (
-                                                                <Button variant="link" className="text-pink-600 hover:text-pink-700 text-xs font-semibold h-auto p-0 whitespace-nowrap">
-                                                                    Configure Now
-                                                                </Button>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
+                                            <div className="text-right">
+                                                <p className="font-bold text-slate-900 dark:text-white text-sm">
+                                                    {formatCurrency(payRun.totalNetPay)}
+                                                </p>
+                                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                                    payRun.status === 'COMPLETED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                                                    payRun.status === 'PENDING_APPROVAL' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                                                    'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                                }`}>
+                                                    {payRun.status}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                                        <Receipt className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                                        <p className="text-sm">No pay runs yet</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bottom Section */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Leave Statistics */}
+                        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <Coffee className="w-5 h-5 text-pink-600" />
+                                    Leave Overview
+                                </h2>
+                                <Link to="/attendance?tab=leave-requests" className="text-sm text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1">
+                                    Manage <ChevronRight className="w-4 h-4" />
+                                </Link>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                                            <Clock className="w-5 h-5 text-orange-600" />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-slate-900 dark:text-white">Pending Approval</p>
+                                            <p className="text-xs text-slate-600 dark:text-slate-400">Requires action</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-2xl font-bold text-orange-600">{dashboardData.leaves.pending}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                                            <CheckCircle className="w-5 h-5 text-green-600" />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-slate-900 dark:text-white">Approved</p>
+                                            <p className="text-xs text-slate-600 dark:text-slate-400">This month</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-2xl font-bold text-green-600">{dashboardData.leaves.approved}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                                            <XCircle className="w-5 h-5 text-red-600" />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-slate-900 dark:text-white">Rejected</p>
+                                            <p className="text-xs text-slate-600 dark:text-slate-400">This month</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-2xl font-bold text-red-600">{dashboardData.leaves.rejected}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Year to Date Summary */}
+                        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                                <TrendingUp className="w-5 h-5 text-pink-600" />
+                                Year to Date Summary
+                            </h2>
+                            
+                            <div className="space-y-6">
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-sm text-slate-600 dark:text-slate-400">Total Payroll (YTD)</span>
+                                        <span className="text-lg font-bold text-slate-900 dark:text-white">
+                                            {formatCurrency(dashboardData.payroll.totalYTD)}
+                                        </span>
+                                    </div>
+                                    <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                        <div className="bg-gradient-to-r from-pink-500 to-rose-500 h-2 rounded-full" style={{ width: '75%' }}></div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
+                                        <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">Current Month</p>
+                                        <p className="text-xl font-bold text-slate-900 dark:text-white">
+                                            {formatCurrency(dashboardData.payroll.currentMonth)}
+                                        </p>
+                                    </div>
+                                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
+                                        <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">Last Month</p>
+                                        <p className="text-xl font-bold text-slate-900 dark:text-white">
+                                            {formatCurrency(dashboardData.payroll.lastMonth)}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-lg p-4 border border-pink-200 dark:border-pink-800">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">Average Salary</p>
+                                            <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                                                {formatCurrency(dashboardData.payroll.avgSalary)}
+                                            </p>
+                                        </div>
+                                        <div className="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center">
+                                            <DollarSign className="w-6 h-6 text-pink-600" />
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                            </div>
                         </div>
+                    </div>
 
-                        {/* Additional Features */}
-                        <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-slate-700 dark:to-slate-800 p-8 border-t border-pink-100 dark:border-slate-700">
-                            <h3 className="font-bold text-slate-900 dark:text-white mb-6 text-xl">ADDITIONAL NOTABLE FEATURES</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-pink-100 dark:border-slate-600 shadow-sm hover:shadow-md transition-all group">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                        <DollarSign className="w-6 h-6 text-white" />
+                    {/* Statutory Compliance Section */}
+                    <div className="mt-4 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <Shield className="w-4 h-4 text-pink-600" />
+                                Statutory Compliance
+                            </h2>
+                            <Link to="/settings/statutory" className="text-xs text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1">
+                                Configure <ChevronRight className="w-3 h-3" />
+                            </Link>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded flex items-center justify-center">
+                                        <span className="text-xs font-bold text-blue-600">PF</span>
                                     </div>
-                                    <h4 className="font-bold text-slate-900 dark:text-white mb-2">Automated Payroll</h4>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400">Run payroll automatically every month</p>
+                                    <span className="text-xs font-medium text-blue-800 dark:text-blue-200">Provident Fund</span>
                                 </div>
-                                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-pink-100 dark:border-slate-600 shadow-sm hover:shadow-md transition-all group">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                        <Shield className="w-6 h-6 text-white" />
+                                <p className="text-lg font-bold text-blue-700 dark:text-blue-300">12%</p>
+                                <p className="text-[10px] text-blue-600 dark:text-blue-400">Employee + Employer</p>
+                            </div>
+                            
+                            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded flex items-center justify-center">
+                                        <span className="text-xs font-bold text-green-600">ESI</span>
                                     </div>
-                                    <h4 className="font-bold text-slate-900 dark:text-white mb-2">Tax Compliance</h4>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400">Stay compliant with all tax regulations</p>
+                                    <span className="text-xs font-medium text-green-800 dark:text-green-200">State Insurance</span>
                                 </div>
-                                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-pink-100 dark:border-slate-600 shadow-sm hover:shadow-md transition-all group">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                        <Users className="w-6 h-6 text-white" />
+                                <p className="text-lg font-bold text-green-700 dark:text-green-300">0.75%</p>
+                                <p className="text-[10px] text-green-600 dark:text-green-400">If gross ≤ ₹21,000</p>
+                            </div>
+                            
+                            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-6 h-6 bg-purple-100 dark:bg-purple-900/30 rounded flex items-center justify-center">
+                                        <span className="text-xs font-bold text-purple-600">PT</span>
                                     </div>
-                                    <h4 className="font-bold text-slate-900 dark:text-white mb-2">Employee Self-Service</h4>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400">Let employees access their payslips</p>
+                                    <span className="text-xs font-medium text-purple-800 dark:text-purple-200">Professional Tax</span>
                                 </div>
+                                <p className="text-lg font-bold text-purple-700 dark:text-purple-300">₹200</p>
+                                <p className="text-[10px] text-purple-600 dark:text-purple-400">Max per month</p>
+                            </div>
+                            
+                            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-200 dark:border-orange-800">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-6 h-6 bg-orange-100 dark:bg-orange-900/30 rounded flex items-center justify-center">
+                                        <span className="text-xs font-bold text-orange-600">TDS</span>
+                                    </div>
+                                    <span className="text-xs font-medium text-orange-800 dark:text-orange-200">Income Tax</span>
+                                </div>
+                                <p className="text-lg font-bold text-orange-700 dark:text-orange-300">Slab</p>
+                                <p className="text-[10px] text-orange-600 dark:text-orange-400">As per regime</p>
                             </div>
                         </div>
                     </div>

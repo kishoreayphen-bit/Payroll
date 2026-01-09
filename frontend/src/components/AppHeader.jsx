@@ -18,26 +18,64 @@ import { useTheme } from '../contexts/ThemeContext';
 export default function AppHeader({
     sidebarOpen,
     setSidebarOpen,
-    showCompanyMenu,
-    setShowCompanyMenu,
-    showProfileMenu,
-    setShowProfileMenu,
-    organization,
-    loading,
-    user,
-    logout
+    sidebarCollapsed,
+    setSidebarCollapsed,
+    organization: propOrganization,
+    loading: propLoading,
+    user
 }) {
     const navigate = useNavigate();
     const { darkMode, toggleDarkMode } = useTheme();
+    const [showCompanyMenu, setShowCompanyMenu] = React.useState(false);
+    const [showProfileMenu, setShowProfileMenu] = React.useState(false);
+    const [organization, setOrganization] = React.useState(propOrganization);
+    const [loading, setLoading] = React.useState(propLoading || false);
+
+    React.useEffect(() => {
+        if (propOrganization) {
+            setOrganization(propOrganization);
+        } else {
+            loadOrganization();
+        }
+    }, [propOrganization]);
+
+    const loadOrganization = async () => {
+        try {
+            const orgId = localStorage.getItem('selectedOrganizationId');
+            if (orgId) {
+                setLoading(true);
+                const { api } = await import('../services/authService');
+                const res = await api.get('/organizations');
+                const org = res.data?.find(o => o.id === parseInt(orgId));
+                setOrganization(org);
+            }
+        } catch (error) {
+            console.error('Error loading organization:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Support both prop naming conventions
+    const isSidebarOpen = sidebarOpen !== undefined ? sidebarOpen : !sidebarCollapsed;
+    const toggleSidebar = (open) => {
+        if (setSidebarOpen) setSidebarOpen(open);
+        if (setSidebarCollapsed) setSidebarCollapsed(!open);
+    };
+
+    const handleLogout = () => {
+        localStorage.clear();
+        window.location.href = '/login';
+    };
 
     return (
         <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-pink-100 dark:border-slate-700 px-6 py-4 flex-shrink-0 shadow-sm">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4 flex-1">
                     {/* Menu button to open sidebar when closed */}
-                    {!sidebarOpen && (
+                    {!isSidebarOpen && (
                         <button
-                            onClick={() => setSidebarOpen(true)}
+                            onClick={() => toggleSidebar(true)}
                             className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
                             title="Open sidebar"
                         >
@@ -45,11 +83,12 @@ export default function AppHeader({
                         </button>
                     )}
                     <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
+                        <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500 pointer-events-none" />
                         <input
                             type="text"
                             placeholder="Search employees..."
-                            className="w-full pl-10 pr-4 py-2 border border-pink-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white dark:bg-slate-800 dark:text-white dark:placeholder-slate-400"
+                            className="w-full pl-8 pr-3 py-1.5 text-sm border border-pink-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white dark:bg-slate-800 dark:text-white dark:placeholder-slate-400"
+                            style={{ paddingLeft: '2rem' }}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && e.target.value.trim()) {
                                     window.location.href = `/employees?search=${encodeURIComponent(e.target.value.trim())}`;
@@ -165,10 +204,7 @@ export default function AppHeader({
                                         <span className="text-sm text-slate-700 dark:text-slate-200">Account Settings</span>
                                     </Link>
                                     <button
-                                        onClick={() => {
-                                            logout();
-                                            window.location.href = '/login';
-                                        }}
+                                        onClick={handleLogout}
                                         className="w-full flex items-center gap-2 px-3 py-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors text-left"
                                     >
                                         <LogOut className="w-4 h-4 text-red-600" />

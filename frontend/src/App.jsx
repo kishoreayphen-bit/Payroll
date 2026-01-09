@@ -19,6 +19,12 @@ import ComingSoon from './pages/ComingSoon'
 import Notifications from './pages/Notifications'
 import PayScheduleSettings from './pages/PayScheduleSettings'
 import PayRun from './pages/PayRun'
+import StatutoryCompliance from './pages/StatutoryCompliance'
+import Settings from './pages/Settings'
+import AttendanceLeave from './pages/AttendanceLeave'
+import EmployeeFeatures from './pages/EmployeeFeatures'
+import Reports from './pages/Reports'
+import AdvancedFeatures from './pages/AdvancedFeatures'
 
 function App() {
   return (
@@ -117,6 +123,46 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/attendance"
+            element={
+              <ProtectedRoute>
+                <AttendanceLeave />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/benefits"
+            element={
+              <ProtectedRoute>
+                <EmployeeFeatures />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute>
+                <Reports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/advanced"
+            element={
+              <ProtectedRoute>
+                <AdvancedFeatures />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/form16"
+            element={
+              <ProtectedRoute>
+                <AdvancedFeatures />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Coming Soon Pages */}
           <Route
@@ -127,6 +173,14 @@ function App() {
                   title="Tax Details Configuration"
                   description="Set up your organization's tax details including TDS, GST, and other statutory tax information."
                 />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             }
           />
@@ -142,21 +196,7 @@ function App() {
             path="/settings/statutory"
             element={
               <ProtectedRoute>
-                <ComingSoon
-                  title="Statutory Components Setup"
-                  description="Configure statutory components like PF, ESI, LWF, and Professional Tax for compliance."
-                />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings/salary-components"
-            element={
-              <ProtectedRoute>
-                <ComingSoon
-                  title="Salary Components Setup"
-                  description="Define and configure salary components, allowances, and deductions for your payroll."
-                />
+                <StatutoryCompliance />
               </ProtectedRoute>
             }
           />
