@@ -94,12 +94,12 @@ export default function Settings() {
                     organization={organization} 
                     user={user} 
                 />
-                <main className="flex-1 overflow-y-auto p-6">
+                <main className="flex-1 overflow-y-auto p-4">
                     <div className="max-w-7xl mx-auto">
                         {/* Header */}
-                        <div className="mb-6">
-                            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Settings</h1>
-                            <p className="text-slate-600 dark:text-slate-400 mt-1">
+                        <div className="mb-4">
+                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Settings</h1>
+                            <p className="text-xs text-slate-600 dark:text-slate-400">
                                 Configure your payroll system settings
                             </p>
                         </div>

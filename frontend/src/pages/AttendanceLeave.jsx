@@ -448,15 +448,15 @@ export default function AttendanceLeave() {
                     organization={organization}
                     user={user}
                 />
-                <main className="flex-1 overflow-y-auto p-6">
+                <main className="flex-1 overflow-y-auto p-4">
                     <div className="max-w-7xl mx-auto">
-                        <div className="mb-6">
-                            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Attendance & Leave</h1>
-                            <p className="text-slate-600 dark:text-slate-400 mt-1">Manage employee attendance and leave requests</p>
+                        <div className="mb-4">
+                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Attendance & Leave</h1>
+                            <p className="text-xs text-slate-600 dark:text-slate-400">Manage employee attendance and leave requests</p>
                         </div>
 
                         {alert && (
-                            <div className={`mb-4 p-4 rounded-lg flex items-center gap-2 ${alert.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                            <div className={`mb-3 px-3 py-2 rounded-lg flex items-center gap-2 text-sm ${alert.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                                 {alert.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                                 {alert.message}
                             </div>
