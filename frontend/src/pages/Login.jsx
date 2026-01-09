@@ -144,11 +144,12 @@ export default function Login() {
             {/* Email/Username */}
             <div>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <Input
                   id="emailOrUsername"
                   placeholder="Email address or mobile number"
-                  className="pl-10 h-12 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg"
+                  className="h-12 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg"
+                  style={{ paddingLeft: '2.5rem' }}
                   {...register('emailOrUsername')}
                 />
               </div>
@@ -158,12 +159,13 @@ export default function Login() {
             {/* Password */}
             <div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
-                  className="pl-10 pr-10 h-12 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg"
+                  className="h-12 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg"
+                  style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}
                   {...register('password')}
                 />
                 <Button
@@ -174,7 +176,7 @@ export default function Login() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0 h-auto"
                   aria-label="Toggle password visibility"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </Button>
               </div>
               {errors.password && <p className="mt-1.5 text-sm text-red-600">{errors.password.message}</p>}
