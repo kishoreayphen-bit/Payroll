@@ -70,6 +70,7 @@ export default function EmployeeList() {
     const [showViewDropdown, setShowViewDropdown] = useState(false);
     const [showCreateCustomView, setShowCreateCustomView] = useState(false);
     const [activeView, setActiveView] = useState('Active Employees');
+    const [showFilters, setShowFilters] = useState(true);
     const [filters, setFilters] = useState({
         workLocation: '',
         department: '',
@@ -442,6 +443,7 @@ export default function EmployeeList() {
                             </div>
 
                             {/* Filters Row */}
+                            {showFilters && (
                             <div className="flex items-center gap-3">
                                 <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">FILTER BY :</span>
 
@@ -450,7 +452,7 @@ export default function EmployeeList() {
                                     <select
                                         value={filters.workLocation}
                                         onChange={(e) => handleFilterChange('workLocation', e.target.value)}
-                                        className="appearance-none pl-2.5 pr-9 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
+                                        className="appearance-none pl-2.5 pr-10 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
                                     >
                                         <option value="">Select Work Location</option>
                                         <option value="Head Office">Head Office</option>
@@ -465,7 +467,7 @@ export default function EmployeeList() {
                                     <select
                                         value={filters.department}
                                         onChange={(e) => handleFilterChange('department', e.target.value)}
-                                        className="appearance-none pl-2.5 pr-9 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
+                                        className="appearance-none pl-2.5 pr-10 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
                                     >
                                         <option value="">Select Department</option>
                                         <option value="Engineering">Engineering</option>
@@ -482,7 +484,7 @@ export default function EmployeeList() {
                                     <select
                                         value={filters.designation}
                                         onChange={(e) => handleFilterChange('designation', e.target.value)}
-                                        className="appearance-none pl-2.5 pr-9 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
+                                        className="appearance-none pl-2.5 pr-10 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
                                     >
                                         <option value="">Select Designation</option>
                                         <option value="Senior Developer">Senior Developer</option>
@@ -520,7 +522,28 @@ export default function EmployeeList() {
                                         Clear All
                                     </Button>
                                 )}
+
+                                {/* Close Filters Button */}
+                                <button
+                                    onClick={() => setShowFilters(false)}
+                                    className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors ml-auto"
+                                    title="Hide Filters"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
                             </div>
+                            )}
+
+                            {/* Show Filters Button (when hidden) */}
+                            {!showFilters && (
+                                <button
+                                    onClick={() => setShowFilters(true)}
+                                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition-colors font-medium"
+                                >
+                                    <Filter className="w-4 h-4" />
+                                    Show Filters
+                                </button>
+                            )}
                         </div>
 
                         {/* Employee Table - Modern Sleek Design */}
