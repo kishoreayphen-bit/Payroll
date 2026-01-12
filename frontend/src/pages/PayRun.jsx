@@ -74,10 +74,21 @@ export default function PayRun() {
 
     const fetchOrganization = async () => {
         try {
-            const response = await api.get('/organizations/current');
-            setOrganization(response.data);
+            const selectedOrgId = localStorage.getItem('selectedOrganizationId');
+            if (!selectedOrgId) {
+                window.location.href = '/select-organization';
+                return;
+            }
+            const response = await api.get('/organizations');
+            const org = response.data?.find(o => o.id === parseInt(selectedOrgId));
+            if (org) {
+                setOrganization(org);
+            } else {
+                console.error('Organization not found');
+            }
         } catch (error) {
             console.error('Failed to fetch organization:', error);
+            setLoading(false);
         }
     };
 
