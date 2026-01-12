@@ -728,23 +728,8 @@ function EditBasicInfoModal({ employee, onClose, onSave }) {
 
 // Overview Tab Component
 function OverviewTab({ employee, onTogglePT, onEditBasicInfo, onEditPersonalInfo, onEditPaymentInfo, onCompleteProfile }) {
-    // Only show incomplete alert if profile is not 100% complete
-    const isProfileComplete = employee?.isProfileComplete === true || employee?.profileCompletionPercentage === 100;
-    
     return (
         <div className="max-w-5xl space-y-6">
-            {/* Incomplete Profile Alert - only show if profile is not complete */}
-            {!isProfileComplete && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                        <p className="text-sm text-yellow-800">
-                            This employee's profile is incomplete. <button onClick={onCompleteProfile} className="text-rose-600 hover:text-rose-700 font-medium">Complete now</button>
-                        </p>
-                    </div>
-                </div>
-            )}
-
             {/* Basic Information */}
             <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
                 <div className="flex items-center justify-between mb-4">

@@ -486,18 +486,18 @@ export default function AttendanceLeave() {
                                         <div className="flex items-center justify-between mb-4">
                                             <div className="flex items-center gap-4">
                                                 <div className="flex items-center gap-2">
-                                                    <button onClick={() => setSelectedMonth(m => m > 1 ? m - 1 : 12)} className="p-1 hover:bg-slate-100 rounded">
+                                                    <button onClick={() => setSelectedMonth(m => m > 1 ? m - 1 : 12)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-700 dark:text-slate-300">
                                                         <ChevronLeft className="w-5 h-5" />
                                                     </button>
-                                                    <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="px-3 py-1.5 border rounded-lg">
+                                                    <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white">
                                                         {[...Array(12)].map((_, i) => (
                                                             <option key={i + 1} value={i + 1}>{new Date(2024, i).toLocaleString('default', { month: 'long' })}</option>
                                                         ))}
                                                     </select>
-                                                    <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="px-3 py-1.5 border rounded-lg">
+                                                    <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white">
                                                         {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
                                                     </select>
-                                                    <button onClick={() => setSelectedMonth(m => m < 12 ? m + 1 : 1)} className="p-1 hover:bg-slate-100 rounded">
+                                                    <button onClick={() => setSelectedMonth(m => m < 12 ? m + 1 : 1)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-700 dark:text-slate-300">
                                                         <ChevronRight className="w-5 h-5" />
                                                     </button>
                                                 </div>
@@ -508,7 +508,7 @@ export default function AttendanceLeave() {
                                                         placeholder="Search employees..."
                                                         value={searchTerm}
                                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                                        className="pl-10 pr-4 py-1.5 border rounded-lg w-64"
+                                                        className="pl-10 pr-4 py-1.5 border border-slate-300 dark:border-slate-600 rounded-lg w-64 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
                                                     />
                                                 </div>
                                             </div>
