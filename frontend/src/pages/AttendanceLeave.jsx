@@ -637,21 +637,21 @@ export default function AttendanceLeave() {
 
                                         <div className="overflow-x-auto">
                                             <table className="w-full text-sm">
-                                                <thead className="bg-slate-50 border-b">
+                                                <thead className="bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
                                                     <tr>
-                                                        <th className="px-3 py-2 text-left font-semibold sticky left-0 bg-slate-50 z-10">Employee</th>
+                                                        <th className="px-3 py-2 text-left font-semibold sticky left-0 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white z-10">Employee</th>
                                                         {monthDays.map(day => (
-                                                            <th key={day} className="px-1 py-2 text-center font-medium min-w-[32px]">
+                                                            <th key={day} className="px-1 py-2 text-center font-medium min-w-[32px] text-slate-700 dark:text-slate-300">
                                                                 {day}
                                                             </th>
                                                         ))}
-                                                        <th className="px-3 py-2 text-center font-semibold sticky right-0 bg-slate-50 z-10">Actions</th>
+                                                        <th className="px-3 py-2 text-center font-semibold sticky right-0 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white z-10">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {filteredEmployees.map(emp => (
-                                                        <tr key={emp.id} className="border-b hover:bg-slate-50">
-                                                            <td className="px-3 py-2 font-medium sticky left-0 bg-white z-10">
+                                                        <tr key={emp.id} className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                                                            <td className="px-3 py-2 font-medium sticky left-0 bg-white dark:bg-slate-800 text-slate-900 dark:text-white z-10">
                                                                 {emp.firstName} {emp.lastName}
                                                             </td>
                                                             {monthDays.map(day => {
@@ -660,7 +660,7 @@ export default function AttendanceLeave() {
                                                                 const dayOfWeek = new Date(selectedYear, selectedMonth - 1, day).getDay();
                                                                 const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
                                                                 return (
-                                                                    <td key={day} className={`px-1 py-1 text-center ${isWeekend ? 'bg-slate-100' : ''}`}>
+                                                                    <td key={day} className={`px-1 py-1 text-center ${isWeekend ? 'bg-slate-100 dark:bg-slate-700/50' : ''}`}>
                                                                         <button
                                                                             onClick={() => {
                                                                                 setSelectedEmployee(emp);
@@ -668,13 +668,13 @@ export default function AttendanceLeave() {
                                                                                 setShowAttendanceModal(true);
                                                                             }}
                                                                             className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all hover:scale-110 ${
-                                                                                status === 'PRESENT' ? 'bg-green-500 text-white shadow-sm' :
-                                                                                status === 'ABSENT' ? 'bg-red-500 text-white shadow-sm' :
-                                                                                status === 'HALF_DAY' ? 'bg-yellow-500 text-white shadow-sm' :
-                                                                                status === 'LEAVE' ? 'bg-blue-500 text-white shadow-sm' :
-                                                                                status === 'HOLIDAY' ? 'bg-purple-500 text-white shadow-sm' :
-                                                                                status === 'WEEKEND' ? 'bg-slate-300 text-slate-600' :
-                                                                                'bg-slate-200 text-slate-500 hover:bg-slate-300'
+                                                                                status === 'PRESENT' ? 'bg-green-500 dark:bg-green-600 text-white shadow-sm' :
+                                                                                status === 'ABSENT' ? 'bg-red-500 dark:bg-red-600 text-white shadow-sm' :
+                                                                                status === 'HALF_DAY' ? 'bg-yellow-500 dark:bg-yellow-600 text-white shadow-sm' :
+                                                                                status === 'LEAVE' ? 'bg-blue-500 dark:bg-blue-600 text-white shadow-sm' :
+                                                                                status === 'HOLIDAY' ? 'bg-purple-500 dark:bg-purple-600 text-white shadow-sm' :
+                                                                                status === 'WEEKEND' ? 'bg-slate-300 dark:bg-slate-600 text-slate-600 dark:text-slate-300' :
+                                                                                'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-600'
                                                                             }`}
                                                                             title={status}
                                                                         >
@@ -683,18 +683,18 @@ export default function AttendanceLeave() {
                                                                     </td>
                                                                 );
                                                             })}
-                                                            <td className="px-3 py-2 sticky right-0 bg-white z-10">
+                                                            <td className="px-3 py-2 sticky right-0 bg-white dark:bg-slate-800 z-10">
                                                                 <div className="flex items-center gap-1">
                                                                     <button
                                                                         onClick={() => markEmployeeForMonth(emp.id, 'PRESENT')}
-                                                                        className="p-1.5 hover:bg-green-100 rounded text-green-600 transition-colors"
+                                                                        className="p-1.5 hover:bg-green-100 dark:hover:bg-green-900/30 rounded text-green-600 dark:text-green-400 transition-colors"
                                                                         title="Mark Present for Month"
                                                                     >
                                                                         <CheckCircle className="w-4 h-4" />
                                                                     </button>
                                                                     <button
                                                                         onClick={() => markEmployeeForMonth(emp.id, 'ABSENT')}
-                                                                        className="p-1.5 hover:bg-red-100 rounded text-red-600 transition-colors"
+                                                                        className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-red-600 dark:text-red-400 transition-colors"
                                                                         title="Mark Absent for Month"
                                                                     >
                                                                         <XCircle className="w-4 h-4" />
