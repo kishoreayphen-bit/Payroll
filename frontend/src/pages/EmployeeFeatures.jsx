@@ -183,7 +183,7 @@ export default function EmployeeFeatures() {
                         </div>
 
                         {alert && (
-                            <div className={`mb-4 p-4 rounded-lg flex items-center gap-2 ${alert.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                            <div className={`mb-4 p-4 rounded-lg flex items-center gap-2 ${alert.type === 'success' ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800'}`}>
                                 {alert.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                                 {alert.message}
                             </div>
@@ -194,7 +194,7 @@ export default function EmployeeFeatures() {
                                 {tabs.map(tab => (
                                     <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                                         className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap ${
-                                            activeTab === tab.id ? 'text-pink-600 border-b-2 border-pink-600 bg-pink-50/50' : 'text-slate-600 hover:bg-slate-50'
+                                            activeTab === tab.id ? 'text-pink-600 dark:text-pink-400 border-b-2 border-pink-600 dark:border-pink-400 bg-pink-50/50 dark:bg-pink-900/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                                         }`}>
                                         <tab.icon className="w-4 h-4" />{tab.label}
                                     </button>

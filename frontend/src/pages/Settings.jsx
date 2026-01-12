@@ -129,8 +129,8 @@ export default function Settings() {
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap ${
                                             activeTab === tab.id
-                                                ? 'text-pink-600 border-b-2 border-pink-600 bg-pink-50/50 dark:bg-pink-900/20'
-                                                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                                ? 'text-pink-600 dark:text-pink-400 border-b-2 border-pink-600 dark:border-pink-400 bg-pink-50/50 dark:bg-pink-900/20'
+                                                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                                         }`}
                                     >
                                         <tab.icon className="w-4 h-4" />
