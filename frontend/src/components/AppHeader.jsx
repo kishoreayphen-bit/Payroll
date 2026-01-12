@@ -162,7 +162,7 @@ export default function AppHeader({
                     </Link>
 
                     <button 
-                        onClick={() => navigate('/settings/pay-schedule')}
+                        onClick={() => navigate('/settings')}
                         className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
                         title="Settings"
                     >

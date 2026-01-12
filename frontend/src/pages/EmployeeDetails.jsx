@@ -974,35 +974,35 @@ function SalaryTab({ employee, salaryBreakdown, onEditSalaryInfo, onCompleteProf
 
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-slate-50 border-b border-slate-200">
+                        <thead className="bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
                             <tr>
                                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Salary Components</th>
                                 <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Monthly Amount</th>
                                 <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Annual Amount</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-200">
+                        <tbody className="divide-y divide-slate-200 dark:divide-slate-600">
                             {/* Standard Earnings */}
                             <tr>
                                 <td colSpan="3" className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700">Earnings</td>
                             </tr>
-                            <tr>
+                            <tr className="dark:bg-slate-800">
                                 <td className="px-4 py-3">
                                     <div className="text-sm text-slate-900 dark:text-white">Basic</div>
-                                    <div className="text-xs text-slate-500">({employee.basicPercent}.00 % of CTC)</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400">({employee.basicPercent}.00 % of CTC)</div>
                                 </td>
                                 <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{employee.basic.toLocaleString()}.00</td>
                                 <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{(employee.basic * 12).toLocaleString()}.00</td>
                             </tr>
-                            <tr>
+                            <tr className="dark:bg-slate-800">
                                 <td className="px-4 py-3">
                                     <div className="text-sm text-slate-900 dark:text-white">House Rent Allowance</div>
-                                    <div className="text-xs text-slate-500">({employee.hraPercent}.00 % of Basic Amount)</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400">({employee.hraPercent}.00 % of Basic Amount)</div>
                                 </td>
                                 <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{employee.hra.toLocaleString()}.00</td>
                                 <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{(employee.hra * 12).toLocaleString()}.00</td>
                             </tr>
-                            <tr>
+                            <tr className="dark:bg-slate-800">
                                 <td className="px-4 py-3">
                                     <div className="text-sm text-slate-900 dark:text-white">Fixed Allowance</div>
                                 </td>
@@ -1012,13 +1012,13 @@ function SalaryTab({ employee, salaryBreakdown, onEditSalaryInfo, onCompleteProf
 
                             {/* Additional Earnings from Breakdown */}
                             {earnings.map(earning => (
-                                <tr key={earning.componentCode}>
+                                <tr key={earning.componentCode} className="dark:bg-slate-800">
                                     <td className="px-4 py-3">
-                                        <div className="text-sm text-slate-900">{earning.componentName}</div>
-                                        <div className="text-xs text-slate-500">({earning.calculationType === 'PERCENTAGE' ? '% based' : 'Fixed'})</div>
+                                        <div className="text-sm text-slate-900 dark:text-white">{earning.componentName}</div>
+                                        <div className="text-xs text-slate-500 dark:text-slate-400">({earning.calculationType === 'PERCENTAGE' ? '% based' : 'Fixed'})</div>
                                     </td>
-                                    <td className="px-4 py-3 text-right text-sm text-slate-900">₹{earning.calculatedAmount?.toLocaleString()}</td>
-                                    <td className="px-4 py-3 text-right text-sm text-slate-900">₹{(earning.calculatedAmount * 12)?.toLocaleString()}</td>
+                                    <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{earning.calculatedAmount?.toLocaleString()}</td>
+                                    <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{(earning.calculatedAmount * 12)?.toLocaleString()}</td>
                                 </tr>
                             ))}
 
@@ -1026,35 +1026,35 @@ function SalaryTab({ employee, salaryBreakdown, onEditSalaryInfo, onCompleteProf
                             {deductions.length > 0 && (
                                 <>
                                     <tr>
-                                        <td colSpan="3" className="px-4 py-2 text-sm font-semibold text-slate-700 bg-slate-50">Deductions</td>
+                                        <td colSpan="3" className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700">Deductions</td>
                                     </tr>
                                     {deductions.map(deduction => (
-                                        <tr key={deduction.componentCode}>
+                                        <tr key={deduction.componentCode} className="dark:bg-slate-800">
                                             <td className="px-4 py-3">
-                                                <div className="text-sm text-slate-900">{deduction.componentName}</div>
-                                                <div className="text-xs text-slate-500">{deduction.componentCode} ({deduction.calculationType === 'PERCENTAGE' ? '% based' : 'Fixed'})</div>
+                                                <div className="text-sm text-slate-900 dark:text-white">{deduction.componentName}</div>
+                                                <div className="text-xs text-slate-500 dark:text-slate-400">{deduction.componentCode} ({deduction.calculationType === 'PERCENTAGE' ? '% based' : 'Fixed'})</div>
                                             </td>
-                                            <td className="px-4 py-3 text-right text-sm text-red-600">- ₹{deduction.calculatedAmount?.toLocaleString()}</td>
-                                            <td className="px-4 py-3 text-right text-sm text-red-600">- ₹{(deduction.calculatedAmount * 12)?.toLocaleString()}</td>
+                                            <td className="px-4 py-3 text-right text-sm text-red-600 dark:text-red-400">- ₹{deduction.calculatedAmount?.toLocaleString()}</td>
+                                            <td className="px-4 py-3 text-right text-sm text-red-600 dark:text-red-400">- ₹{(deduction.calculatedAmount * 12)?.toLocaleString()}</td>
                                         </tr>
                                     ))}
                                 </>
                             )}
 
                             {/* Totals */}
-                            <tr className="bg-slate-50 font-semibold border-t-2 border-slate-200">
-                                <td className="px-4 py-3 text-sm text-slate-900">Cost to Company (CTC)</td>
-                                <td className="px-4 py-3 text-right text-sm text-slate-900">₹{employee.monthlyCtc.toLocaleString()}.00</td>
-                                <td className="px-4 py-3 text-right text-sm text-slate-900">₹{employee.annualCtc.toLocaleString()}.00</td>
+                            <tr className="bg-slate-50 dark:bg-slate-700 font-semibold border-t-2 border-slate-200 dark:border-slate-600">
+                                <td className="px-4 py-3 text-sm text-slate-900 dark:text-white">Cost to Company (CTC)</td>
+                                <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{employee.monthlyCtc.toLocaleString()}.00</td>
+                                <td className="px-4 py-3 text-right text-sm text-slate-900 dark:text-white">₹{employee.annualCtc.toLocaleString()}.00</td>
                             </tr>
                             {totalDeductions > 0 && (
-                                <tr className="font-semibold text-red-700 bg-red-50/30">
+                                <tr className="font-semibold text-red-700 dark:text-red-400 bg-red-50/30 dark:bg-red-900/20">
                                     <td className="px-4 py-3 text-sm">Total Deductions</td>
                                     <td className="px-4 py-3 text-right text-sm">- ₹{totalDeductions.toLocaleString()}</td>
                                     <td className="px-4 py-3 text-right text-sm">- ₹{(totalDeductions * 12).toLocaleString()}</td>
                                 </tr>
                             )}
-                            <tr className="font-bold text-emerald-800 bg-emerald-50 border-t border-emerald-100">
+                            <tr className="font-bold text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-t border-emerald-100 dark:border-emerald-800">
                                 <td className="px-4 py-3 text-sm">Net Pay (Take Home)</td>
                                 <td className="px-4 py-3 text-right text-sm">₹{netSalary.toLocaleString()}</td>
                                 <td className="px-4 py-3 text-right text-sm">₹{(netSalary * 12).toLocaleString()}</td>
@@ -1068,8 +1068,8 @@ function SalaryTab({ employee, salaryBreakdown, onEditSalaryInfo, onCompleteProf
             <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
                 <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Perquisites</h2>
                 <div>
-                    <p className="text-sm text-slate-500 mb-1">Additional Benefits</p>
-                    <p className="text-lg font-semibold text-slate-900">₹0.00 <button className="text-sm text-rose-600 hover:text-rose-700 ml-2">View Details ›</button></p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Additional Benefits</p>
+                    <p className="text-lg font-semibold text-slate-900 dark:text-white">₹0.00 <button className="text-sm text-rose-600 hover:text-rose-700 ml-2">View Details ›</button></p>
                 </div>
             </div>
         </div>
@@ -1099,30 +1099,30 @@ function InvestmentsTab() {
 
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-slate-50 border-b border-slate-200">
+                        <thead className="bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase w-24">Section</th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Investment Type</th>
-                                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Max Limit</th>
-                                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Declared Amount</th>
-                                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Accepted Amount</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase w-24">Section</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Investment Type</th>
+                                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Max Limit</th>
+                                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Declared Amount</th>
+                                <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Accepted Amount</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-200">
+                        <tbody className="divide-y divide-slate-200 dark:divide-slate-600">
                             {declarations.map((item, idx) => (
-                                <tr key={idx} className="hover:bg-slate-50/50">
-                                    <td className="px-4 py-3 text-sm font-medium text-slate-600">{item.section}</td>
-                                    <td className="px-4 py-3 text-sm text-slate-900">{item.title}</td>
-                                    <td className="px-4 py-3 text-right text-sm text-slate-500">₹{item.maxOffset.toLocaleString()}</td>
-                                    <td className="px-4 py-3 text-right text-sm font-medium text-slate-900">₹{item.amount.toLocaleString()}</td>
-                                    <td className="px-4 py-3 text-right text-sm text-slate-500">₹0</td>
+                                <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50">
+                                    <td className="px-4 py-3 text-sm font-medium text-slate-600 dark:text-slate-300">{item.section}</td>
+                                    <td className="px-4 py-3 text-sm text-slate-900 dark:text-white">{item.title}</td>
+                                    <td className="px-4 py-3 text-right text-sm text-slate-500 dark:text-slate-400">₹{item.maxOffset.toLocaleString()}</td>
+                                    <td className="px-4 py-3 text-right text-sm font-medium text-slate-900 dark:text-white">₹{item.amount.toLocaleString()}</td>
+                                    <td className="px-4 py-3 text-right text-sm text-slate-500 dark:text-slate-400">₹0</td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center text-sm text-slate-500">
+                <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center text-sm text-slate-500 dark:text-slate-400">
                     <p>Total Taxable Income will be calculated after verified investment proofs.</p>
                 </div>
             </div>
