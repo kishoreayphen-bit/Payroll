@@ -836,8 +836,8 @@ export default function AttendanceLeave() {
                     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Mark Attendance</h3>
-                            <button onClick={() => setShowAttendanceModal(false)} className="p-1 hover:bg-slate-100 rounded">
-                                <X className="w-5 h-5" />
+                            <button onClick={() => setShowAttendanceModal(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
+                                <X className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                             </button>
                         </div>
                         <div className="space-y-4">
@@ -856,35 +856,35 @@ export default function AttendanceLeave() {
                                 <div className="grid grid-cols-2 gap-2">
                                     <button
                                         onClick={() => markAttendance(selectedEmployee.id, 'PRESENT', selectedDay)}
-                                        className="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-50 hover:bg-green-100 border-2 border-green-200 text-green-700 font-medium transition-all"
+                                        className="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50 border-2 border-green-200 dark:border-green-700 text-green-700 dark:text-green-400 font-medium transition-all"
                                     >
                                         <CheckCircle className="w-5 h-5" />
                                         Present
                                     </button>
                                     <button
                                         onClick={() => markAttendance(selectedEmployee.id, 'ABSENT', selectedDay)}
-                                        className="flex items-center justify-center gap-2 p-3 rounded-lg bg-red-50 hover:bg-red-100 border-2 border-red-200 text-red-700 font-medium transition-all"
+                                        className="flex items-center justify-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 border-2 border-red-200 dark:border-red-700 text-red-700 dark:text-red-400 font-medium transition-all"
                                     >
                                         <XCircle className="w-5 h-5" />
                                         Absent
                                     </button>
                                     <button
                                         onClick={() => markAttendance(selectedEmployee.id, 'HALF_DAY', selectedDay)}
-                                        className="flex items-center justify-center gap-2 p-3 rounded-lg bg-yellow-50 hover:bg-yellow-100 border-2 border-yellow-200 text-yellow-700 font-medium transition-all"
+                                        className="flex items-center justify-center gap-2 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 border-2 border-yellow-200 dark:border-yellow-700 text-yellow-700 dark:text-yellow-400 font-medium transition-all"
                                     >
                                         <Coffee className="w-5 h-5" />
                                         Half Day
                                     </button>
                                     <button
                                         onClick={() => markAttendance(selectedEmployee.id, 'HOLIDAY', selectedDay)}
-                                        className="flex items-center justify-center gap-2 p-3 rounded-lg bg-purple-50 hover:bg-purple-100 border-2 border-purple-200 text-purple-700 font-medium transition-all"
+                                        className="flex items-center justify-center gap-2 p-3 rounded-lg bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 border-2 border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-400 font-medium transition-all"
                                     >
                                         <CalendarDays className="w-5 h-5" />
                                         Holiday
                                     </button>
                                     <button
                                         onClick={() => markAttendance(selectedEmployee.id, 'WEEKEND', selectedDay)}
-                                        className="flex items-center justify-center gap-2 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 text-slate-700 font-medium transition-all"
+                                        className="flex items-center justify-center gap-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium transition-all"
                                     >
                                         <Sun className="w-5 h-5" />
                                         Weekend
@@ -896,7 +896,7 @@ export default function AttendanceLeave() {
                                 <select
                                     value={selectedLeaveType || ''}
                                     onChange={(e) => setSelectedLeaveType(e.target.value ? parseInt(e.target.value) : null)}
-                                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 dark:bg-slate-700 dark:text-white"
+                                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                                 >
                                     <option value="">Select Leave Type</option>
                                     {leaveTypes.map(type => (
@@ -910,7 +910,7 @@ export default function AttendanceLeave() {
                                 <button
                                     onClick={() => markAttendance(selectedEmployee.id, 'LEAVE', selectedDay)}
                                     disabled={!selectedLeaveType}
-                                    className="w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 text-blue-700 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 border-2 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-400 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <Calendar className="w-5 h-5" />
                                     Mark as Leave
