@@ -301,44 +301,48 @@ public class AttendanceImportService {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Attendance");
 
-            // Create header style
+            // Create header style (orange background like in screenshot)
             CellStyle headerStyle = workbook.createCellStyle();
             Font headerFont = workbook.createFont();
             headerFont.setBold(true);
-            headerFont.setFontHeightInPoints((short) 12);
+            headerFont.setFontHeightInPoints((short) 11);
+            headerFont.setColor(IndexedColors.WHITE.getIndex());
             headerStyle.setFont(headerFont);
-            headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            headerStyle.setFillForegroundColor(IndexedColors.ORANGE.getIndex());
             headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             headerStyle.setBorderBottom(BorderStyle.THIN);
             headerStyle.setBorderTop(BorderStyle.THIN);
             headerStyle.setBorderLeft(BorderStyle.THIN);
             headerStyle.setBorderRight(BorderStyle.THIN);
 
-            // Create header row
+            // Create header row with Date, Sprint, Day, then sample employee names
             Row headerRow = sheet.createRow(0);
             String[] headers = {
-                    "Employee ID*",
-                    "Date* (YYYY-MM-DD)",
-                    "Status* (PRESENT/ABSENT/LEAVE/HALF_DAY/HOLIDAY/WEEKEND)",
-                    "Leave Type (for LEAVE status)",
-                    "Check In Time (HH:mm)",
-                    "Check Out Time (HH:mm)",
-                    "Remarks"
+                    "Date",
+                    "Sprint",
+                    "Day",
+                    "Employee1",
+                    "Employee2",
+                    "Employee3"
             };
 
             for (int i = 0; i < headers.length; i++) {
                 Cell cell = headerRow.createCell(i);
                 cell.setCellValue(headers[i]);
                 cell.setCellStyle(headerStyle);
-                sheet.setColumnWidth(i, 6000);
+                sheet.setColumnWidth(i, i < 3 ? 4000 : 5000);
             }
 
-            // Add sample data rows
+            // Add sample data rows - empty = PRESENT, leave type name = LEAVE
+            // Format: Date, Sprint, Day, Employee1 status, Employee2 status, Employee3 status
             String[][] sampleData = {
-                    {"EMP001", "2026-01-15", "PRESENT", "", "09:00", "18:00", ""},
-                    {"EMP001", "2026-01-16", "LEAVE", "Sick Leave", "", "", "Sick"},
-                    {"EMP002", "2026-01-15", "HALF_DAY", "", "09:00", "13:00", "Personal work"},
-                    {"EMP002", "2026-01-16", "ABSENT", "", "", "", ""}
+                    {"12-Jan-26", "", "Monday", "", "", ""},
+                    {"13-Jan-26", "", "Tuesday", "", "Casual", ""},
+                    {"14-Jan-26", "", "Wednesday", "Sick", "", ""},
+                    {"15-Jan-26", "", "Thursday", "", "", "Casual"},
+                    {"16-Jan-26", "", "Friday", "", "", ""},
+                    {"17-Jan-26", "", "Saturday", "", "", ""},
+                    {"18-Jan-26", "", "Sunday", "", "", ""}
             };
 
             for (int i = 0; i < sampleData.length; i++) {
@@ -348,10 +352,197 @@ public class AttendanceImportService {
                 }
             }
 
+            // Add instructions sheet
+            Sheet instructionSheet = workbook.createSheet("Instructions");
+            String[] instructions = {
+                    "ATTENDANCE IMPORT INSTRUCTIONS",
+                    "",
+                    "Column A: Date - Enter dates in DD-MMM-YY or DD/MM/YYYY format",
+                    "Column B: Sprint - Optional, for your reference",
+                    "Column C: Day - Day name (Monday, Tuesday, etc.) - Optional",
+                    "Columns D onwards: Replace 'Employee1', 'Employee2', etc. with actual Employee IDs",
+                    "",
+                    "CELL VALUES:",
+                    "- Empty cell = PRESENT (employee attended work)",
+                    "- Leave type name (Casual, Sick, etc.) = LEAVE",
+                    "- 'ABSENT' = Employee was absent",
+                    "- 'HALF_DAY' = Half day attendance",
+                    "- 'HOLIDAY' = Public holiday",
+                    "- 'WEEKEND' = Weekend (Saturday/Sunday)",
+                    "",
+                    "NOTES:",
+                    "- Weekends (Saturday/Sunday) will be auto-detected if cell is empty",
+                    "- Leave types must match names configured in the system"
+            };
+
+            for (int i = 0; i < instructions.length; i++) {
+                Row row = instructionSheet.createRow(i);
+                row.createCell(0).setCellValue(instructions[i]);
+            }
+            instructionSheet.setColumnWidth(0, 20000);
+
             // Write to byte array
             java.io.ByteArrayOutputStream outputStream = new java.io.ByteArrayOutputStream();
             workbook.write(outputStream);
             return outputStream.toByteArray();
         }
+    }
+
+    /**
+     * Import attendance from pivot-style Excel (Date rows, Employee columns)
+     */
+    @Transactional
+    public Map<String, Object> importAttendanceFromPivotExcel(MultipartFile file, Long tenantId) throws IOException {
+        log.info("Starting pivot-style attendance import for tenant: {}", tenantId);
+
+        List<String> errors = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
+        int successCount = 0;
+        int errorCount = 0;
+        int updatedCount = 0;
+
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
+
+            // Validate header row
+            Row headerRow = sheet.getRow(0);
+            if (headerRow == null) {
+                throw new RuntimeException("Excel file is empty or missing header row");
+            }
+
+            // Get leave types for mapping
+            List<LeaveType> leaveTypes = leaveTypeRepository.findByOrganizationIdAndIsActiveTrue(tenantId);
+            Map<String, LeaveType> leaveTypeMap = new HashMap<>();
+            for (LeaveType lt : leaveTypes) {
+                leaveTypeMap.put(lt.getName().toUpperCase(), lt);
+                leaveTypeMap.put(lt.getCode().toUpperCase(), lt);
+            }
+
+            // Parse employee IDs from header (columns D onwards, index 3+)
+            List<String> employeeIds = new ArrayList<>();
+            Map<Integer, Employee> columnToEmployee = new HashMap<>();
+
+            for (int col = 3; col <= headerRow.getLastCellNum(); col++) {
+                Cell cell = headerRow.getCell(col);
+                String employeeId = getCellValueAsString(cell);
+                if (employeeId != null && !employeeId.trim().isEmpty()) {
+                    Employee employee = employeeRepository.findByEmployeeIdAndOrganizationId(employeeId.trim(), tenantId)
+                            .orElse(null);
+                    if (employee != null) {
+                        columnToEmployee.put(col, employee);
+                        employeeIds.add(employeeId);
+                    } else {
+                        warnings.add("Employee not found in header: " + employeeId);
+                    }
+                }
+            }
+
+            if (columnToEmployee.isEmpty()) {
+                throw new RuntimeException("No valid employees found in header row. Please use Employee IDs in columns D onwards.");
+            }
+
+            // Process data rows (skip header)
+            for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
+                Row row = sheet.getRow(rowNum);
+                if (row == null) continue;
+
+                // Parse date from column A
+                String dateStr = getCellValueAsString(row.getCell(0));
+                if (dateStr == null || dateStr.trim().isEmpty()) continue;
+
+                LocalDate date = parseDate(dateStr);
+                if (date == null) {
+                    errors.add("Row " + (rowNum + 1) + ": Invalid date format: " + dateStr);
+                    errorCount++;
+                    continue;
+                }
+
+                // Determine if weekend
+                boolean isWeekend = date.getDayOfWeek().getValue() >= 6;
+
+                // Process each employee column
+                for (Map.Entry<Integer, Employee> entry : columnToEmployee.entrySet()) {
+                    int col = entry.getKey();
+                    Employee employee = entry.getValue();
+
+                    String cellValue = getCellValueAsString(row.getCell(col));
+                    String status;
+                    Long leaveTypeId = null;
+
+                    if (cellValue == null || cellValue.trim().isEmpty()) {
+                        // Empty cell = PRESENT or WEEKEND
+                        status = isWeekend ? "WEEKEND" : "PRESENT";
+                    } else {
+                        cellValue = cellValue.trim().toUpperCase();
+                        
+                        // Check if it's a direct status
+                        if (isValidStatus(cellValue)) {
+                            status = cellValue;
+                        } else {
+                            // Assume it's a leave type name
+                            LeaveType leaveType = leaveTypeMap.get(cellValue);
+                            if (leaveType != null) {
+                                status = "LEAVE";
+                                leaveTypeId = leaveType.getId();
+                            } else {
+                                // Try partial match
+                                LeaveType matchedType = null;
+                                for (Map.Entry<String, LeaveType> ltEntry : leaveTypeMap.entrySet()) {
+                                    if (ltEntry.getKey().contains(cellValue) || cellValue.contains(ltEntry.getKey())) {
+                                        matchedType = ltEntry.getValue();
+                                        break;
+                                    }
+                                }
+                                if (matchedType != null) {
+                                    status = "LEAVE";
+                                    leaveTypeId = matchedType.getId();
+                                } else {
+                                    warnings.add("Row " + (rowNum + 1) + ", Employee " + employee.getEmployeeId() + ": Unknown value '" + cellValue + "', marking as ABSENT");
+                                    status = "ABSENT";
+                                }
+                            }
+                        }
+                    }
+
+                    // Create or update attendance
+                    try {
+                        Attendance attendance = attendanceRepository.findByEmployeeIdAndDate(employee.getId(), date)
+                                .orElse(new Attendance());
+
+                        boolean isNew = attendance.getId() == null;
+
+                        attendance.setEmployeeId(employee.getId());
+                        attendance.setOrganizationId(tenantId);
+                        attendance.setDate(date);
+                        attendance.setStatus(status);
+                        attendance.setLeaveTypeId(leaveTypeId);
+
+                        attendanceRepository.save(attendance);
+
+                        if (isNew) {
+                            successCount++;
+                        } else {
+                            updatedCount++;
+                        }
+                    } catch (Exception e) {
+                        errors.add("Row " + (rowNum + 1) + ", Employee " + employee.getEmployeeId() + ": " + e.getMessage());
+                        errorCount++;
+                    }
+                }
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", errors.isEmpty());
+        result.put("successCount", successCount);
+        result.put("updatedCount", updatedCount);
+        result.put("errorCount", errorCount);
+        result.put("errors", errors.size() > 20 ? errors.subList(0, 20) : errors);
+        result.put("warnings", warnings.size() > 20 ? warnings.subList(0, 20) : warnings);
+        result.put("totalProcessed", successCount + updatedCount + errorCount);
+
+        log.info("Pivot import completed: {} created, {} updated, {} errors", successCount, updatedCount, errorCount);
+
+        return result;
     }
 }

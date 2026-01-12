@@ -197,7 +197,8 @@ public class AttendanceController {
                 ));
             }
 
-            Map<String, Object> result = attendanceImportService.importAttendanceFromExcel(file, tenantId);
+            // Use pivot-style import (Date rows, Employee columns)
+            Map<String, Object> result = attendanceImportService.importAttendanceFromPivotExcel(file, tenantId);
             return ResponseEntity.ok(result);
 
         } catch (Exception e) {

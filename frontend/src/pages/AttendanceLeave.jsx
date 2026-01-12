@@ -712,7 +712,7 @@ export default function AttendanceLeave() {
                                 {activeTab === 'leave-requests' && (
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
-                                            <h3 className="font-semibold text-slate-900">Leave Requests</h3>
+                                            <h3 className="font-semibold text-slate-900 dark:text-white">Leave Requests</h3>
                                             <Button onClick={loadLeaveRequests} variant="outline">
                                                 <RefreshCw className="w-4 h-4 mr-2" />
                                                 Refresh
@@ -721,22 +721,22 @@ export default function AttendanceLeave() {
 
                                         <div className="overflow-x-auto">
                                             <table className="w-full">
-                                                <thead className="bg-slate-50 border-b">
+                                                <thead className="bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
                                                     <tr>
-                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Employee</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Leave Type</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">From</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">To</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Days</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Reason</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Status</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Actions</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Employee</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Leave Type</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">From</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">To</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Days</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Reason</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Status</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Actions</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody className="divide-y divide-slate-200">
+                                                <tbody className="divide-y divide-slate-200 dark:divide-slate-600">
                                                     {leaveRequests.length === 0 ? (
                                                         <tr>
-                                                            <td colSpan="8" className="px-4 py-8 text-center text-slate-500">
+                                                            <td colSpan="8" className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
                                                                 No leave requests found
                                                             </td>
                                                         </tr>
@@ -745,13 +745,13 @@ export default function AttendanceLeave() {
                                                             const emp = employees.find(e => e.id === request.employeeId);
                                                             const leaveType = leaveTypes.find(t => t.id === request.leaveTypeId);
                                                             return (
-                                                                <tr key={request.id} className="hover:bg-slate-50">
-                                                                    <td className="px-4 py-3 font-medium">{emp ? `${emp.firstName} ${emp.lastName}` : 'Unknown'}</td>
-                                                                    <td className="px-4 py-3">{leaveType?.name || 'Unknown'}</td>
-                                                                    <td className="px-4 py-3">{request.startDate}</td>
-                                                                    <td className="px-4 py-3">{request.endDate}</td>
-                                                                    <td className="px-4 py-3">{request.totalDays}</td>
-                                                                    <td className="px-4 py-3 max-w-[200px] truncate">{request.reason}</td>
+                                                                <tr key={request.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                                                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">{emp ? `${emp.firstName} ${emp.lastName}` : 'Unknown'}</td>
+                                                                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{leaveType?.name || 'Unknown'}</td>
+                                                                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{request.startDate}</td>
+                                                                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{request.endDate}</td>
+                                                                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{request.totalDays}</td>
+                                                                    <td className="px-4 py-3 max-w-[200px] truncate text-slate-700 dark:text-slate-300">{request.reason}</td>
                                                                     <td className="px-4 py-3">
                                                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
                                                                             {request.status}
@@ -782,7 +782,7 @@ export default function AttendanceLeave() {
                                 {activeTab === 'leave-types' && (
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
-                                            <h3 className="font-semibold text-slate-900">Leave Types</h3>
+                                            <h3 className="font-semibold text-slate-900 dark:text-white">Leave Types</h3>
                                             <div className="flex gap-2">
                                                 <Button onClick={() => setShowLeaveTypeModal(true)} className="bg-pink-600 hover:bg-pink-700">
                                                     <Plus className="w-4 h-4 mr-2" />
@@ -797,20 +797,20 @@ export default function AttendanceLeave() {
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                             {leaveTypes.length === 0 ? (
-                                                <div className="col-span-full text-center py-8 text-slate-500">
+                                                <div className="col-span-full text-center py-8 text-slate-500 dark:text-slate-400">
                                                     No leave types configured. Click "Initialize Default Types" to add standard leave types.
                                                 </div>
                                             ) : (
                                                 leaveTypes.map(type => (
-                                                    <div key={type.id} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                                                    <div key={type.id} className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4 border border-slate-200 dark:border-slate-600">
                                                         <div className="flex items-center gap-3 mb-2">
                                                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: type.color || '#6B7280' }}></div>
-                                                            <h4 className="font-semibold text-slate-900">{type.name}</h4>
-                                                            <span className="text-xs bg-slate-200 px-2 py-0.5 rounded">{type.code}</span>
+                                                            <h4 className="font-semibold text-slate-900 dark:text-white">{type.name}</h4>
+                                                            <span className="text-xs bg-slate-200 dark:bg-slate-600 dark:text-slate-300 px-2 py-0.5 rounded">{type.code}</span>
                                                         </div>
-                                                        <p className="text-sm text-slate-600 mb-2">{type.description}</p>
+                                                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{type.description}</p>
                                                         <div className="flex items-center gap-4 text-sm">
-                                                            <span className="text-slate-500">Days/Year: <strong>{type.daysPerYear}</strong></span>
+                                                            <span className="text-slate-500 dark:text-slate-400">Days/Year: <strong className="text-slate-900 dark:text-white">{type.daysPerYear}</strong></span>
                                                             <span className={`px-2 py-0.5 rounded text-xs ${type.isPaid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                                                 {type.isPaid ? 'Paid' : 'Unpaid'}
                                                             </span>

@@ -380,18 +380,6 @@ export default function EmployeeList() {
                                         />
                                     </div>
 
-                                    {/* Compact Incomplete Employee Indicator */}
-                                    {filteredEmployees.filter(e => !e.isProfileComplete).length > 0 && activeView === 'Active Employees' && (
-                                        <button
-                                            onClick={() => setActiveView('Incomplete Employees')}
-                                            className="flex items-center gap-1.5 px-3 py-2 bg-orange-50 border border-orange-200 rounded-md hover:bg-orange-100 transition-colors"
-                                        >
-                                            <span className="text-orange-600 text-sm">⚠️</span>
-                                            <span className="text-xs font-medium text-orange-700">
-                                                {filteredEmployees.filter(e => !e.isProfileComplete).length} Incomplete
-                                            </span>
-                                        </button>
-                                    )}
                                 </div>
                                 <div className="flex gap-2">
                                     <button
@@ -462,7 +450,7 @@ export default function EmployeeList() {
                                     <select
                                         value={filters.workLocation}
                                         onChange={(e) => handleFilterChange('workLocation', e.target.value)}
-                                        className="appearance-none pl-2.5 pr-7 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
+                                        className="appearance-none pl-2.5 pr-8 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
                                     >
                                         <option value="">Select Work Location</option>
                                         <option value="Head Office">Head Office</option>
@@ -477,7 +465,7 @@ export default function EmployeeList() {
                                     <select
                                         value={filters.department}
                                         onChange={(e) => handleFilterChange('department', e.target.value)}
-                                        className="appearance-none pl-2.5 pr-7 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
+                                        className="appearance-none pl-2.5 pr-8 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
                                     >
                                         <option value="">Select Department</option>
                                         <option value="Engineering">Engineering</option>
@@ -494,7 +482,7 @@ export default function EmployeeList() {
                                     <select
                                         value={filters.designation}
                                         onChange={(e) => handleFilterChange('designation', e.target.value)}
-                                        className="appearance-none pl-2.5 pr-7 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
+                                        className="appearance-none pl-2.5 pr-8 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-md focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 cursor-pointer"
                                     >
                                         <option value="">Select Designation</option>
                                         <option value="Senior Developer">Senior Developer</option>
@@ -580,11 +568,6 @@ export default function EmployeeList() {
                                                                 <p className="text-sm font-medium text-slate-900 dark:text-white">{employee.name}</p>
                                                                 <p className="text-[10px] text-slate-500 dark:text-slate-400">{employee.employeeId}</p>
                                                             </div>
-                                                            {!employee.isProfileComplete && (
-                                                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-orange-50 text-orange-600 text-[10px] font-medium rounded">
-                                                                    ⚠️ {employee.profileCompletionPercentage}%
-                                                                </span>
-                                                            )}
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-3">

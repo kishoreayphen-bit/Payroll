@@ -292,55 +292,55 @@ export default function EmployeeFeatures() {
                                 {activeTab === 'loans' && (
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
-                                            <h3 className="font-semibold text-slate-900">Loan Applications</h3>
+                                            <h3 className="font-semibold text-slate-900 dark:text-white">Loan Applications</h3>
                                             <Button onClick={loadLoans} variant="outline" size="sm">
                                                 <RefreshCw className="w-4 h-4 mr-2" />Refresh
                                             </Button>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                                            <div className="bg-slate-50 rounded-lg p-4 border">
-                                                <p className="text-sm text-slate-500">Total Loans</p>
-                                                <p className="text-2xl font-bold text-slate-900">{loans.length}</p>
+                                            <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4 border border-slate-200 dark:border-slate-600">
+                                                <p className="text-sm text-slate-500 dark:text-slate-400">Total Loans</p>
+                                                <p className="text-2xl font-bold text-slate-900 dark:text-white">{loans.length}</p>
                                             </div>
-                                            <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                                                <p className="text-sm text-yellow-600">Pending</p>
-                                                <p className="text-2xl font-bold text-yellow-700">{loans.filter(l => l.status === 'PENDING').length}</p>
+                                            <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
+                                                <p className="text-sm text-yellow-600 dark:text-yellow-400">Pending</p>
+                                                <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">{loans.filter(l => l.status === 'PENDING').length}</p>
                                             </div>
-                                            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                                                <p className="text-sm text-green-600">Active</p>
-                                                <p className="text-2xl font-bold text-green-700">{loans.filter(l => ['ACTIVE', 'DISBURSED'].includes(l.status)).length}</p>
+                                            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
+                                                <p className="text-sm text-green-600 dark:text-green-400">Active</p>
+                                                <p className="text-2xl font-bold text-green-700 dark:text-green-300">{loans.filter(l => ['ACTIVE', 'DISBURSED'].includes(l.status)).length}</p>
                                             </div>
-                                            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                                                <p className="text-sm text-blue-600">Total Outstanding</p>
-                                                <p className="text-2xl font-bold text-blue-700">{formatCurrency(loans.reduce((sum, l) => sum + (l.outstandingAmount || 0), 0))}</p>
+                                            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                                                <p className="text-sm text-blue-600 dark:text-blue-400">Total Outstanding</p>
+                                                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{formatCurrency(loans.reduce((sum, l) => sum + (l.outstandingAmount || 0), 0))}</p>
                                             </div>
                                         </div>
 
                                         <table className="w-full">
-                                            <thead className="bg-slate-50 border-b">
+                                            <thead className="bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
                                                 <tr>
-                                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Employee</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Type</th>
-                                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Amount</th>
-                                                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase">Tenure</th>
-                                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">EMI</th>
-                                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Outstanding</th>
-                                                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase">Status</th>
-                                                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase">Actions</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Employee</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Type</th>
+                                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Amount</th>
+                                                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Tenure</th>
+                                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">EMI</th>
+                                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Outstanding</th>
+                                                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Status</th>
+                                                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Actions</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y">
+                                            <tbody className="divide-y divide-slate-200 dark:divide-slate-600">
                                                 {loans.length === 0 ? (
-                                                    <tr><td colSpan="8" className="px-4 py-8 text-center text-slate-500">No loan applications</td></tr>
+                                                    <tr><td colSpan="8" className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">No loan applications</td></tr>
                                                 ) : loans.map(loan => (
-                                                    <tr key={loan.id} className="hover:bg-slate-50">
-                                                        <td className="px-4 py-3 font-medium">{getEmployeeName(loan.employeeId)}</td>
-                                                        <td className="px-4 py-3">{loan.loanType?.replace('_', ' ')}</td>
-                                                        <td className="px-4 py-3 text-right">{formatCurrency(loan.principalAmount)}</td>
-                                                        <td className="px-4 py-3 text-center">{loan.tenureMonths} months</td>
-                                                        <td className="px-4 py-3 text-right">{formatCurrency(loan.emiAmount)}</td>
-                                                        <td className="px-4 py-3 text-right">{formatCurrency(loan.outstandingAmount)}</td>
+                                                    <tr key={loan.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">{getEmployeeName(loan.employeeId)}</td>
+                                                        <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{loan.loanType?.replace('_', ' ')}</td>
+                                                        <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-300">{formatCurrency(loan.principalAmount)}</td>
+                                                        <td className="px-4 py-3 text-center text-slate-700 dark:text-slate-300">{loan.tenureMonths} months</td>
+                                                        <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-300">{formatCurrency(loan.emiAmount)}</td>
+                                                        <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-300">{formatCurrency(loan.outstandingAmount)}</td>
                                                         <td className="px-4 py-3 text-center">
                                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}>{loan.status}</span>
                                                         </td>
@@ -365,53 +365,53 @@ export default function EmployeeFeatures() {
                                 {activeTab === 'reimbursements' && (
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
-                                            <h3 className="font-semibold text-slate-900">Expense Claims</h3>
+                                            <h3 className="font-semibold text-slate-900 dark:text-white">Expense Claims</h3>
                                             <Button onClick={loadReimbursements} variant="outline" size="sm">
                                                 <RefreshCw className="w-4 h-4 mr-2" />Refresh
                                             </Button>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                                            <div className="bg-slate-50 rounded-lg p-4 border">
-                                                <p className="text-sm text-slate-500">Total Claims</p>
-                                                <p className="text-2xl font-bold text-slate-900">{reimbursements.length}</p>
+                                            <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4 border border-slate-200 dark:border-slate-600">
+                                                <p className="text-sm text-slate-500 dark:text-slate-400">Total Claims</p>
+                                                <p className="text-2xl font-bold text-slate-900 dark:text-white">{reimbursements.length}</p>
                                             </div>
-                                            <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                                                <p className="text-sm text-yellow-600">Pending</p>
-                                                <p className="text-2xl font-bold text-yellow-700">{reimbursements.filter(r => r.status === 'PENDING').length}</p>
+                                            <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
+                                                <p className="text-sm text-yellow-600 dark:text-yellow-400">Pending</p>
+                                                <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">{reimbursements.filter(r => r.status === 'PENDING').length}</p>
                                             </div>
-                                            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                                                <p className="text-sm text-green-600">Approved</p>
-                                                <p className="text-2xl font-bold text-green-700">{reimbursements.filter(r => ['APPROVED', 'PARTIALLY_APPROVED'].includes(r.status)).length}</p>
+                                            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
+                                                <p className="text-sm text-green-600 dark:text-green-400">Approved</p>
+                                                <p className="text-2xl font-bold text-green-700 dark:text-green-300">{reimbursements.filter(r => ['APPROVED', 'PARTIALLY_APPROVED'].includes(r.status)).length}</p>
                                             </div>
-                                            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                                                <p className="text-sm text-blue-600">Pending Payout</p>
-                                                <p className="text-2xl font-bold text-blue-700">{formatCurrency(reimbursements.filter(r => ['APPROVED', 'PARTIALLY_APPROVED'].includes(r.status) && r.paidInPayrollId == null).reduce((sum, r) => sum + (r.approvedAmount || r.amount || 0), 0))}</p>
+                                            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                                                <p className="text-sm text-blue-600 dark:text-blue-400">Pending Payout</p>
+                                                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{formatCurrency(reimbursements.filter(r => ['APPROVED', 'PARTIALLY_APPROVED'].includes(r.status) && r.paidInPayrollId == null).reduce((sum, r) => sum + (r.approvedAmount || r.amount || 0), 0))}</p>
                                             </div>
                                         </div>
 
                                         <table className="w-full">
-                                            <thead className="bg-slate-50 border-b">
+                                            <thead className="bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
                                                 <tr>
-                                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Employee</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Category</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Description</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Date</th>
-                                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Amount</th>
-                                                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase">Status</th>
-                                                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase">Actions</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Employee</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Category</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Description</th>
+                                                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Date</th>
+                                                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Amount</th>
+                                                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Status</th>
+                                                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Actions</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y">
+                                            <tbody className="divide-y divide-slate-200 dark:divide-slate-600">
                                                 {reimbursements.length === 0 ? (
-                                                    <tr><td colSpan="7" className="px-4 py-8 text-center text-slate-500">No expense claims</td></tr>
+                                                    <tr><td colSpan="7" className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">No expense claims</td></tr>
                                                 ) : reimbursements.map(claim => (
-                                                    <tr key={claim.id} className="hover:bg-slate-50">
-                                                        <td className="px-4 py-3 font-medium">{getEmployeeName(claim.employeeId)}</td>
-                                                        <td className="px-4 py-3">{claim.category}</td>
-                                                        <td className="px-4 py-3 max-w-[200px] truncate">{claim.description}</td>
-                                                        <td className="px-4 py-3">{claim.expenseDate}</td>
-                                                        <td className="px-4 py-3 text-right">{formatCurrency(claim.amount)}</td>
+                                                    <tr key={claim.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">{getEmployeeName(claim.employeeId)}</td>
+                                                        <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{claim.category}</td>
+                                                        <td className="px-4 py-3 max-w-[200px] truncate text-slate-700 dark:text-slate-300">{claim.description}</td>
+                                                        <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{claim.expenseDate}</td>
+                                                        <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-300">{formatCurrency(claim.amount)}</td>
                                                         <td className="px-4 py-3 text-center">
                                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(claim.status)}`}>{claim.status}</span>
                                                         </td>
