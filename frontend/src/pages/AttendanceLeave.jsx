@@ -927,7 +927,7 @@ export default function AttendanceLeave() {
                     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 max-w-lg w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Add Leave Type</h3>
-                            <button onClick={() => setShowLeaveTypeModal(false)} className="p-1 hover:bg-slate-100 rounded">
+                            <button onClick={() => setShowLeaveTypeModal(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-300">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -938,7 +938,7 @@ export default function AttendanceLeave() {
                                     type="text"
                                     value={newLeaveType.name}
                                     onChange={(e) => setNewLeaveType({ ...newLeaveType, name: e.target.value })}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                     placeholder="e.g., Casual Leave"
                                 />
                             </div>
@@ -948,7 +948,7 @@ export default function AttendanceLeave() {
                                     type="text"
                                     value={newLeaveType.code}
                                     onChange={(e) => setNewLeaveType({ ...newLeaveType, code: e.target.value.toUpperCase() })}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                     placeholder="e.g., CL"
                                     maxLength={10}
                                 />
@@ -959,7 +959,7 @@ export default function AttendanceLeave() {
                                     type="number"
                                     value={newLeaveType.daysPerYear}
                                     onChange={(e) => setNewLeaveType({ ...newLeaveType, daysPerYear: parseInt(e.target.value) || 0 })}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                                     min="0"
                                 />
                             </div>
@@ -968,7 +968,7 @@ export default function AttendanceLeave() {
                                 <textarea
                                     value={newLeaveType.description}
                                     onChange={(e) => setNewLeaveType({ ...newLeaveType, description: e.target.value })}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                     rows="3"
                                     placeholder="Brief description of this leave type"
                                 />

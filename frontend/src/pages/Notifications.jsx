@@ -148,7 +148,7 @@ export default function Notifications() {
                                 {unreadCount > 0 && (
                                     <Button
                                         onClick={markAllAsRead}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-100 dark:bg-slate-700 text-rose-700 dark:text-slate-200 border border-rose-200 dark:border-slate-600 rounded-lg hover:bg-rose-200 dark:hover:bg-slate-600 transition-colors text-xs font-medium"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 dark:bg-slate-700 text-white dark:text-slate-200 border border-rose-600 dark:border-slate-600 rounded-lg hover:bg-rose-600 dark:hover:bg-slate-600 transition-colors text-xs font-medium shadow-sm"
                                     >
                                         <CheckCheck className="w-3.5 h-3.5" />
                                         Mark all read
