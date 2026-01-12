@@ -79,12 +79,23 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- PDF Generation -->
+    <!-- PDF Generation - OpenPDF for Form16 (old iText API) -->
+    <dependency>
+      <groupId>com.github.librepdf</groupId>
+      <artifactId>openpdf</artifactId>
+      <version>1.3.30</version>
+    </dependency>
+    
+    <!-- PDF Generation - iText 7 for Payslips -->
     <dependency>
       <groupId>com.itextpdf</groupId>
-      <artifactId>itext7-core</artifactId>
+      <artifactId>kernel</artifactId>
       <version>7.2.5</version>
-      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>layout</artifactId>
+      <version>7.2.5</version>
     </dependency>
 
     <!-- Email -->
