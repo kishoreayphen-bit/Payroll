@@ -812,26 +812,26 @@ function OverviewTab({ employee, onTogglePT, onEditBasicInfo, onEditPersonalInfo
                 </div>
                 <div className="grid grid-cols-2 gap-x-12 gap-y-4">
                     <div>
-                        <p className="text-xs text-slate-500 mb-1">Professional Tax</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Professional Tax</p>
                         <p className="text-sm text-slate-900 dark:text-white flex items-center gap-1">
                             {employee?.professionalTax ? (
                                 <>
-                                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                    <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                                     <span>Enabled</span>
                                     <button
                                         onClick={onTogglePT}
-                                        className="text-slate-400 text-xs hover:text-rose-600 ml-1 underline decoration-dotted"
+                                        className="text-slate-400 dark:text-slate-500 text-xs hover:text-rose-600 dark:hover:text-rose-400 ml-1 underline decoration-dotted"
                                     >
                                         (Disable)
                                     </button>
                                 </>
                             ) : (
                                 <>
-                                    <X className="w-4 h-4 text-slate-400" />
+                                    <X className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                                     <span>Disabled</span>
                                     <button
                                         onClick={onTogglePT}
-                                        className="text-rose-600 text-xs font-medium hover:text-rose-700 ml-1 underline decoration-dotted"
+                                        className="text-rose-600 dark:text-rose-400 text-xs font-medium hover:text-rose-700 dark:hover:text-rose-300 ml-1 underline decoration-dotted"
                                     >
                                         (Enable)
                                     </button>
@@ -852,27 +852,27 @@ function OverviewTab({ employee, onTogglePT, onEditBasicInfo, onEditPersonalInfo
                 </div>
                 <div className="grid grid-cols-2 gap-x-12 gap-y-4">
                     <div>
-                        <p className="text-xs text-slate-500 mb-1">Date of Birth</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Date of Birth</p>
                         <p className="text-sm text-slate-900 dark:text-white">{employee.dateOfBirth}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-slate-500 mb-1">Email Address</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Email Address</p>
                         <p className="text-sm text-slate-900 dark:text-white">{employee.personalEmail}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-slate-500 mb-1">Father's Name</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Father's Name</p>
                         <p className="text-sm text-slate-900 dark:text-white">{employee.fatherName}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-slate-500 mb-1">Residential Address</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Residential Address</p>
                         <p className="text-sm text-slate-900 dark:text-white">{employee.address || '-'}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-slate-500 mb-1">PAN</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">PAN</p>
                         <p className="text-sm text-slate-900 dark:text-white">{employee.panNumber || '-'}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-slate-500 mb-1">Differently Abled Type</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Differently Abled Type</p>
                         <p className="text-sm text-slate-900 dark:text-white">{employee.differentlyAbledType || 'None'}</p>
                     </div>
                 </div>
@@ -888,19 +888,19 @@ function OverviewTab({ employee, onTogglePT, onEditBasicInfo, onEditPersonalInfo
                 </div>
                 <div className="grid grid-cols-2 gap-x-12 gap-y-4">
                     <div>
-                        <p className="text-xs text-slate-500 mb-1">Payment Mode</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Payment Mode</p>
                         <p className="text-sm text-slate-900 dark:text-white">{employee.paymentMethod || '-'}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-slate-500 mb-1">Bank Name</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Bank Name</p>
                         <p className="text-sm text-slate-900 dark:text-white">{employee.bankName || '-'}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-slate-500 mb-1">Account Number</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Account Number</p>
                         <p className="text-sm text-slate-900 dark:text-white">{employee.accountNumber || '-'}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-slate-500 mb-1">IFSC Code</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">IFSC Code</p>
                         <p className="text-sm text-slate-900 dark:text-white">{employee.ifscCode || '-'}</p>
                     </div>
                 </div>
