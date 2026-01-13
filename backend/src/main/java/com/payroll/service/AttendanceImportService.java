@@ -203,11 +203,16 @@ public class AttendanceImportService {
             }
 
             // Get leave types for mapping
-            List<LeaveType> leaveTypes = leaveTypeRepository.findByOrganizationIdAndIsActiveTrue(tenantId);
+            List<LeaveType> leaveTypes = leaveTypeRepository.findByOrganizationId(tenantId);
             Map<String, LeaveType> leaveTypeMap = new HashMap<>();
             for (LeaveType lt : leaveTypes) {
-                leaveTypeMap.put(lt.getName().toUpperCase(), lt);
-                leaveTypeMap.put(lt.getCode().toUpperCase(), lt);
+                // Only include active leave types
+                if (lt.getIsActive() != null && lt.getIsActive()) {
+                    leaveTypeMap.put(lt.getName().toUpperCase(), lt);
+                    if (lt.getCode() != null && !lt.getCode().isEmpty()) {
+                        leaveTypeMap.put(lt.getCode().toUpperCase(), lt);
+                    }
+                }
             }
 
             // Parse employee IDs from header (columns D onwards, index 3+)
