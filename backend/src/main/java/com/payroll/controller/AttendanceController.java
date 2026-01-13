@@ -3,6 +3,7 @@ package com.payroll.controller;
 import com.payroll.entity.Attendance;
 import com.payroll.service.AttendanceService;
 import com.payroll.service.AttendanceImportService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/attendance")
 @CrossOrigin(origins = "*")
@@ -202,9 +204,11 @@ public class AttendanceController {
             return ResponseEntity.ok(result);
 
         } catch (Exception e) {
+            log.error("Error importing attendance", e);
             return ResponseEntity.internalServerError().body(Map.of(
                 "success", false,
-                "message", "Failed to import attendance: " + e.getMessage()
+                "message", "Failed to import attendance: " + e.getMessage(),
+                "error", e.getClass().getSimpleName()
             ));
         }
     }
