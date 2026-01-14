@@ -235,7 +235,11 @@ public class AttendanceImportService {
             }
 
             if (columnToEmployee.isEmpty()) {
-                throw new RuntimeException("No valid employees found in header row. Please use Employee IDs in columns D onwards.");
+                String headerEmployeeIds = String.join(", ", employeeIds);
+                throw new RuntimeException("No valid employees found in header row. " +
+                        "Header contained: [" + headerEmployeeIds + "]. " +
+                        "Please ensure these Employee IDs exist in your system. " +
+                        "Use actual Employee IDs from your employee list in columns D onwards.");
             }
 
             // Process data rows (skip header)
@@ -398,7 +402,18 @@ public class AttendanceImportService {
             }
 
             if (columnToEmployee.isEmpty()) {
-                throw new RuntimeException("No valid employees found in header row. Please use Employee IDs in columns after Date, Sprint, Day.");
+                List<String> attemptedIds = new ArrayList<>();
+                for (int col = 3; col < headers.length; col++) {
+                    String employeeId = headers[col].trim();
+                    if (!employeeId.isEmpty()) {
+                        attemptedIds.add(employeeId);
+                    }
+                }
+                String headerEmployeeIds = String.join(", ", attemptedIds);
+                throw new RuntimeException("No valid employees found in header row. " +
+                        "Header contained: [" + headerEmployeeIds + "]. " +
+                        "Please ensure these Employee IDs exist in your system. " +
+                        "Use actual Employee IDs from your employee list in columns after Date, Sprint, Day.");
             }
 
             // Process data rows
