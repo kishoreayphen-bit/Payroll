@@ -322,8 +322,8 @@ public class AttendanceService {
             double totalUsage = previousUsage + currentMonthUsage;
             
             LeaveType leaveType = leaveTypeCache.get(leaveTypeId);
-            if (leaveType != null) {
-                double totalAllocation = leaveType.getDaysPerYear();
+            if (leaveType != null && leaveType.getDaysPerYear() != null) {
+                double totalAllocation = leaveType.getDaysPerYear().doubleValue();
                 
                 log.info("Employee {}: Leave Type: {}, Previous: {}, Current: {}, Total: {}, Limit: {}", 
                     employeeId, leaveType.getName(), previousUsage, currentMonthUsage, totalUsage, totalAllocation);
