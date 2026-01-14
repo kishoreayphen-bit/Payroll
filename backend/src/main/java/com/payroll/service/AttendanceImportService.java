@@ -113,9 +113,9 @@ public class AttendanceImportService {
                     "Date",
                     "Sprint",
                     "Day",
-                    "Employee1",
-                    "Employee2",
-                    "Employee3"
+                    "John Doe",
+                    "Jane Smith",
+                    "Bob Johnson"
             };
 
             for (int i = 0; i < headers.length; i++) {
@@ -215,31 +215,32 @@ public class AttendanceImportService {
                 }
             }
 
-            // Parse employee IDs from header (columns D onwards, index 3+)
-            List<String> employeeIds = new ArrayList<>();
+            // Parse employee names from header (columns D onwards, index 3+)
+            List<String> employeeNames = new ArrayList<>();
             Map<Integer, Employee> columnToEmployee = new HashMap<>();
 
             for (int col = 3; col <= headerRow.getLastCellNum(); col++) {
                 Cell cell = headerRow.getCell(col);
-                String employeeId = getCellValueAsString(cell);
-                if (employeeId != null && !employeeId.trim().isEmpty()) {
-                    Employee employee = employeeRepository.findByEmployeeIdAndOrganizationId(employeeId.trim(), tenantId)
+                String employeeName = getCellValueAsString(cell);
+                if (employeeName != null && !employeeName.trim().isEmpty()) {
+                    // Try to find employee by name (case-insensitive)
+                    Employee employee = employeeRepository.findByNameIgnoreCaseAndOrganizationId(employeeName.trim(), tenantId)
                             .orElse(null);
                     if (employee != null) {
                         columnToEmployee.put(col, employee);
-                        employeeIds.add(employeeId);
+                        employeeNames.add(employeeName);
                     } else {
-                        warnings.add("Employee not found in header: " + employeeId);
+                        warnings.add("Employee not found in header: " + employeeName);
                     }
                 }
             }
 
             if (columnToEmployee.isEmpty()) {
-                String headerEmployeeIds = String.join(", ", employeeIds);
+                String headerEmployeeNames = String.join(", ", employeeNames);
                 throw new RuntimeException("No valid employees found in header row. " +
-                        "Header contained: [" + headerEmployeeIds + "]. " +
-                        "Please ensure these Employee IDs exist in your system. " +
-                        "Use actual Employee IDs from your employee list in columns D onwards.");
+                        "Header contained: [" + headerEmployeeNames + "]. " +
+                        "Please ensure these employee names exist in your system. " +
+                        "Use actual employee names from your employee list in columns D onwards.");
             }
 
             // Process data rows (skip header)
@@ -386,34 +387,35 @@ public class AttendanceImportService {
                 throw new RuntimeException("Invalid CSV format. Expected: Date, Sprint, Day, Employee1, Employee2, ...");
             }
 
-            // Parse employee IDs from header (columns 3+, index 3+)
+            // Parse employee names from header (columns 3+, index 3+)
             Map<Integer, Employee> columnToEmployee = new HashMap<>();
             for (int col = 3; col < headers.length; col++) {
-                String employeeId = headers[col].trim();
-                if (!employeeId.isEmpty()) {
-                    Employee employee = employeeRepository.findByEmployeeIdAndOrganizationId(employeeId, tenantId)
+                String employeeName = headers[col].trim();
+                if (!employeeName.isEmpty()) {
+                    // Try to find employee by name (case-insensitive)
+                    Employee employee = employeeRepository.findByNameIgnoreCaseAndOrganizationId(employeeName, tenantId)
                             .orElse(null);
                     if (employee != null) {
                         columnToEmployee.put(col, employee);
                     } else {
-                        warnings.add("Employee not found in header: " + employeeId);
+                        warnings.add("Employee not found in header: " + employeeName);
                     }
                 }
             }
 
             if (columnToEmployee.isEmpty()) {
-                List<String> attemptedIds = new ArrayList<>();
+                List<String> attemptedNames = new ArrayList<>();
                 for (int col = 3; col < headers.length; col++) {
-                    String employeeId = headers[col].trim();
-                    if (!employeeId.isEmpty()) {
-                        attemptedIds.add(employeeId);
+                    String employeeName = headers[col].trim();
+                    if (!employeeName.isEmpty()) {
+                        attemptedNames.add(employeeName);
                     }
                 }
-                String headerEmployeeIds = String.join(", ", attemptedIds);
+                String headerEmployeeNames = String.join(", ", attemptedNames);
                 throw new RuntimeException("No valid employees found in header row. " +
-                        "Header contained: [" + headerEmployeeIds + "]. " +
-                        "Please ensure these Employee IDs exist in your system. " +
-                        "Use actual Employee IDs from your employee list in columns after Date, Sprint, Day.");
+                        "Header contained: [" + headerEmployeeNames + "]. " +
+                        "Please ensure these employee names exist in your system. " +
+                        "Use actual employee names from your employee list in columns after Date, Sprint, Day.");
             }
 
             // Process data rows
