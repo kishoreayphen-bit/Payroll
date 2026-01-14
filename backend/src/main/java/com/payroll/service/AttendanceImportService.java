@@ -342,4 +342,170 @@ public class AttendanceImportService {
 
         return result;
     }
+
+    /**
+     * Import attendance from pivot-style CSV (Date rows, Employee columns)
+     */
+    @Transactional
+    public Map<String, Object> importAttendanceFromPivotCsv(MultipartFile file, Long tenantId) throws IOException {
+        log.info("Starting pivot-style CSV attendance import for tenant: {}", tenantId);
+
+        List<String> errors = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
+        int successCount = 0;
+        int errorCount = 0;
+        int updatedCount = 0;
+
+        try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                new java.io.InputStreamReader(file.getInputStream()))) {
+
+            // Get leave types for mapping
+            List<LeaveType> leaveTypes = leaveTypeRepository.findByOrganizationId(tenantId);
+            Map<String, LeaveType> leaveTypeMap = new HashMap<>();
+            for (LeaveType lt : leaveTypes) {
+                if (lt.getIsActive() != null && lt.getIsActive()) {
+                    leaveTypeMap.put(lt.getName().toUpperCase(), lt);
+                    if (lt.getCode() != null && !lt.getCode().isEmpty()) {
+                        leaveTypeMap.put(lt.getCode().toUpperCase(), lt);
+                    }
+                }
+            }
+
+            // Read header row
+            String headerLine = reader.readLine();
+            if (headerLine == null || headerLine.trim().isEmpty()) {
+                throw new RuntimeException("CSV file is empty or missing header row");
+            }
+
+            String[] headers = headerLine.split(",");
+            if (headers.length < 4) {
+                throw new RuntimeException("Invalid CSV format. Expected: Date, Sprint, Day, Employee1, Employee2, ...");
+            }
+
+            // Parse employee IDs from header (columns 3+, index 3+)
+            Map<Integer, Employee> columnToEmployee = new HashMap<>();
+            for (int col = 3; col < headers.length; col++) {
+                String employeeId = headers[col].trim();
+                if (!employeeId.isEmpty()) {
+                    Employee employee = employeeRepository.findByEmployeeIdAndOrganizationId(employeeId, tenantId)
+                            .orElse(null);
+                    if (employee != null) {
+                        columnToEmployee.put(col, employee);
+                    } else {
+                        warnings.add("Employee not found in header: " + employeeId);
+                    }
+                }
+            }
+
+            if (columnToEmployee.isEmpty()) {
+                throw new RuntimeException("No valid employees found in header row. Please use Employee IDs in columns after Date, Sprint, Day.");
+            }
+
+            // Process data rows
+            String line;
+            int rowNum = 1;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+
+                String[] values = line.split(",", -1); // -1 to keep empty trailing fields
+                if (values.length < 1) continue;
+
+                // Parse date from column 0
+                String dateStr = values[0].trim();
+                if (dateStr.isEmpty()) continue;
+
+                LocalDate date = parseDate(dateStr);
+                if (date == null) {
+                    errors.add("Row " + (rowNum + 1) + ": Invalid date format: " + dateStr);
+                    errorCount++;
+                    rowNum++;
+                    continue;
+                }
+
+                // Determine if weekend
+                boolean isWeekend = date.getDayOfWeek().getValue() >= 6;
+
+                // Process each employee column
+                for (Map.Entry<Integer, Employee> entry : columnToEmployee.entrySet()) {
+                    int col = entry.getKey();
+                    Employee employee = entry.getValue();
+
+                    String cellValue = col < values.length ? values[col].trim() : "";
+                    String status;
+                    Long leaveTypeId = null;
+
+                    if (cellValue.isEmpty()) {
+                        status = isWeekend ? "WEEKEND" : "PRESENT";
+                    } else {
+                        String upperValue = cellValue.toUpperCase();
+                        
+                        if (isValidStatus(upperValue)) {
+                            status = upperValue;
+                        } else {
+                            LeaveType leaveType = leaveTypeMap.get(upperValue);
+                            if (leaveType != null) {
+                                status = "LEAVE";
+                                leaveTypeId = leaveType.getId();
+                            } else {
+                                // Try partial match
+                                LeaveType matchedType = null;
+                                for (Map.Entry<String, LeaveType> ltEntry : leaveTypeMap.entrySet()) {
+                                    if (ltEntry.getKey().contains(upperValue) || upperValue.contains(ltEntry.getKey())) {
+                                        matchedType = ltEntry.getValue();
+                                        break;
+                                    }
+                                }
+                                if (matchedType != null) {
+                                    status = "LEAVE";
+                                    leaveTypeId = matchedType.getId();
+                                } else {
+                                    warnings.add("Row " + (rowNum + 1) + ", Employee " + employee.getEmployeeId() + ": Unknown value '" + cellValue + "', marking as ABSENT");
+                                    status = "ABSENT";
+                                }
+                            }
+                        }
+                    }
+
+                    // Create or update attendance
+                    try {
+                        Attendance attendance = attendanceRepository.findByEmployeeIdAndDate(employee.getId(), date)
+                                .orElse(new Attendance());
+
+                        boolean isNew = attendance.getId() == null;
+
+                        attendance.setEmployeeId(employee.getId());
+                        attendance.setOrganizationId(tenantId);
+                        attendance.setDate(date);
+                        attendance.setStatus(status);
+                        attendance.setLeaveTypeId(leaveTypeId);
+
+                        attendanceRepository.save(attendance);
+
+                        if (isNew) {
+                            successCount++;
+                        } else {
+                            updatedCount++;
+                        }
+                    } catch (Exception e) {
+                        errors.add("Row " + (rowNum + 1) + ", Employee " + employee.getEmployeeId() + ": " + e.getMessage());
+                        errorCount++;
+                    }
+                }
+                rowNum++;
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", errors.isEmpty());
+        result.put("successCount", successCount);
+        result.put("updatedCount", updatedCount);
+        result.put("errorCount", errorCount);
+        result.put("errors", errors.size() > 20 ? errors.subList(0, 20) : errors);
+        result.put("warnings", warnings.size() > 20 ? warnings.subList(0, 20) : warnings);
+        result.put("totalProcessed", successCount + updatedCount + errorCount);
+
+        log.info("CSV import completed: {} created, {} updated, {} errors", successCount, updatedCount, errorCount);
+
+        return result;
+    }
 }

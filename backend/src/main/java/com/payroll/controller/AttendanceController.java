@@ -192,15 +192,20 @@ public class AttendanceController {
             }
 
             String filename = file.getOriginalFilename();
-            if (filename == null || (!filename.endsWith(".xlsx") && !filename.endsWith(".xls"))) {
+            if (filename == null || (!filename.endsWith(".xlsx") && !filename.endsWith(".xls") && !filename.endsWith(".csv"))) {
                 return ResponseEntity.badRequest().body(Map.of(
                     "success", false,
-                    "message", "Please upload a valid Excel file (.xlsx or .xls)"
+                    "message", "Please upload a valid Excel file (.xlsx, .xls) or CSV file (.csv)"
                 ));
             }
 
             // Use pivot-style import (Date rows, Employee columns)
-            Map<String, Object> result = attendanceImportService.importAttendanceFromPivotExcel(file, tenantId);
+            Map<String, Object> result;
+            if (filename.endsWith(".csv")) {
+                result = attendanceImportService.importAttendanceFromPivotCsv(file, tenantId);
+            } else {
+                result = attendanceImportService.importAttendanceFromPivotExcel(file, tenantId);
+            }
             return ResponseEntity.ok(result);
 
         } catch (Exception e) {
