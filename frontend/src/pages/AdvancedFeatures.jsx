@@ -196,7 +196,7 @@ export default function AdvancedFeatures() {
                                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Select Pay Run</h3>
                                 <select
                                     value={selectedPayRun || ''}
-                                    onChange={(e) => setSelectedPayRun(e.target.value)}
+                                    onChange={(e) => setSelectedPayRun(e.target.value ? parseInt(e.target.value) : null)}
                                     className="w-full max-w-md px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                                 >
                                     <option value="">Select a pay run...</option>
