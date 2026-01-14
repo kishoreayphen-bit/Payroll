@@ -266,7 +266,7 @@ export default function Signup() {
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
                   <Select
                     id="country"
-                    className="w-full h-11 pl-9 pr-3 rounded-lg border border-slate-300 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 appearance-none"
+                    className="w-full h-11 pl-10 pr-3 rounded-lg border border-slate-300 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 appearance-none"
                     {...register('country')}
                   >
                     <option value="">Select Country</option>
@@ -285,7 +285,7 @@ export default function Signup() {
                   <Select
                     id="state"
                     disabled={!selectedCountry || currentStateOptions.length === 0}
-                    className="w-full h-11 pl-9 pr-3 rounded-lg border border-slate-300 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 disabled:bg-slate-50 disabled:text-slate-400 appearance-none"
+                    className="w-full h-11 pl-10 pr-3 rounded-lg border border-slate-300 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 disabled:bg-slate-50 disabled:text-slate-400 appearance-none"
                     {...register('state')}
                   >
                     <option value="">{currentStateOptions.length ? 'Select State' : 'Select Country First'}</option>
