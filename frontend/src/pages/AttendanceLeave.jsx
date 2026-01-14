@@ -999,8 +999,8 @@ export default function AttendanceLeave() {
 
             {/* Import Modal */}
             {showImportModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={closeImportModal}>
-                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 max-w-2xl w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto" onClick={closeImportModal}>
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 max-w-2xl w-full my-8 shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 <Upload className="w-5 h-5 text-purple-600" />
