@@ -396,11 +396,10 @@ export default function EmployeeDetails() {
                                     <span className="font-medium">Pay Runs</span>
                                 </Link>
 
-                                <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all cursor-pointer group">
+                                <Link to="/attendance" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
                                     <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    <span className="font-medium">Approvals</span>
-                                    <ChevronRight className="w-4 h-4 ml-auto opacity-50" />
-                                </div>
+                                    <span className="font-medium">Attendance</span>
+                                </Link>
 
                                 <Link to="/form16" className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all group">
                                     <FileText className="w-5 h-5 group-hover:scale-110 transition-transform" />
