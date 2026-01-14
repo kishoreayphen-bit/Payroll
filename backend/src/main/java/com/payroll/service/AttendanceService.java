@@ -290,9 +290,56 @@ public class AttendanceService {
         
         log.info("Employee {}: Previous months usage: {}", employeeId, previousMonthsUsageByType);
         
-        // Now calculate LOP for THIS month, considering previous months' usage
-        double lopDays = 0.0;
+        // First pass: Count total leaves by type in current month (excluding unpaid leaves)
         Map<Long, Double> currentMonthUsageByType = new HashMap<>();
+        Map<Long, LeaveType> leaveTypeCache = new HashMap<>();
+        
+        for (Attendance a : attendanceList) {
+            DayOfWeek dayOfWeek = a.getDate().getDayOfWeek();
+            // Skip weekends
+            if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+                continue;
+            }
+            
+            if ("LEAVE".equals(a.getStatus()) && a.getLeaveTypeId() != null) {
+                LeaveType leaveType = leaveTypeCache.computeIfAbsent(a.getLeaveTypeId(), 
+                    id -> leaveTypeRepository.findById(id).orElse(null));
+                
+                if (leaveType != null && (leaveType.getIsPaid() == null || leaveType.getIsPaid())) {
+                    // Only count paid leaves for balance checking
+                    double currentUsage = currentMonthUsageByType.getOrDefault(a.getLeaveTypeId(), 0.0);
+                    currentMonthUsageByType.put(a.getLeaveTypeId(), currentUsage + 1.0);
+                }
+            }
+        }
+        
+        // Calculate excess leaves (LOP) by type
+        Map<Long, Double> excessLeavesByType = new HashMap<>();
+        for (Map.Entry<Long, Double> entry : currentMonthUsageByType.entrySet()) {
+            Long leaveTypeId = entry.getKey();
+            double currentMonthUsage = entry.getValue();
+            double previousUsage = previousMonthsUsageByType.getOrDefault(leaveTypeId, 0.0);
+            double totalUsage = previousUsage + currentMonthUsage;
+            
+            LeaveType leaveType = leaveTypeCache.get(leaveTypeId);
+            if (leaveType != null) {
+                double totalAllocation = leaveType.getDaysPerYear();
+                
+                log.info("Employee {}: Leave Type: {}, Previous: {}, Current: {}, Total: {}, Limit: {}", 
+                    employeeId, leaveType.getName(), previousUsage, currentMonthUsage, totalUsage, totalAllocation);
+                
+                if (totalUsage > totalAllocation) {
+                    double excess = totalUsage - totalAllocation;
+                    excessLeavesByType.put(leaveTypeId, excess);
+                    log.info("Employee {}: Leave Type {} EXCEEDS allocation by {} days", 
+                        employeeId, leaveType.getName(), excess);
+                }
+            }
+        }
+        
+        // Second pass: Calculate actual LOP days
+        double lopDays = 0.0;
+        Map<Long, Double> lopCountedByType = new HashMap<>();
         
         for (Attendance a : attendanceList) {
             DayOfWeek dayOfWeek = a.getDate().getDayOfWeek();
@@ -309,44 +356,32 @@ public class AttendanceService {
             else if ("HALF_DAY".equals(a.getStatus()) && a.getLeaveTypeId() == null) {
                 lopDays += 0.5;
             }
-            // LEAVE status - check if it's paid or unpaid based on leave balance
+            // LEAVE status - check if it's paid or unpaid
             else if ("LEAVE".equals(a.getStatus()) && a.getLeaveTypeId() != null) {
-                double leaveDays = 1.0;
-                
-                // Check if this leave type is paid or unpaid
-                LeaveType leaveType = leaveTypeRepository.findById(a.getLeaveTypeId()).orElse(null);
+                LeaveType leaveType = leaveTypeCache.get(a.getLeaveTypeId());
                 
                 if (leaveType != null) {
                     // If leave type is marked as unpaid, it's always LOP
                     if (leaveType.getIsPaid() != null && !leaveType.getIsPaid()) {
-                        lopDays += leaveDays;
+                        lopDays += 1.0;
                         continue;
                     }
                     
-                    // For paid leave types, check against TOTAL annual allocation
-                    double totalAllocation = leaveType.getDaysPerYear();
-                    
-                    // Calculate total usage: previous months + current month so far + this leave
-                    double previousUsage = previousMonthsUsageByType.getOrDefault(a.getLeaveTypeId(), 0.0);
-                    double currentMonthUsageSoFar = currentMonthUsageByType.getOrDefault(a.getLeaveTypeId(), 0.0);
-                    double totalUsageIncludingThis = previousUsage + currentMonthUsageSoFar + leaveDays;
-                    
-                    log.info("Employee {}: Leave on {} - Type: {}, Previous: {}, Current: {}, This: {}, Total: {}, Limit: {}", 
-                        employeeId, a.getDate(), leaveType.getName(), previousUsage, currentMonthUsageSoFar, 
-                        leaveDays, totalUsageIncludingThis, totalAllocation);
-                    
-                    if (totalUsageIncludingThis > totalAllocation) {
-                        // This leave exceeds the annual limit - it's LOP
-                        lopDays += leaveDays;
-                        log.info("Employee {}: Leave on {} EXCEEDS allocation. Marking as LOP", 
-                            employeeId, a.getDate());
+                    // For paid leave types, check if there's excess to deduct
+                    Double excessForType = excessLeavesByType.get(a.getLeaveTypeId());
+                    if (excessForType != null && excessForType > 0) {
+                        double alreadyCounted = lopCountedByType.getOrDefault(a.getLeaveTypeId(), 0.0);
+                        if (alreadyCounted < excessForType) {
+                            // This leave counts as LOP (part of the excess)
+                            lopDays += 1.0;
+                            lopCountedByType.put(a.getLeaveTypeId(), alreadyCounted + 1.0);
+                            log.info("Employee {}: Leave on {} marked as LOP (excess leave)", 
+                                employeeId, a.getDate());
+                        }
                     }
-                    
-                    // Track usage for this leave type in current month
-                    currentMonthUsageByType.put(a.getLeaveTypeId(), currentMonthUsageSoFar + leaveDays);
                 } else {
                     // If leave type not found, treat as LOP
-                    lopDays += leaveDays;
+                    lopDays += 1.0;
                 }
             }
         }
