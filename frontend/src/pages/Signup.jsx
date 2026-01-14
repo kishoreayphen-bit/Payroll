@@ -233,11 +233,11 @@ export default function Signup() {
             {/* Company Name */}
             <div>
               <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
                 <Input
                   id="companyName"
                   placeholder="Company Name"
-                  className="pl-9 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                  className="pl-10 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
                   {...register('companyName')}
                 />
               </div>
@@ -247,12 +247,12 @@ export default function Signup() {
             {/* Email */}
             <div>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="Email Address"
-                  className="pl-9 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                  className="pl-10 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
                   {...register('email')}
                 />
               </div>
@@ -302,11 +302,11 @@ export default function Signup() {
             <div>
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
                   <Input
                     id="phoneNumber"
                     placeholder="Phone Number"
-                    className="pl-9 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                    className="pl-10 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
                     {...register('phoneNumber')}
                     disabled={phoneVerified}
                   />
@@ -374,12 +374,12 @@ export default function Signup() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
-                    className="pl-9 pr-9 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                    className="pl-10 pr-10 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
                     {...register('password')}
                   />
                   <button
@@ -395,12 +395,12 @@ export default function Signup() {
 
               <div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm Password"
-                    className="pl-9 pr-9 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                    className="pl-10 pr-10 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
                     {...register('confirmPassword')}
                   />
                   <button
