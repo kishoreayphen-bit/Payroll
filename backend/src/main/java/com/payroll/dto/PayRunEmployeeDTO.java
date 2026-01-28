@@ -31,7 +31,7 @@ public class PayRunEmployeeDTO {
     private Integer workingDays;
     private Integer daysWorked;
     private Integer leaveDays;
-    private Integer lopDays;
+    private java.math.BigDecimal lopDays;
     private BigDecimal lopDeduction;
 
     // Deductions
@@ -54,7 +54,12 @@ public class PayRunEmployeeDTO {
     private String status;
     private Boolean payslipGenerated;
     private Boolean payslipSent;
+    private Boolean isSkipped;
+    private String skipReason;
     private String notes;
+    private String paymentStatus;
+    private LocalDateTime paymentDate;
+    private Boolean isWithheld;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -64,7 +69,7 @@ public class PayRunEmployeeDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UpdateRequest {
-        private Integer lopDays;
+        private java.math.BigDecimal lopDays;
         private BigDecimal otherEarnings;
         private BigDecimal otherDeductions;
         private String notes;

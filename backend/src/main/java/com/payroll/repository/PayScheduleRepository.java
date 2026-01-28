@@ -9,16 +9,16 @@ import java.util.Optional;
 
 @Repository
 public interface PayScheduleRepository extends JpaRepository<PaySchedule, Long> {
-    
+
     List<PaySchedule> findByOrganizationIdAndIsActiveTrue(Long organizationId);
-    
+
     List<PaySchedule> findByOrganizationId(Long organizationId);
-    
+
     Optional<PaySchedule> findByOrganizationIdAndIsDefaultTrue(Long organizationId);
-    
+
     Optional<PaySchedule> findByIdAndOrganizationId(Long id, Long organizationId);
-    
+
     boolean existsByOrganizationIdAndScheduleNameAndIdNot(Long organizationId, String scheduleName, Long id);
-    
+
     boolean existsByOrganizationIdAndScheduleName(Long organizationId, String scheduleName);
 }

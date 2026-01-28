@@ -39,6 +39,18 @@ public class SalaryComponentController {
         return ResponseEntity.ok(components);
     }
 
+    /**
+     * Get variable components for pay run dropdown
+     */
+    @GetMapping("/variable")
+    public ResponseEntity<List<com.payroll.dto.VariableComponentDTO>> getVariableComponents(
+            @RequestParam Long organizationId,
+            @RequestParam ComponentType type) {
+        List<com.payroll.dto.VariableComponentDTO> components = salaryComponentService
+                .getVariableComponents(organizationId, type);
+        return ResponseEntity.ok(components);
+    }
+
     @GetMapping("/earnings")
     public ResponseEntity<List<SalaryComponentDTO>> getEarnings(
             @RequestParam Long organizationId) {
@@ -86,5 +98,11 @@ public class SalaryComponentController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PostMapping("/seed")
+    public ResponseEntity<Void> seedDefaults(@RequestParam Long organizationId) {
+        salaryComponentService.createDefaults(organizationId);
+        return ResponseEntity.ok().build();
     }
 }

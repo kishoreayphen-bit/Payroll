@@ -237,7 +237,8 @@ export default function Signup() {
                 <Input
                   id="companyName"
                   placeholder="Company Name"
-                  className="pl-11 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                  className="h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                  style={{ paddingLeft: '2.75rem' }}
                   {...register('companyName')}
                 />
               </div>
@@ -252,7 +253,8 @@ export default function Signup() {
                   id="email"
                   type="email"
                   placeholder="Email Address"
-                  className="pl-11 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                  className="h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                  style={{ paddingLeft: '2.75rem' }}
                   {...register('email')}
                 />
               </div>
@@ -306,7 +308,8 @@ export default function Signup() {
                   <Input
                     id="phoneNumber"
                     placeholder="Phone Number"
-                    className="pl-11 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                    className="h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                    style={{ paddingLeft: '2.75rem' }}
                     {...register('phoneNumber')}
                     disabled={phoneVerified}
                   />
@@ -379,7 +382,8 @@ export default function Signup() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
-                    className="pl-11 pr-10 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                    className="h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                    style={{ paddingLeft: '2.75rem', paddingRight: '2.5rem' }}
                     {...register('password')}
                   />
                   <button
@@ -400,7 +404,8 @@ export default function Signup() {
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm Password"
-                    className="pl-11 pr-10 h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                    className="h-11 border-slate-300 focus:border-pink-500 focus:ring-pink-500 rounded-lg text-sm"
+                    style={{ paddingLeft: '2.75rem', paddingRight: '2.5rem' }}
                     {...register('confirmPassword')}
                   />
                   <button

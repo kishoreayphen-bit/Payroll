@@ -14,10 +14,16 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import com.payroll.dto.PayslipDTO;
-import com.payroll.entity.*;
 import com.payroll.organization.Organization;
 import com.payroll.organization.OrganizationRepository;
-import com.payroll.repository.*;
+import com.payroll.entity.Employee;
+import com.payroll.entity.PayRun;
+import com.payroll.entity.PayRunEmployee;
+import com.payroll.entity.Payslip;
+import com.payroll.repository.PayslipRepository;
+import com.payroll.repository.PayRunRepository;
+import com.payroll.repository.PayRunEmployeeRepository;
+import com.payroll.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,8 +58,11 @@ public class PayslipService {
     @Value("${payslip.storage.path:./payslips}")
     private String payslipStoragePath;
 
-    @Value("${spring.mail.username:noreply@payroll.com}")
+    @Value("${app.mail.sender:noreply@payroll.com}")
     private String fromEmail;
+
+    @Value("${spring.mail.password:}")
+    private String mailPassword;
 
     private static final DeviceRgb PRIMARY_COLOR = new DeviceRgb(236, 72, 153); // Pink-500
     private static final DeviceRgb HEADER_BG = new DeviceRgb(248, 250, 252); // Slate-50
@@ -65,8 +74,8 @@ public class PayslipService {
         PayRun payRun = payRunRepository.findByIdAndTenantId(payRunId, tenantId)
                 .orElseThrow(() -> new RuntimeException("Pay run not found"));
 
-        if (payRun.getStatus() != PayRun.PayRunStatus.APPROVED && 
-            payRun.getStatus() != PayRun.PayRunStatus.COMPLETED) {
+        if (payRun.getStatus() != PayRun.PayRunStatus.APPROVED &&
+                payRun.getStatus() != PayRun.PayRunStatus.COMPLETED) {
             throw new RuntimeException("Pay run must be APPROVED or COMPLETED to generate payslips");
         }
 
@@ -74,7 +83,7 @@ public class PayslipService {
                 .orElseThrow(() -> new RuntimeException("Organization not found"));
 
         List<PayRunEmployee> employees = payRunEmployeeRepository.findByPayRunId(payRunId);
-        
+
         return employees.stream()
                 .map(pre -> generatePayslip(pre, payRun, organization))
                 .collect(Collectors.toList());
@@ -84,7 +93,7 @@ public class PayslipService {
     public PayslipDTO generatePayslip(PayRunEmployee payRunEmployee, PayRun payRun, Organization organization) {
         // Check if payslip already exists
         Payslip existingPayslip = payslipRepository.findByPayRunEmployeeId(payRunEmployee.getId()).orElse(null);
-        
+
         Payslip payslip;
         if (existingPayslip != null) {
             payslip = existingPayslip;
@@ -131,6 +140,15 @@ public class PayslipService {
             payRunEmployee.setPayslipGenerated(true);
             payRunEmployeeRepository.save(payRunEmployee);
 
+            // Auto-send email (non-blocking)
+            try {
+                log.info("Auto-sending payslip email for employee: {}", payslip.getEmployee().getId());
+                sendPayslipEmail(payslip.getId(), payslip.getTenantId());
+            } catch (Exception emailEx) {
+                log.error("Failed to auto-send payslip email for payslip: {}", payslip.getId(), emailEx);
+                // Don't throw - email failure shouldn't block payslip generation
+            }
+
         } catch (Exception e) {
             log.error("Failed to generate PDF for payslip: {}", payslip.getId(), e);
             throw new RuntimeException("Failed to generate PDF: " + e.getMessage());
@@ -141,7 +159,7 @@ public class PayslipService {
 
     public String generatePdf(Payslip payslip, Organization organization) throws IOException {
         Employee employee = payslip.getEmployee();
-        
+
         // Create directory if not exists
         File dir = new File(payslipStoragePath);
         if (!dir.exists()) {
@@ -155,9 +173,9 @@ public class PayslipService {
         String filePath = payslipStoragePath + File.separator + fileName;
 
         try (FileOutputStream fos = new FileOutputStream(filePath);
-             PdfWriter writer = new PdfWriter(fos);
-             PdfDocument pdf = new PdfDocument(writer);
-             Document document = new Document(pdf, PageSize.A4)) {
+                PdfWriter writer = new PdfWriter(fos);
+                PdfDocument pdf = new PdfDocument(writer);
+                Document document = new Document(pdf, PageSize.A4)) {
 
             document.setMargins(30, 30, 30, 30);
 
@@ -198,7 +216,7 @@ public class PayslipService {
                     .setMarginBottom(20));
 
             // Employee details table
-            Table empTable = new Table(UnitValue.createPercentArray(new float[]{1, 2, 1, 2}))
+            Table empTable = new Table(UnitValue.createPercentArray(new float[] { 1, 2, 1, 2 }))
                     .useAllAvailableWidth()
                     .setMarginBottom(20);
 
@@ -214,7 +232,7 @@ public class PayslipService {
             document.add(empTable);
 
             // Earnings and Deductions
-            Table salaryTable = new Table(UnitValue.createPercentArray(new float[]{3, 2, 3, 2}))
+            Table salaryTable = new Table(UnitValue.createPercentArray(new float[] { 3, 2, 3, 2 }))
                     .useAllAvailableWidth()
                     .setMarginTop(10);
 
@@ -225,11 +243,14 @@ public class PayslipService {
             salaryTable.addHeaderCell(createHeaderCell("AMOUNT (₹)"));
 
             // Data rows
-            addSalaryRow(salaryTable, "Basic Salary", payslip.getBasicSalary(), "Provident Fund", payslip.getPfEmployee());
+            addSalaryRow(salaryTable, "Basic Salary", payslip.getBasicSalary(), "Provident Fund",
+                    payslip.getPfEmployee());
             addSalaryRow(salaryTable, "House Rent Allowance", payslip.getHra(), "ESI", payslip.getEsiEmployee());
-            addSalaryRow(salaryTable, "Conveyance Allowance", payslip.getConveyanceAllowance(), "Professional Tax", payslip.getProfessionalTax());
+            addSalaryRow(salaryTable, "Conveyance Allowance", payslip.getConveyanceAllowance(), "Professional Tax",
+                    payslip.getProfessionalTax());
             addSalaryRow(salaryTable, "Fixed Allowance", payslip.getFixedAllowance(), "TDS", payslip.getTds());
-            addSalaryRow(salaryTable, "Other Earnings", payslip.getOtherEarnings(), "LOP Deduction", payslip.getLopDeduction());
+            addSalaryRow(salaryTable, "Other Earnings", payslip.getOtherEarnings(), "LOP Deduction",
+                    payslip.getLopDeduction());
             addSalaryRow(salaryTable, "", null, "Other Deductions", payslip.getOtherDeductions());
 
             // Totals
@@ -242,16 +263,16 @@ public class PayslipService {
 
             // Net Pay
             document.add(new Paragraph("\n"));
-            Table netPayTable = new Table(UnitValue.createPercentArray(new float[]{3, 1}))
+            Table netPayTable = new Table(UnitValue.createPercentArray(new float[] { 3, 1 }))
                     .useAllAvailableWidth();
-            
+
             Cell netPayLabelCell = new Cell()
                     .add(new Paragraph("NET PAY").setBold().setFontSize(14))
                     .setBackgroundColor(PRIMARY_COLOR)
                     .setFontColor(ColorConstants.WHITE)
                     .setPadding(10)
                     .setBorder(Border.NO_BORDER);
-            
+
             Cell netPayValueCell = new Cell()
                     .add(new Paragraph("₹ " + formatAmount(payslip.getNetSalary())).setBold().setFontSize(14))
                     .setBackgroundColor(PRIMARY_COLOR)
@@ -289,7 +310,8 @@ public class PayslipService {
                 .setTextAlignment(TextAlignment.CENTER);
     }
 
-    private void addSalaryRow(Table table, String earning, BigDecimal earningAmt, String deduction, BigDecimal deductionAmt) {
+    private void addSalaryRow(Table table, String earning, BigDecimal earningAmt, String deduction,
+            BigDecimal deductionAmt) {
         table.addCell(new Cell().add(new Paragraph(earning).setFontSize(10)).setPadding(8)
                 .setBorderTop(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f))
                 .setBorderBottom(Border.NO_BORDER)
@@ -306,12 +328,13 @@ public class PayslipService {
                 .setBorderBottom(Border.NO_BORDER)
                 .setBorderLeft(Border.NO_BORDER)
                 .setBorderRight(Border.NO_BORDER));
-        table.addCell(new Cell().add(new Paragraph(deductionAmt != null ? formatAmount(deductionAmt) : "").setFontSize(10))
-                .setPadding(8).setTextAlignment(TextAlignment.RIGHT)
-                .setBorderTop(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f))
-                .setBorderBottom(Border.NO_BORDER)
-                .setBorderLeft(Border.NO_BORDER)
-                .setBorderRight(Border.NO_BORDER));
+        table.addCell(
+                new Cell().add(new Paragraph(deductionAmt != null ? formatAmount(deductionAmt) : "").setFontSize(10))
+                        .setPadding(8).setTextAlignment(TextAlignment.RIGHT)
+                        .setBorderTop(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f))
+                        .setBorderBottom(Border.NO_BORDER)
+                        .setBorderLeft(Border.NO_BORDER)
+                        .setBorderRight(Border.NO_BORDER));
     }
 
     private Cell createTotalCell(String text) {
@@ -323,12 +346,14 @@ public class PayslipService {
     }
 
     private String formatAmount(BigDecimal amount) {
-        if (amount == null) return "0.00";
+        if (amount == null)
+            return "0.00";
         return String.format("%,.2f", amount);
     }
 
     private String maskAccountNumber(String accountNumber) {
-        if (accountNumber == null || accountNumber.length() < 4) return "-";
+        if (accountNumber == null || accountNumber.length() < 4)
+            return "-";
         return "XXXX" + accountNumber.substring(accountNumber.length() - 4);
     }
 
@@ -353,7 +378,8 @@ public class PayslipService {
                 .orElseThrow(() -> new RuntimeException("Payslip not found"));
 
         Employee employee = payslip.getEmployee();
-        String recipientEmail = employee.getPersonalEmail() != null ? employee.getPersonalEmail() : employee.getWorkEmail();
+        String recipientEmail = employee.getPersonalEmail() != null ? employee.getPersonalEmail()
+                : employee.getWorkEmail();
 
         if (recipientEmail == null) {
             throw new RuntimeException("No email address found for employee");
@@ -363,6 +389,9 @@ public class PayslipService {
                 .orElseThrow(() -> new RuntimeException("Organization not found"));
 
         try {
+            // SIMULATION MODE REMOVED: Using Local MailDev
+            // if (mailPassword == null || mailPassword.isEmpty()) { ... }
+
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
@@ -375,25 +404,17 @@ public class PayslipService {
 
             String body = String.format("""
                     Dear %s,
-                    
+
                     Please find attached your payslip for the period %s to %s.
-                    
-                    Summary:
-                    - Gross Salary: ₹%s
-                    - Total Deductions: ₹%s
-                    - Net Pay: ₹%s
-                    
+
                     You can also view your payslip in the employee portal.
-                    
+
                     Best regards,
                     %s HR Team
                     """,
                     employee.getFirstName(),
                     payslip.getPayPeriodStart().format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
                     payslip.getPayPeriodEnd().format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
-                    formatAmount(payslip.getGrossSalary()),
-                    formatAmount(payslip.getTotalDeductions()),
-                    formatAmount(payslip.getNetSalary()),
                     organization.getCompanyName());
 
             helper.setText(body);
@@ -416,9 +437,10 @@ public class PayslipService {
 
             log.info("Payslip email sent to: {}", recipientEmail);
 
-        } catch (MessagingException e) {
-            log.error("Failed to send payslip email: {}", e.getMessage());
-            throw new RuntimeException("Failed to send email: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("Failed to send payslip email", e);
+            throw new RuntimeException(
+                    "Failed to send email: [" + e.getClass().getSimpleName() + "] " + e.getMessage());
         }
     }
 
@@ -496,19 +518,23 @@ public class PayslipService {
             sb.append(organization.getAddressLine1());
         }
         if (organization.getAddressLine2() != null && !organization.getAddressLine2().isEmpty()) {
-            if (sb.length() > 0) sb.append(", ");
+            if (sb.length() > 0)
+                sb.append(", ");
             sb.append(organization.getAddressLine2());
         }
         if (organization.getCity() != null) {
-            if (sb.length() > 0) sb.append(", ");
+            if (sb.length() > 0)
+                sb.append(", ");
             sb.append(organization.getCity());
         }
         if (organization.getState() != null) {
-            if (sb.length() > 0) sb.append(", ");
+            if (sb.length() > 0)
+                sb.append(", ");
             sb.append(organization.getState());
         }
         if (organization.getPinCode() != null) {
-            if (sb.length() > 0) sb.append(" - ");
+            if (sb.length() > 0)
+                sb.append(" - ");
             sb.append(organization.getPinCode());
         }
         return sb.toString();

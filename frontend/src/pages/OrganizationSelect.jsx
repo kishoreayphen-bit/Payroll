@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building, Plus, ArrowRight, Users, Calendar } from 'lucide-react';
+import { Building, Plus, ArrowRight, Users, MapPin, LogOut } from 'lucide-react';
 import { api } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 
 export default function OrganizationSelect() {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const [organizations, setOrganizations] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -17,14 +17,32 @@ export default function OrganizationSelect() {
 
     const fetchOrganizations = async () => {
         try {
-            console.log('Fetching organizations...');
             const response = await api.get('/organizations');
-            console.log('API Response:', response);
-            console.log('Organizations data:', response.data);
-            setOrganizations(response.data || []);
+            const orgs = response.data || [];
+            
+            // Fetch employee counts for all organizations in parallel
+            const orgsWithCounts = await Promise.all(
+                orgs.map(async (org) => {
+                    try {
+                        const empResponse = await api.get(`/employees/count/${org.id}`);
+                        return { ...org, employeeCount: empResponse.data?.count || 0 };
+                    } catch (err) {
+                        // Try alternate endpoint or use 0
+                        try {
+                            const empListResponse = await api.get('/employees', {
+                                headers: { 'X-Tenant-ID': org.id.toString() }
+                            });
+                            return { ...org, employeeCount: Array.isArray(empListResponse.data) ? empListResponse.data.length : 0 };
+                        } catch {
+                            return { ...org, employeeCount: 0 };
+                        }
+                    }
+                })
+            );
+            
+            setOrganizations(orgsWithCounts);
         } catch (error) {
             console.error('Error fetching organizations:', error);
-            console.error('Error response:', error.response);
         } finally {
             setLoading(false);
         }
@@ -55,30 +73,40 @@ export default function OrganizationSelect() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-white">
             {/* Header */}
-            <div className="bg-white/80 backdrop-blur-md border-b border-pink-100 shadow-sm">
+            <div className="bg-white border-b border-pink-100 shadow-sm sticky top-0 z-10">
                 <div className="max-w-6xl mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center">
-                                <Building className="w-6 h-6 text-white" />
+                            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-pink-500/20">
+                                <Building className="w-5 h-5 text-white" />
                             </div>
                             <div>
                                 <h1 className="text-xl font-bold text-slate-900">Your Organizations</h1>
                                 <p className="text-xs text-slate-500">Select an organization to continue</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <span className="text-sm text-slate-600">Welcome, {user?.email?.split('@')[0]}</span>
-                            <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                        <div className="flex items-center gap-4">
+                            <div className="text-right">
+                                <p className="text-sm font-medium text-slate-900">{user?.email?.split('@')[0]}</p>
+                                <p className="text-xs text-slate-500">{user?.email}</p>
+                            </div>
+                            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-pink-500/20">
                                 {user?.email?.charAt(0).toUpperCase()}
                             </div>
+                            <button
+                                onClick={() => { logout(); navigate('/login'); }}
+                                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                title="Logout"
+                            >
+                                <LogOut className="w-5 h-5" />
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Main Content */}
-            <div className="max-w-6xl mx-auto px-6 py-12">
+            <div className="max-w-6xl mx-auto px-6 py-10">
                 {organizations.length === 0 ? (
                     /* No Organizations */
                     <div className="text-center py-16">
@@ -139,10 +167,10 @@ export default function OrganizationSelect() {
                                     <div className="p-6 space-y-3">
                                         <div className="flex items-center gap-2 text-sm text-slate-600">
                                             <Users className="w-4 h-4 text-pink-500" />
-                                            <span>0 Employees</span>
+                                            <span>{org.employeeCount || 0} Employees</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <Building className="w-4 h-4 text-pink-500" />
+                                            <MapPin className="w-4 h-4 text-pink-500" />
                                             <span>{org.businessLocation}</span>
                                         </div>
                                         <div className="pt-3 border-t border-slate-100">
@@ -154,7 +182,7 @@ export default function OrganizationSelect() {
 
                                     {/* Hover Effect */}
                                     <div className="px-6 pb-6">
-                                        <div className="w-full py-2 bg-pink-50 group-hover:bg-gradient-to-r group-hover:from-pink-600 group-hover:to-rose-600 rounded-lg text-center transition-all">
+                                        <div className="w-full py-2.5 bg-pink-50 group-hover:bg-gradient-to-r group-hover:from-pink-600 group-hover:to-rose-600 rounded-lg text-center transition-all">
                                             <span className="text-sm font-semibold text-pink-600 group-hover:text-white transition-colors">
                                                 Open Organization
                                             </span>

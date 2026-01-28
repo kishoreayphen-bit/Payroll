@@ -165,6 +165,40 @@ public class Employee {
     @Column(name = "status", length = 20)
     private String status = "Active";
 
+    // Exit Details
+    @Column(name = "exit_date")
+    private LocalDate exitDate;
+
+    @Column(name = "last_working_day")
+    private LocalDate lastWorkingDay;
+
+    @Column(name = "exit_reason", length = 100)
+    private String exitReason;
+
+    @Column(name = "exit_notes", columnDefinition = "TEXT")
+    private String exitNotes;
+
+    @Column(name = "exit_initiated_at")
+    private LocalDateTime exitInitiatedAt;
+
+    @Column(name = "exit_initiated_by")
+    private Long exitInitiatedBy;
+
+    @Column(name = "notice_period_days")
+    private Integer noticePeriodDays = 30;
+
+    @Column(name = "is_notice_period_served")
+    private Boolean isNoticePeriodServed = false;
+
+    @Column(name = "rehire_eligible")
+    private Boolean rehireEligible = true;
+
+    @Column(name = "exit_interview_done")
+    private Boolean exitInterviewDone = false;
+
+    @Column(name = "final_settlement_status", length = 50)
+    private String finalSettlementStatus = "PENDING";
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;

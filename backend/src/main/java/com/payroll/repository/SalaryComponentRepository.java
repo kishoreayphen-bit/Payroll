@@ -28,4 +28,26 @@ public interface SalaryComponentRepository extends JpaRepository<SalaryComponent
 
     // Check if code exists
     boolean existsByOrganizationIdAndCode(Long organizationId, String code);
+
+    /**
+     * Find variable components for dropdown (ad-hoc additions in pay run)
+     */
+    List<SalaryComponent> findByOrganizationIdAndIsActiveTrueAndIsVariableTrueAndTypeOrderByNameAsc(
+            Long organizationId, ComponentType type);
+
+    /**
+     * Find recurring components (for salary structure)
+     */
+    List<SalaryComponent> findByOrganizationIdAndIsActiveTrueAndIsRecurringTrueOrderByDisplayOrderAsc(
+            Long organizationId);
+
+    /**
+     * Find by code and organization (for uniqueness check)
+     */
+    Optional<SalaryComponent> findByCodeAndOrganizationId(String code, Long organizationId);
+
+    /**
+     * Check if component code exists for organization (excluding specific id)
+     */
+    boolean existsByCodeAndOrganizationIdAndIdNot(String code, Long organizationId, Long id);
 }

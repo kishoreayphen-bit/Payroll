@@ -3,8 +3,11 @@ server:
 
 logging:
   level:
-    com.payroll.security: DEBUG
+    root: INFO
+    com.payroll: DEBUG
     org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.web.servlet: DEBUG
 
 spring:
   datasource:
@@ -19,14 +22,15 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     open-in-view: false
+    show-sql: true
   flyway:
     enabled: true
     locations: classpath:db/migration
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
+    host: smtp-relay.brevo.com
+    port: 587
+    username: "9be370001@smtp-brevo.com"
+    password: "3M8Cm1VaU7IN0wWH"
     properties:
       mail:
         smtp:
@@ -34,9 +38,6 @@ spring:
           starttls:
             enable: true
             required: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
 
 management:
   endpoints:
@@ -48,6 +49,8 @@ management:
       show-details: always
 
 app:
+  mail:
+    sender: "kishore.ayphen@gmail.com"
   security:
     jwt:
       secret: ${JWT_SECRET:c3VwZXItc2VjcmV0LWZvci1kZXZlbG9wbWVudC0xMjM0NTY3ODkwMTIzNDU2Nzg5MA==}

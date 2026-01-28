@@ -15,6 +15,11 @@ public interface PayRunEmployeeRepository extends JpaRepository<PayRunEmployee, 
 
     List<PayRunEmployee> findByPayRunId(Long payRunId);
 
+    List<PayRunEmployee> findByPayRunIdAndPayRunTenantId(Long payRunId, Long tenantId);
+
+    Optional<PayRunEmployee> findByPayRunIdAndEmployeeIdAndPayRunTenantId(Long payRunId, Long employeeId,
+            Long tenantId);
+
     List<PayRunEmployee> findByPayRunIdAndStatus(Long payRunId, PayRunEmployeeStatus status);
 
     Optional<PayRunEmployee> findByPayRunIdAndEmployeeId(Long payRunId, Long employeeId);

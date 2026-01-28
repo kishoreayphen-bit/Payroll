@@ -18,10 +18,14 @@ public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
     private final UserRepository userRepository;
+    private final com.payroll.service.SalaryComponentService salaryComponentService;
 
-    public OrganizationService(OrganizationRepository organizationRepository, UserRepository userRepository) {
+    public OrganizationService(OrganizationRepository organizationRepository,
+            UserRepository userRepository,
+            com.payroll.service.SalaryComponentService salaryComponentService) {
         this.organizationRepository = organizationRepository;
         this.userRepository = userRepository;
+        this.salaryComponentService = salaryComponentService;
     }
 
     public OrganizationResponse createOrganization(CreateOrganizationRequest request) {
@@ -47,6 +51,9 @@ public class OrganizationService {
                 .build();
 
         organization = organizationRepository.save(organization);
+
+        // Seed default salary components
+        salaryComponentService.createDefaults(organization.getId());
 
         return mapToResponse(java.util.Objects.requireNonNull(organization));
     }

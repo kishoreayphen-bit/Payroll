@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
     Search,
     Bell,
@@ -22,14 +22,41 @@ export default function AppHeader({
     setSidebarCollapsed,
     organization: propOrganization,
     loading: propLoading,
-    user
+    user,
+    logout
 }) {
     const navigate = useNavigate();
+    const location = useLocation();
     const { darkMode, toggleDarkMode } = useTheme();
     const [showCompanyMenu, setShowCompanyMenu] = React.useState(false);
     const [showProfileMenu, setShowProfileMenu] = React.useState(false);
     const [organization, setOrganization] = React.useState(propOrganization);
     const [loading, setLoading] = React.useState(propLoading || false);
+    const [searchQuery, setSearchQuery] = React.useState('');
+    const companyMenuRef = React.useRef(null);
+    const profileMenuRef = React.useRef(null);
+
+    React.useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (companyMenuRef.current && !companyMenuRef.current.contains(event.target)) {
+                setShowCompanyMenu(false);
+            }
+            if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+                setShowProfileMenu(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    React.useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const search = params.get('search');
+        setSearchQuery(search || '');
+    }, [location.search]);
 
     React.useEffect(() => {
         if (propOrganization) {
@@ -68,8 +95,14 @@ export default function AppHeader({
         window.location.href = '/login';
     };
 
+    const handleSearch = (e) => {
+        if (e.key === 'Enter') {
+            navigate(`/employees?search=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
+
     return (
-        <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-pink-100 dark:border-slate-700 px-6 py-4 flex-shrink-0 shadow-sm">
+        <div className="relative z-50 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-pink-100 dark:border-slate-700 px-6 py-4 flex-shrink-0 shadow-sm">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4 flex-1">
                     {/* Menu button to open sidebar when closed */}
@@ -87,19 +120,23 @@ export default function AppHeader({
                         <input
                             type="text"
                             placeholder="Search employees..."
-                            className="w-full pl-8 pr-3 py-1.5 text-sm border border-pink-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white dark:bg-slate-800 dark:text-white dark:placeholder-slate-400"
-                            style={{ paddingLeft: '2rem' }}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' && e.target.value.trim()) {
-                                    window.location.href = `/employees?search=${encodeURIComponent(e.target.value.trim())}`;
+                            value={searchQuery}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setSearchQuery(value);
+                                if (value === '') {
+                                    navigate(location.pathname);
                                 }
                             }}
+                            onKeyDown={handleSearch}
+                            className="w-full pl-8 pr-3 py-1.5 text-sm border border-pink-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white dark:bg-slate-800 dark:text-white dark:placeholder-slate-400"
+                            style={{ paddingLeft: '2rem' }}
                         />
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
                     {/* Company Dropdown */}
-                    <div className="relative">
+                    <div className="relative" ref={companyMenuRef}>
                         <button
                             onClick={() => {
                                 setShowCompanyMenu(!showCompanyMenu);
@@ -161,7 +198,7 @@ export default function AppHeader({
                         <Bell className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                     </Link>
 
-                    <button 
+                    <button
                         onClick={() => navigate('/settings')}
                         className="p-2 hover:bg-pink-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
                         title="Settings"
@@ -170,7 +207,7 @@ export default function AppHeader({
                     </button>
 
                     {/* Profile Dropdown */}
-                    <div className="relative">
+                    <div className="relative" ref={profileMenuRef}>
                         <button
                             onClick={() => {
                                 setShowProfileMenu(!showProfileMenu);

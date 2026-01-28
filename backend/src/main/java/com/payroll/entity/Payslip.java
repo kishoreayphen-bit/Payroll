@@ -94,8 +94,8 @@ public class Payslip {
     @Column(name = "days_worked")
     private Integer daysWorked;
 
-    @Column(name = "lop_days")
-    private Integer lopDays;
+    @Column(name = "lop_days", precision = 5, scale = 2)
+    private java.math.BigDecimal lopDays = java.math.BigDecimal.ZERO;
 
     // PDF storage
     @Column(name = "pdf_path")

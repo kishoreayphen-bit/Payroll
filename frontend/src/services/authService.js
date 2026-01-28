@@ -1,10 +1,16 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 
-// Base API URL - update this with your backend URL
-const API_URL = import.meta.env.VITE_API_URL || 'https://payroll-ppmh.onrender.com/api/v1';
+// Base API URL - prefer env, else infer from environment (localhost vs prod)
+const API_URL =
+    import.meta.env.VITE_API_URL ||
+    (typeof window !== 'undefined' && ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)
+        ? 'http://localhost:8080/api/v1'
+        : 'https://payroll-ppmh.onrender.com/api/v1');
 
 // Create axios instance with default config
+console.log('[authService] API base URL:', API_URL);
+
 const api = axios.create({
     baseURL: API_URL,
     headers: {
@@ -24,11 +30,37 @@ const authApi = axios.create({
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
-        console.log('API Request to:', config.url);
-        console.log('Token exists:', !!token);
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-            console.log('Authorization header set:', `Bearer ${token.substring(0, 20)}...`);
+            // Use axios-recommended way to set headers if possible, or plain object
+            if (!config.headers.Authorization) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+
+            try {
+                // Get organization/tenant ID from localStorage as fallback
+                const storedTenantId = localStorage.getItem('selectedOrganizationId') || localStorage.getItem('organizationId');
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const storedUserId = user?.id;
+
+                // Only set if not already present in config.headers
+                if (!config.headers['X-Tenant-ID'] && storedTenantId) {
+                    config.headers['X-Tenant-ID'] = storedTenantId;
+                }
+
+                if (!config.headers['X-User-ID'] && storedUserId) {
+                    config.headers['X-User-ID'] = storedUserId;
+                }
+
+                console.log(`[api-request] ${config.method.toUpperCase()} ${config.url}`, {
+                    hasAuth: !!config.headers.Authorization,
+                    tenantId: config.headers['X-Tenant-ID'],
+                    userId: config.headers['X-User-ID']
+                });
+            } catch (error) {
+                console.error('Error processing headers:', error);
+            }
+        } else {
+            console.warn('[authService] Request without token:', config.url);
         }
         return config;
     },
@@ -44,26 +76,40 @@ api.interceptors.response.use(
         const status = error.response?.status;
         const currentPath = window.location.pathname;
         const token = localStorage.getItem('token');
-        
+
         // Only redirect on 401 if it's a true auth failure (not just missing endpoint)
         // Check if the error message indicates token/auth issue specifically
         const isAuthError = error.response?.data?.message?.toLowerCase()?.includes('token') ||
-                           error.response?.data?.message?.toLowerCase()?.includes('unauthorized') ||
-                           error.response?.data?.message?.toLowerCase()?.includes('expired') ||
-                           error.response?.data?.error?.toLowerCase()?.includes('jwt');
-        
-        if (status === 401 && isAuthError) {
-            // Don't logout if we're already on login/signup page or if no token exists
-            if (token && currentPath !== '/login' && currentPath !== '/signup') {
-                console.warn('401 Unauthorized - Auth error, redirecting to login...');
+            error.response?.data?.message?.toLowerCase()?.includes('unauthorized') ||
+            error.response?.data?.message?.toLowerCase()?.includes('expired') ||
+            error.response?.data?.error?.toLowerCase()?.includes('jwt');
+
+        const isAuthEndpoint = error.config?.url?.includes('/auth/');
+        if (status === 401 && !isAuthEndpoint) {
+            console.warn('[authService] 401 Unauthorized detected:', {
+                url: error.config?.url,
+                isAuthError,
+                message: error.response?.data?.message
+            });
+
+            // CHECK: Is the token actually expired locally?
+            const isLocalTokenExpired = !authService.isAuthenticated();
+
+            const forceRedirect = isLocalTokenExpired || (isAuthError && (
+                error.response?.data?.message?.toLowerCase()?.includes('token') ||
+                error.response?.data?.message?.toLowerCase()?.includes('expired') ||
+                error.response?.data?.error?.toLowerCase()?.includes('jwt') ||
+                error.response?.data?.message?.toLowerCase()?.includes('unauthorized')
+            ));
+
+            if (forceRedirect && currentPath !== '/login' && currentPath !== '/signup') {
+                console.warn('[authService] Redirecting to login due to auth failure');
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
-                localStorage.removeItem('selectedOrganizationId');
-                window.location.href = '/login';
+                window.location.href = '/login?expired=true';
+            } else {
+                console.info('[authService] 401 detected but not redirecting. Might be a resource-specific error.');
             }
-        } else if (status === 401) {
-            // Log but don't redirect - might be endpoint-specific auth issue
-            console.warn('401 received but not redirecting - may be endpoint-specific:', error.config?.url);
         }
         return Promise.reject(error);
     }
@@ -76,7 +122,14 @@ const authService = {
             const response = await authApi.post('/auth/signup', userData);
             if (response.data.token) {
                 this.setToken(response.data.token);
-                this.setUser(response.data.user);
+                // Create user object from response
+                const user = {
+                    id: response.data.userId,
+                    username: response.data.username,
+                    email: response.data.email,
+                    roles: response.data.roles
+                };
+                this.setUser(user);
             }
             return response.data;
         } catch (error) {
@@ -90,7 +143,14 @@ const authService = {
             const response = await authApi.post('/auth/login', credentials);
             if (response.data.token) {
                 this.setToken(response.data.token);
-                this.setUser(response.data.user);
+                // Create user object from response
+                const user = {
+                    id: response.data.userId,
+                    username: response.data.username,
+                    email: response.data.email,
+                    roles: response.data.roles
+                };
+                this.setUser(user);
             }
             return response.data;
         } catch (error) {

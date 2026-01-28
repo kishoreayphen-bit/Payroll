@@ -24,4 +24,6 @@ public interface ReimbursementRepository extends JpaRepository<Reimbursement, Lo
 
     @Query("SELECT r FROM Reimbursement r WHERE r.employeeId = :empId AND r.status = 'APPROVED' AND r.paidInPayrollId IS NULL")
     List<Reimbursement> findApprovedUnpaidByEmployee(@Param("empId") Long employeeId);
+
+    List<Reimbursement> findByPaidInPayrollId(Long paidInPayrollId);
 }

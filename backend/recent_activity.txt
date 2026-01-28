@@ -1,0 +1,100 @@
+﻿2026-01-24T20:15:27.182+05:30  INFO 37328 --- [nio-8080-exec-5] c.payroll.config.RequestLoggingFilter    : Response Status: 400
+2026-01-24T20:15:27.182+05:30  INFO 37328 --- [nio-8080-exec-5] c.payroll.config.RequestLoggingFilter    : === End Request ===
+2026-01-24T20:15:27.183+05:30 DEBUG 37328 --- [nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing POST /error
+2026-01-24T20:15:27.183+05:30 DEBUG 37328 --- [nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-01-24T20:15:38.700+05:30 DEBUG 37328 --- [nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:15:38.700+05:30 DEBUG 37328 --- [nio-8080-exec-8] com.payroll.security.JwtAuthFilter       : JWT Filter processing request: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:15:38.700+05:30 DEBUG 37328 --- [nio-8080-exec-8] com.payroll.security.JwtAuthFilter       : No Bearer token found in Authorization header for request: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:15:38.700+05:30 DEBUG 37328 --- [nio-8080-exec-8] com.payroll.security.JwtAuthFilter       : No username extracted from token for request: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:15:38.700+05:30 DEBUG 37328 --- [nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-01-24T20:15:38.700+05:30 DEBUG 37328 --- [nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:15:38.702+05:30  INFO 37328 --- [nio-8080-exec-8] c.payroll.config.RequestLoggingFilter    : === Incoming Request ===
+2026-01-24T20:15:38.702+05:30  INFO 37328 --- [nio-8080-exec-8] c.payroll.config.RequestLoggingFilter    : Method: POST
+2026-01-24T20:15:38.702+05:30  INFO 37328 --- [nio-8080-exec-8] c.payroll.config.RequestLoggingFilter    : URI: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:15:38.702+05:30  INFO 37328 --- [nio-8080-exec-8] c.payroll.config.RequestLoggingFilter    : Header: host = localhost:8080
+2026-01-24T20:15:38.702+05:30  INFO 37328 --- [nio-8080-exec-8] c.payroll.config.RequestLoggingFilter    : Header: user-agent = curl/8.16.0
+2026-01-24T20:15:38.702+05:30  INFO 37328 --- [nio-8080-exec-8] c.payroll.config.RequestLoggingFilter    : Header: accept = */*
+2026-01-24T20:15:38.702+05:30 DEBUG 37328 --- [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : POST "/api/v1/pay-runs/55/employees/1/lop", parameters={}
+2026-01-24T20:15:38.702+05:30 DEBUG 37328 --- [nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.payroll.controller.PayRunManagementController#addLOP(Long, Long, AddLOPRequest, Long)
+2026-01-24T20:15:38.702+05:30 DEBUG 37328 --- [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Read "application/octet-stream" to []
+2026-01-24T20:15:38.702+05:30  WARN 37328 --- [nio-8080-exec-8] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotReadableException: Required request body is missing: public org.springframework.http.ResponseEntity<?> com.payroll.controller.PayRunManagementController.addLOP(java.lang.Long,java.lang.Long,com.payroll.dto.AddLOPRequest,java.lang.Long)]
+2026-01-24T20:15:38.702+05:30 DEBUG 37328 --- [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 400 BAD_REQUEST
+2026-01-24T20:15:38.702+05:30  INFO 37328 --- [nio-8080-exec-8] c.payroll.config.RequestLoggingFilter    : Filter chain completed successfully
+2026-01-24T20:15:38.702+05:30  INFO 37328 --- [nio-8080-exec-8] c.payroll.config.RequestLoggingFilter    : Response Status: 400
+2026-01-24T20:15:38.702+05:30  INFO 37328 --- [nio-8080-exec-8] c.payroll.config.RequestLoggingFilter    : === End Request ===
+2026-01-24T20:15:38.702+05:30 DEBUG 37328 --- [nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing POST /error
+2026-01-24T20:15:38.702+05:30 DEBUG 37328 --- [nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-01-24T20:17:13.900+05:30 DEBUG 37328 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:17:13.900+05:30 DEBUG 37328 --- [nio-8080-exec-9] com.payroll.security.JwtAuthFilter       : JWT Filter processing request: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:17:13.900+05:30 DEBUG 37328 --- [nio-8080-exec-9] com.payroll.security.JwtAuthFilter       : No Bearer token found in Authorization header for request: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:17:13.900+05:30 DEBUG 37328 --- [nio-8080-exec-9] com.payroll.security.JwtAuthFilter       : No username extracted from token for request: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:17:13.900+05:30 DEBUG 37328 --- [nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-01-24T20:17:13.900+05:30 DEBUG 37328 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:17:13.900+05:30  INFO 37328 --- [nio-8080-exec-9] c.payroll.config.RequestLoggingFilter    : === Incoming Request ===
+2026-01-24T20:17:13.900+05:30  INFO 37328 --- [nio-8080-exec-9] c.payroll.config.RequestLoggingFilter    : Method: POST
+2026-01-24T20:17:13.900+05:30  INFO 37328 --- [nio-8080-exec-9] c.payroll.config.RequestLoggingFilter    : URI: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:17:13.900+05:30  INFO 37328 --- [nio-8080-exec-9] c.payroll.config.RequestLoggingFilter    : Header: host = localhost:8080
+2026-01-24T20:17:13.900+05:30  INFO 37328 --- [nio-8080-exec-9] c.payroll.config.RequestLoggingFilter    : Header: user-agent = curl/8.16.0
+2026-01-24T20:17:13.900+05:30  INFO 37328 --- [nio-8080-exec-9] c.payroll.config.RequestLoggingFilter    : Header: accept = */*
+2026-01-24T20:17:13.900+05:30  INFO 37328 --- [nio-8080-exec-9] c.payroll.config.RequestLoggingFilter    : Header: content-type = application/json
+2026-01-24T20:17:13.900+05:30  INFO 37328 --- [nio-8080-exec-9] c.payroll.config.RequestLoggingFilter    : Header: x-tenant-id = 1
+2026-01-24T20:17:13.900+05:30  INFO 37328 --- [nio-8080-exec-9] c.payroll.config.RequestLoggingFilter    : Header: content-length = 2
+2026-01-24T20:17:13.900+05:30 DEBUG 37328 --- [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : POST "/api/v1/pay-runs/55/employees/1/lop", parameters={}
+2026-01-24T20:17:13.902+05:30 DEBUG 37328 --- [nio-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.payroll.controller.PayRunManagementController#addLOP(Long, Long, AddLOPRequest, Long)
+2026-01-24T20:17:13.963+05:30 DEBUG 37328 --- [nio-8080-exec-9] o.s.web.method.HandlerMethod             : Could not resolve parameter [2] in public org.springframework.http.ResponseEntity<?> com.payroll.controller.PayRunManagementController.addLOP(java.lang.Long,java.lang.Long,com.payroll.dto.AddLOPRequest,java.lang.Long): JSON parse error: Unexpected character ('\' (code 92)): was expecting double-quote to start field name
+2026-01-24T20:17:13.963+05:30  WARN 37328 --- [nio-8080-exec-9] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Unexpected character ('\' (code 92)): was expecting double-quote to start field name]
+2026-01-24T20:17:13.963+05:30 DEBUG 37328 --- [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 400 BAD_REQUEST
+2026-01-24T20:17:13.963+05:30  INFO 37328 --- [nio-8080-exec-9] c.payroll.config.RequestLoggingFilter    : Filter chain completed successfully
+2026-01-24T20:17:13.963+05:30  INFO 37328 --- [nio-8080-exec-9] c.payroll.config.RequestLoggingFilter    : Response Status: 400
+2026-01-24T20:17:13.963+05:30  INFO 37328 --- [nio-8080-exec-9] c.payroll.config.RequestLoggingFilter    : === End Request ===
+2026-01-24T20:17:13.963+05:30 DEBUG 37328 --- [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /error
+2026-01-24T20:17:13.963+05:30 DEBUG 37328 --- [nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-01-24T20:19:19.309+05:30 DEBUG 37328 --- [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:19:19.310+05:30 DEBUG 37328 --- [nio-8080-exec-1] com.payroll.security.JwtAuthFilter       : JWT Filter processing request: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:19:19.310+05:30 DEBUG 37328 --- [nio-8080-exec-1] com.payroll.security.JwtAuthFilter       : No Bearer token found in Authorization header for request: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:19:19.310+05:30 DEBUG 37328 --- [nio-8080-exec-1] com.payroll.security.JwtAuthFilter       : No username extracted from token for request: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:19:19.310+05:30 DEBUG 37328 --- [nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-01-24T20:19:19.311+05:30 DEBUG 37328 --- [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:19:19.311+05:30  INFO 37328 --- [nio-8080-exec-1] c.payroll.config.RequestLoggingFilter    : === Incoming Request ===
+2026-01-24T20:19:19.311+05:30  INFO 37328 --- [nio-8080-exec-1] c.payroll.config.RequestLoggingFilter    : Method: POST
+2026-01-24T20:19:19.311+05:30  INFO 37328 --- [nio-8080-exec-1] c.payroll.config.RequestLoggingFilter    : URI: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:19:19.311+05:30  INFO 37328 --- [nio-8080-exec-1] c.payroll.config.RequestLoggingFilter    : Header: host = localhost:8080
+2026-01-24T20:19:19.311+05:30  INFO 37328 --- [nio-8080-exec-1] c.payroll.config.RequestLoggingFilter    : Header: user-agent = curl/8.16.0
+2026-01-24T20:19:19.311+05:30  INFO 37328 --- [nio-8080-exec-1] c.payroll.config.RequestLoggingFilter    : Header: accept = */*
+2026-01-24T20:19:19.311+05:30 DEBUG 37328 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : POST "/api/v1/pay-runs/55/employees/1/lop", parameters={}
+2026-01-24T20:19:19.312+05:30 DEBUG 37328 --- [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.payroll.controller.PayRunManagementController#addLOP(Long, Long, AddLOPRequest, Long)
+2026-01-24T20:19:19.313+05:30 DEBUG 37328 --- [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Read "application/octet-stream" to []
+2026-01-24T20:19:19.313+05:30  WARN 37328 --- [nio-8080-exec-1] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotReadableException: Required request body is missing: public org.springframework.http.ResponseEntity<?> com.payroll.controller.PayRunManagementController.addLOP(java.lang.Long,java.lang.Long,com.payroll.dto.AddLOPRequest,java.lang.Long)]
+2026-01-24T20:19:19.313+05:30 DEBUG 37328 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 400 BAD_REQUEST
+2026-01-24T20:19:19.313+05:30  INFO 37328 --- [nio-8080-exec-1] c.payroll.config.RequestLoggingFilter    : Filter chain completed successfully
+2026-01-24T20:19:19.313+05:30  INFO 37328 --- [nio-8080-exec-1] c.payroll.config.RequestLoggingFilter    : Response Status: 400
+2026-01-24T20:19:19.313+05:30  INFO 37328 --- [nio-8080-exec-1] c.payroll.config.RequestLoggingFilter    : === End Request ===
+2026-01-24T20:19:19.314+05:30 DEBUG 37328 --- [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /error
+2026-01-24T20:19:19.315+05:30 DEBUG 37328 --- [nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-01-24T20:22:50.514+05:30 DEBUG 37328 --- [nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:22:50.515+05:30 DEBUG 37328 --- [nio-8080-exec-2] com.payroll.security.JwtAuthFilter       : JWT Filter processing request: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:22:50.515+05:30 DEBUG 37328 --- [nio-8080-exec-2] com.payroll.security.JwtAuthFilter       : No Bearer token found in Authorization header for request: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:22:50.515+05:30 DEBUG 37328 --- [nio-8080-exec-2] com.payroll.security.JwtAuthFilter       : No username extracted from token for request: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:22:50.515+05:30 DEBUG 37328 --- [nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-01-24T20:22:50.515+05:30 DEBUG 37328 --- [nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:22:50.515+05:30  INFO 37328 --- [nio-8080-exec-2] c.payroll.config.RequestLoggingFilter    : === Incoming Request ===
+2026-01-24T20:22:50.515+05:30  INFO 37328 --- [nio-8080-exec-2] c.payroll.config.RequestLoggingFilter    : Method: POST
+2026-01-24T20:22:50.515+05:30  INFO 37328 --- [nio-8080-exec-2] c.payroll.config.RequestLoggingFilter    : URI: /api/v1/pay-runs/55/employees/1/lop
+2026-01-24T20:22:50.515+05:30  INFO 37328 --- [nio-8080-exec-2] c.payroll.config.RequestLoggingFilter    : Header: host = localhost:8080
+2026-01-24T20:22:50.515+05:30  INFO 37328 --- [nio-8080-exec-2] c.payroll.config.RequestLoggingFilter    : Header: user-agent = curl/8.16.0
+2026-01-24T20:22:50.515+05:30  INFO 37328 --- [nio-8080-exec-2] c.payroll.config.RequestLoggingFilter    : Header: accept = */*
+2026-01-24T20:22:50.515+05:30 DEBUG 37328 --- [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : POST "/api/v1/pay-runs/55/employees/1/lop", parameters={}
+2026-01-24T20:22:50.517+05:30 DEBUG 37328 --- [nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.payroll.controller.PayRunManagementController#addLOP(Long, Long, AddLOPRequest, Long)
+2026-01-24T20:22:50.518+05:30 DEBUG 37328 --- [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Read "application/octet-stream" to []
+2026-01-24T20:22:50.518+05:30  WARN 37328 --- [nio-8080-exec-2] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotReadableException: Required request body is missing: public org.springframework.http.ResponseEntity<?> com.payroll.controller.PayRunManagementController.addLOP(java.lang.Long,java.lang.Long,com.payroll.dto.AddLOPRequest,java.lang.Long)]
+2026-01-24T20:22:50.518+05:30 DEBUG 37328 --- [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 400 BAD_REQUEST
+2026-01-24T20:22:50.518+05:30  INFO 37328 --- [nio-8080-exec-2] c.payroll.config.RequestLoggingFilter    : Filter chain completed successfully
+2026-01-24T20:22:50.519+05:30  INFO 37328 --- [nio-8080-exec-2] c.payroll.config.RequestLoggingFilter    : Response Status: 400
+2026-01-24T20:22:50.519+05:30  INFO 37328 --- [nio-8080-exec-2] c.payroll.config.RequestLoggingFilter    : === End Request ===
+2026-01-24T20:22:50.519+05:30 DEBUG 37328 --- [nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /error
+2026-01-24T20:22:50.519+05:30 DEBUG 37328 --- [nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-01-24T20:34:35.983+05:30 DEBUG 37328 --- [nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/test-open
+2026-01-24T20:34:35.983+05:30 DEBUG 37328 --- [nio-8080-exec-5] com.payroll.security.JwtAuthFilter       : JWT Filter processing request: /api/v1/test-open
+2026-01-24T20:34:35.983+05:30 DEBUG 37328 --- [nio-8080-exec-5] com.payroll.security.JwtAuthFilter       : No Bearer token found in Authorization header for request: /api/v1/test-open
+2026-01-24T20:34:35.983+05:30 DEBUG 37328 --- [nio-8080-exec-5] com.payroll.security.JwtAuthFilter       : No username extracted from token for request: /api/v1/test-open
+2026-01-24T20:34:35.983+05:30 DEBUG 37328 --- [nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext

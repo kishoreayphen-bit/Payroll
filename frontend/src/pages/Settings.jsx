@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { api } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
+import ComponentModal from '../components/EditComponentModal';
 
 export default function Settings() {
     const navigate = useNavigate();
@@ -49,12 +50,23 @@ export default function Settings() {
 
     const fetchOrganization = async () => {
         try {
-            const orgId = localStorage.getItem('selectedOrganizationId');
-            if (orgId) {
-                const response = await api.get(`/organizations`);
-                const org = response.data?.find(o => o.id === parseInt(orgId));
-                setOrganization(org);
+            let orgId = localStorage.getItem('selectedOrganizationId');
+            const response = await api.get(`/organizations`);
+            const list = response.data || [];
+
+            if (!orgId && list.length > 0) {
+                orgId = String(list[0].id);
+                localStorage.setItem('selectedOrganizationId', orgId);
             }
+
+            let org = null;
+            if (orgId && list.length > 0) {
+                org = list.find(o => o.id === parseInt(orgId, 10)) || list[0];
+                if (org && String(org.id) !== String(orgId)) {
+                    localStorage.setItem('selectedOrganizationId', String(org.id));
+                }
+            }
+            setOrganization(org);
         } catch (error) {
             console.error('Error fetching organization:', error);
         } finally {
@@ -725,6 +737,32 @@ function SalaryComponentsTab({ organization, showAlert }) {
                 </Button>
             </div>
 
+            {/* Diagnostics */}
+            <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">OrgID: {organization?.id || 'N/A'}</span>
+                <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Components: {components.length}</span>
+                <button
+                    onClick={fetchComponents}
+                    className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
+                >
+                    Refresh
+                </button>
+                <button
+                    onClick={async () => {
+                        try {
+                            await api.post(`/salary-components/seed?organizationId=${organization.id}`);
+                            showAlert('Seeded default components');
+                            fetchComponents();
+                        } catch (e) {
+                            showAlert('Failed to seed defaults', 'error');
+                        }
+                    }}
+                    className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
+                >
+                    Seed Defaults
+                </button>
+            </div>
+
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
@@ -840,101 +878,20 @@ function SalaryComponentsTab({ organization, showAlert }) {
 
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white dark:bg-slate-800 rounded-lg max-w-md w-full p-6">
-                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                            {editingComponent ? 'Edit Component' : 'Add Component'}
-                        </h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Component Name
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
-                                    placeholder="e.g., House Rent Allowance"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Component Code
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.code}
-                                    onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
-                                    placeholder="e.g., HRA"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Type
-                                </label>
-                                <select
-                                    value={formData.type}
-                                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
-                                >
-                                    <option value="EARNING">Earning</option>
-                                    <option value="DEDUCTION">Deduction</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Calculation Type
-                                </label>
-                                <select
-                                    value={formData.calculationType}
-                                    onChange={(e) => setFormData({ ...formData, calculationType: e.target.value })}
-                                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
-                                >
-                                    <option value="FIXED">Fixed Amount</option>
-                                    <option value="PERCENTAGE">Percentage</option>
-                                    <option value="COMPUTED">Computed</option>
-                                </select>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <label className="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.isTaxable}
-                                        onChange={(e) => setFormData({ ...formData, isTaxable: e.target.checked })}
-                                        className="rounded border-slate-300"
-                                    />
-                                    <span className="text-sm text-slate-700 dark:text-slate-300">Taxable</span>
-                                </label>
-                                <label className="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.isStatutory}
-                                        onChange={(e) => setFormData({ ...formData, isStatutory: e.target.checked })}
-                                        className="rounded border-slate-300"
-                                    />
-                                    <span className="text-sm text-slate-700 dark:text-slate-300">Statutory</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div className="flex gap-3 mt-6">
-                            <Button onClick={handleSave} className="flex-1 bg-pink-600 hover:bg-pink-700">
-                                <Save className="w-4 h-4 mr-2" />
-                                Save
-                            </Button>
-                            <Button 
-                                onClick={() => {
-                                    setShowModal(false);
-                                    setEditingComponent(null);
-                                }}
-                                className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-900"
-                            >
-                                Cancel
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+                <ComponentModal
+                    component={editingComponent}
+                    onClose={() => {
+                        setShowModal(false);
+                        setEditingComponent(null);
+                    }}
+                    onSave={() => {
+                        setShowModal(false);
+                        setEditingComponent(null);
+                        fetchComponents();
+                    }}
+                    organizationId={organization?.id}
+                    components={components}
+                />
             )}
         </div>
     );

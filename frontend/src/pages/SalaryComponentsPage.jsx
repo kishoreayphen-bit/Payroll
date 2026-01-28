@@ -33,8 +33,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
-import ComponentModal from '../components/ComponentModal';
+import ComponentModal from '../components/EditComponentModal';
 import { api } from '../services/authService';
+import { getAllComponents } from '../api/salaryComponentApi';
 import { Moon, Sun } from 'lucide-react';
 
 export default function SalaryComponents() {
@@ -97,12 +98,9 @@ export default function SalaryComponents() {
 
     const fetchComponents = async () => {
         try {
-            const selectedOrgId = localStorage.getItem('selectedOrganizationId');
-            if (selectedOrgId) {
-                const orgId = parseInt(selectedOrgId, 10);
-                const response = await api.get(`/salary-components?organizationId=${orgId}`);
-                setComponents(response.data || []);
-            }
+            const list = await getAllComponents();
+            setComponents(list || []);
+            try { console.log('[SalaryComponentsPage] fetched components count', Array.isArray(list) ? list.length : 'n/a'); } catch (e) {}
         } catch (error) {
             console.error('Error fetching components:', error);
             if (error.response?.status === 401 || error.response?.status === 403) {
@@ -377,11 +375,17 @@ export default function SalaryComponents() {
 
                 {/* Page Content */}
                 <div className="flex-1 overflow-y-auto p-6">
+                    <div className="bg-yellow-100 p-2 text-xs font-mono text-yellow-800 mb-4 rounded border border-yellow-300">
+                        DEBUG: API={import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1'} |
+                        OrgID={localStorage.getItem('selectedOrganizationId')} |
+                        Components={components.length} |
+                        User={user?.email}
+                    </div>
                     <div className="max-w-7xl mx-auto">
                         {/* Page Header */}
                         <div className="mb-6">
                             <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent mb-2">
-                                Salary Components
+                                Salary Components (Compliance Ready)
                             </h1>
                             <p className="text-slate-600 dark:text-slate-300">Manage earnings and deductions for your organization</p>
                         </div>
@@ -520,20 +524,20 @@ function ComponentCard({ component, onEdit, onDelete }) {
         <div className={`bg-white dark:bg-slate-800 rounded-xl border-2 ${isEarning ? 'border-emerald-200 dark:border-emerald-700' : 'border-red-200 dark:border-red-700'} p-4 hover:shadow-lg transition-all`}>
             <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-slate-900 dark:text-white">{component.name}</h3>
-                        {component.isStatutory && (
-                            <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
-                                Statutory
-                            </span>
-                        )}
-                    </div>
+                    <h3 className="font-semibold text-slate-900 dark:text-white mb-1">{component.name}</h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">{component.code}</p>
                 </div>
                 <div className={`px-2 py-1 rounded-lg text-xs font-medium ${isEarning ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300'
                     }`}>
                     {component.type}
                 </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-4">
+                {component.isRecurring && <span className="px-2 py-0.5 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-medium rounded-full">Recurring</span>}
+                {component.isVariable && <span className="px-2 py-0.5 bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-xs font-medium rounded-full">Variable</span>}
+                {component.isTaxable && <span className="px-2 py-0.5 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 text-xs font-medium rounded-full">Taxable</span>}
+                {component.isStatutory && <span className="px-2 py-0.5 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 text-xs font-medium rounded-full border border-slate-200 dark:border-slate-700">Statutory</span>}
             </div>
 
             <div className="space-y-2 mb-4">
@@ -547,12 +551,6 @@ function ComponentCard({ component, onEdit, onDelete }) {
                         <span className="font-medium text-slate-900 dark:text-white">{component.baseComponentName}</span>
                     </div>
                 )}
-                <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-600 dark:text-slate-400">Taxable:</span>
-                    <span className={`font-medium ${component.isTaxable ? 'text-orange-600' : 'text-slate-400'}`}>
-                        {component.isTaxable ? 'Yes' : 'No'}
-                    </span>
-                </div>
             </div>
 
             {component.description && (

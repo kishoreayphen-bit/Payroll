@@ -24,6 +24,10 @@ public class StatutorySettingsDTO {
     private Boolean pfIncludeEmployerContributionInCtc;
     private String pfEstablishmentId;
     private String pfEstablishmentName;
+    private Boolean restrictPfWage;
+    private Boolean includeAllowancesIfPfWageLow;
+    private Boolean prorateRestrictedPfWage;
+    private Boolean considerApplicableAllowances;
 
     // ESI Settings
     private Boolean esiEnabled;

@@ -128,8 +128,8 @@ export default function Login() {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Sign in</h1>
-            <p className="text-slate-600">to access PayrollPro</p>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Sign in (v2.0)</h1>
+            <p className="text-slate-600">to access PayrollPro (v2.0)</p>
           </div>
 
           {/* Error Message */}

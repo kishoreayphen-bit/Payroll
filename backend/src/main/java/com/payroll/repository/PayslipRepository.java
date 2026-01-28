@@ -30,10 +30,12 @@ public interface PayslipRepository extends JpaRepository<Payslip, Long> {
     List<Payslip> findByEmployeeIdAndYear(@Param("employeeId") Long employeeId, @Param("year") int year);
 
     @Query("SELECT p FROM Payslip p WHERE p.tenantId = :tenantId AND p.payPeriodStart >= :start AND p.payPeriodEnd <= :end")
-    List<Payslip> findByTenantIdAndPeriod(@Param("tenantId") Long tenantId, 
-                                           @Param("start") LocalDate start, 
-                                           @Param("end") LocalDate end);
+    List<Payslip> findByTenantIdAndPeriod(@Param("tenantId") Long tenantId,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end);
 
     @Query("SELECT COUNT(p) FROM Payslip p WHERE p.tenantId = :tenantId AND p.emailSent = false")
     Long countPendingEmailsByTenantId(@Param("tenantId") Long tenantId);
+
+    void deleteByPayRunEmployeeIdIn(List<Long> payRunEmployeeIds);
 }

@@ -19,6 +19,7 @@ export default function StatutoryCompliance() {
     const [settings, setSettings] = useState({
         pfEnabled: true, pfEmployeeRate: 12, pfEmployerRate: 12, pfAdminChargesRate: 0.5, pfEdliRate: 0.5,
         pfWageCeiling: 15000, pfIncludeEmployerContributionInCtc: true, pfEstablishmentId: '', pfEstablishmentName: '',
+        restrictPfWage: true, includeAllowancesIfPfWageLow: true, prorateRestrictedPfWage: false, considerApplicableAllowances: true,
         esiEnabled: true, esiEmployeeRate: 0.75, esiEmployerRate: 3.25, esiWageCeiling: 21000, esiCode: '',
         ptEnabled: true, ptState: 'Tamil Nadu', tdsEnabled: true, tanNumber: '', deductorName: '', deductorCategory: 'Company',
         lwfEnabled: false, lwfEmployeeContribution: 0, lwfEmployerContribution: 0
@@ -47,7 +48,7 @@ export default function StatutoryCompliance() {
             setUser(userResponse.data);
             await loadStatutorySettings(selectedOrgId);
             await loadPTData();
-        } catch (error) { console.error('Failed to load:', error); } 
+        } catch (error) { console.error('Failed to load:', error); }
         finally { setLoading(false); }
     };
 
@@ -87,7 +88,7 @@ export default function StatutoryCompliance() {
             setSaving(true);
             await api.post('/statutory/settings', settings, { headers: { 'X-Tenant-ID': organization.id } });
             alert('Settings saved successfully!');
-        } catch (error) { alert('Failed to save: ' + error.message); } 
+        } catch (error) { alert('Failed to save: ' + error.message); }
         finally { setSaving(false); }
     };
 
@@ -134,8 +135,8 @@ export default function StatutoryCompliance() {
                                 {activeTab === 'settings' && <SettingsTab settings={settings} setSettings={setSettings} saveSettings={saveSettings} saving={saving} />}
                                 {activeTab === 'pf' && <PFTab settings={settings} setSettings={setSettings} saveSettings={saveSettings} saving={saving} />}
                                 {activeTab === 'esi' && <ESITab settings={settings} setSettings={setSettings} saveSettings={saveSettings} saving={saving} />}
-                                {activeTab === 'pt' && <PTTab settings={settings} setSettings={setSettings} ptSlabs={ptSlabs} ptStates={ptStates} selectedPtState={selectedPtState} setSelectedPtState={setSelectedPtState} initializePTSlabs={initializePTSlabs} formatCurrency={formatCurrency} />}
-                                {activeTab === 'tds' && <TDSTab taxDeclarations={taxDeclarations} financialYear={financialYear} setFinancialYear={setFinancialYear} formatCurrency={formatCurrency} />}
+                                {activeTab === 'pt' && <PTTab settings={settings} setSettings={setSettings} saveSettings={saveSettings} saving={saving} ptSlabs={ptSlabs} ptStates={ptStates} selectedPtState={selectedPtState} setSelectedPtState={setSelectedPtState} initializePTSlabs={initializePTSlabs} formatCurrency={formatCurrency} />}
+                                {activeTab === 'tds' && <TDSTab settings={settings} setSettings={setSettings} saveSettings={saveSettings} saving={saving} taxDeclarations={taxDeclarations} financialYear={financialYear} setFinancialYear={setFinancialYear} formatCurrency={formatCurrency} />}
                                 {activeTab === 'employees' && <EmployeesTab employees={employees} searchTerm={searchTerm} setSearchTerm={setSearchTerm} loadEmployees={loadEmployees} />}
                             </div>
                         </div>
@@ -162,15 +163,15 @@ function SettingsTab({ settings, setSettings, saveSettings, saving }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {toggles.map(t => (<div key={t.key} className="bg-slate-50 dark:bg-slate-700/30 rounded-lg p-4 border border-slate-200 dark:border-slate-600 flex justify-between items-center">
                     <div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-lg bg-${t.color}-100 dark:bg-${t.color}-900/30 flex items-center justify-center`}><t.icon className={`w-5 h-5 text-${t.color}-600`} /></div><div><h3 className="font-medium text-slate-900 dark:text-white">{t.label}</h3><p className="text-sm text-slate-500 dark:text-slate-400">{t.desc}</p></div></div>
-                    <label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked={settings[t.key]} onChange={e => setSettings({...settings, [t.key]: e.target.checked})} className="sr-only peer" /><div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-pink-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div></label>
+                    <label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" checked={settings[t.key]} onChange={e => setSettings({ ...settings, [t.key]: e.target.checked })} className="sr-only peer" /><div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-pink-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div></label>
                 </div>))}
             </div>
             <div className="bg-slate-50 dark:bg-slate-700/30 rounded-lg p-6 border border-slate-200 dark:border-slate-600">
                 <h3 className="font-medium text-slate-900 dark:text-white mb-4">TDS Deductor Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">TAN Number</label><input type="text" value={settings.tanNumber || ''} onChange={e => setSettings({...settings, tanNumber: e.target.value.toUpperCase()})} placeholder="ABCD12345E" className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white" /></div>
-                    <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Deductor Name</label><input type="text" value={settings.deductorName || ''} onChange={e => setSettings({...settings, deductorName: e.target.value})} placeholder="Company Name" className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white" /></div>
-                    <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label><select value={settings.deductorCategory || 'Company'} onChange={e => setSettings({...settings, deductorCategory: e.target.value})} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"><option value="Company">Company</option><option value="Government">Government</option><option value="Individual">Individual</option></select></div>
+                    <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">TAN Number</label><input type="text" value={settings.tanNumber || ''} onChange={e => setSettings({ ...settings, tanNumber: e.target.value.toUpperCase() })} placeholder="ABCD12345E" className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white" /></div>
+                    <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Deductor Name</label><input type="text" value={settings.deductorName || ''} onChange={e => setSettings({ ...settings, deductorName: e.target.value })} placeholder="Company Name" className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white" /></div>
+                    <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label><select value={settings.deductorCategory || 'Company'} onChange={e => setSettings({ ...settings, deductorCategory: e.target.value })} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"><option value="Company">Company</option><option value="Government">Government</option><option value="Individual">Individual</option></select></div>
                 </div>
             </div>
         </div>
@@ -182,26 +183,93 @@ function PFTab({ settings, setSettings, saveSettings, saving }) {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Provident Fund Configuration</h2>
-                <Button onClick={saveSettings} disabled={saving} className="bg-pink-600 hover:bg-pink-700">{saving ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}Save</Button>
+                <div className="flex items-center gap-4">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" checked={settings.pfEnabled} onChange={e => setSettings({ ...settings, pfEnabled: e.target.checked })} className="sr-only peer" />
+                        <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-pink-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                        <span className="ml-3 text-sm font-medium text-slate-900 dark:text-slate-300">Enable PF</span>
+                    </label>
+                    <Button onClick={saveSettings} disabled={saving} className="bg-pink-600 hover:bg-pink-700">{saving ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}Save</Button>
+                </div>
             </div>
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 rounded-lg p-4"><div className="flex gap-3"><Info className="w-5 h-5 text-blue-600 flex-shrink-0" /><div className="text-sm text-blue-800 dark:text-blue-200"><p className="font-medium">Standard PF: 12% Employee + 12% Employer</p><p>Admin Charges: 0.50% | EDLI: 0.50%</p></div></div></div>
             <div className="bg-slate-50 dark:bg-slate-700/30 rounded-lg p-6 border">
                 <h3 className="font-medium mb-4 text-slate-900 dark:text-white">Establishment Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">PF Establishment ID</label><input type="text" value={settings.pfEstablishmentId || ''} onChange={e => setSettings({...settings, pfEstablishmentId: e.target.value.toUpperCase()})} placeholder="TNCHE1234567000" className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
-                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Establishment Name</label><input type="text" value={settings.pfEstablishmentName || ''} onChange={e => setSettings({...settings, pfEstablishmentName: e.target.value})} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
+                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">PF Establishment ID</label><input type="text" value={settings.pfEstablishmentId || ''} onChange={e => setSettings({ ...settings, pfEstablishmentId: e.target.value.toUpperCase() })} placeholder="TNCHE1234567000" className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
+                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Establishment Name</label><input type="text" value={settings.pfEstablishmentName || ''} onChange={e => setSettings({ ...settings, pfEstablishmentName: e.target.value })} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
                 </div>
             </div>
             <div className="bg-slate-50 dark:bg-slate-700/30 rounded-lg p-6 border">
                 <h3 className="font-medium mb-4 text-slate-900 dark:text-white">Contribution Rates</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Employee %</label><input type="number" step="0.01" value={settings.pfEmployeeRate || 12} onChange={e => setSettings({...settings, pfEmployeeRate: parseFloat(e.target.value)})} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
-                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Employer %</label><input type="number" step="0.01" value={settings.pfEmployerRate || 12} onChange={e => setSettings({...settings, pfEmployerRate: parseFloat(e.target.value)})} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
-                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Admin %</label><input type="number" step="0.01" value={settings.pfAdminChargesRate || 0.5} onChange={e => setSettings({...settings, pfAdminChargesRate: parseFloat(e.target.value)})} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
-                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Wage Ceiling ₹</label><input type="number" value={settings.pfWageCeiling || 15000} onChange={e => setSettings({...settings, pfWageCeiling: parseInt(e.target.value)})} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
+                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Employee %</label><input type="number" step="0.01" value={settings.pfEmployeeRate || 12} onChange={e => setSettings({ ...settings, pfEmployeeRate: parseFloat(e.target.value) })} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
+                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Employer %</label><input type="number" step="0.01" value={settings.pfEmployerRate || 12} onChange={e => setSettings({ ...settings, pfEmployerRate: parseFloat(e.target.value) })} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
+                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Admin %</label><input type="number" step="0.01" value={settings.pfAdminChargesRate || 0.5} onChange={e => setSettings({ ...settings, pfAdminChargesRate: parseFloat(e.target.value) })} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
+                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Wage Ceiling ₹</label><input type="number" value={settings.pfWageCeiling || 15000} onChange={e => setSettings({ ...settings, pfWageCeiling: parseInt(e.target.value) })} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
                 </div>
             </div>
-        </div>
+            <div className="bg-slate-50 dark:bg-slate-700/30 rounded-lg p-6 border">
+                <h3 className="font-medium mb-4 text-slate-900 dark:text-white">Calculation Logic</h3>
+                <div className="space-y-4">
+                    <label className="flex items-center gap-3 group cursor-pointer">
+                        <div className="relative flex items-center">
+                            <input
+                                type="checkbox"
+                                checked={settings.restrictPfWage}
+                                onChange={e => setSettings({ ...settings, restrictPfWage: e.target.checked })}
+                                className="peer h-4 w-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500 dark:border-slate-600 dark:bg-slate-700 dark:ring-offset-slate-800"
+                            />
+                        </div>
+                        <span className="text-sm text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                            Restrict PF Wage to ₹{settings.pfWageCeiling || 15000} (Statutory Limit)
+                        </span>
+                    </label>
+
+                    <label className="flex items-center gap-3 group cursor-pointer">
+                        <div className="relative flex items-center">
+                            <input
+                                type="checkbox"
+                                checked={settings.includeAllowancesIfPfWageLow}
+                                onChange={e => setSettings({ ...settings, includeAllowancesIfPfWageLow: e.target.checked })}
+                                className="peer h-4 w-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500 dark:border-slate-600 dark:bg-slate-700 dark:ring-offset-slate-800"
+                            />
+                        </div>
+                        <span className="text-sm text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                            Consider allowances when PF Wage is less than ₹{settings.pfWageCeiling || 15000} (Basic + DA)
+                        </span>
+                    </label>
+
+                    <label className="flex items-center gap-3 group cursor-pointer">
+                        <div className="relative flex items-center">
+                            <input
+                                type="checkbox"
+                                checked={settings.prorateRestrictedPfWage}
+                                onChange={e => setSettings({ ...settings, prorateRestrictedPfWage: e.target.checked })}
+                                className="peer h-4 w-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500 dark:border-slate-600 dark:bg-slate-700 dark:ring-offset-slate-800"
+                            />
+                        </div>
+                        <span className="text-sm text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                            Pro-rate Restricted PF Wage (Adjustment for LOP)
+                        </span>
+                    </label>
+
+                    <label className="flex items-center gap-3 group cursor-pointer">
+                        <div className="relative flex items-center">
+                            <input
+                                type="checkbox"
+                                checked={settings.pfIncludeEmployerContributionInCtc}
+                                onChange={e => setSettings({ ...settings, pfIncludeEmployerContributionInCtc: e.target.checked })}
+                                className="peer h-4 w-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500 dark:border-slate-600 dark:bg-slate-700 dark:ring-offset-slate-800"
+                            />
+                        </div>
+                        <span className="text-sm text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                            Include Employer's Contribution in CTC
+                        </span>
+                    </label>
+                </div>
+            </div>
+        </div >
     );
 }
 
@@ -210,36 +278,51 @@ function ESITab({ settings, setSettings, saveSettings, saving }) {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">ESI Configuration</h2>
-                <Button onClick={saveSettings} disabled={saving} className="bg-pink-600 hover:bg-pink-700">{saving ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}Save</Button>
+                <div className="flex items-center gap-4">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" checked={settings.esiEnabled} onChange={e => setSettings({ ...settings, esiEnabled: e.target.checked })} className="sr-only peer" />
+                        <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-pink-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                        <span className="ml-3 text-sm font-medium text-slate-900 dark:text-slate-300">Enable ESI</span>
+                    </label>
+                    <Button onClick={saveSettings} disabled={saving} className="bg-pink-600 hover:bg-pink-700">{saving ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}Save</Button>
+                </div>
             </div>
             <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 rounded-lg p-4"><div className="flex gap-3"><Info className="w-5 h-5 text-green-600 flex-shrink-0" /><div className="text-sm text-green-800"><p className="font-medium">ESI applicable when gross ≤ ₹21,000</p><p>Employee: 0.75% | Employer: 3.25%</p></div></div></div>
             <div className="bg-slate-50 dark:bg-slate-700/30 rounded-lg p-6 border">
                 <h3 className="font-medium mb-4 text-slate-900 dark:text-white">ESI Registration</h3>
-                <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">ESI Code</label><input type="text" value={settings.esiCode || ''} onChange={e => setSettings({...settings, esiCode: e.target.value})} placeholder="12345678901234567" className="w-full md:w-1/2 px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
+                <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">ESI Code</label><input type="text" value={settings.esiCode || ''} onChange={e => setSettings({ ...settings, esiCode: e.target.value })} placeholder="12345678901234567" className="w-full md:w-1/2 px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
             </div>
             <div className="bg-slate-50 dark:bg-slate-700/30 rounded-lg p-6 border">
                 <h3 className="font-medium mb-4 text-slate-900 dark:text-white">Rates</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Employee %</label><input type="number" step="0.01" value={settings.esiEmployeeRate || 0.75} onChange={e => setSettings({...settings, esiEmployeeRate: parseFloat(e.target.value)})} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
-                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Employer %</label><input type="number" step="0.01" value={settings.esiEmployerRate || 3.25} onChange={e => setSettings({...settings, esiEmployerRate: parseFloat(e.target.value)})} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
-                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Wage Ceiling ₹</label><input type="number" value={settings.esiWageCeiling || 21000} onChange={e => setSettings({...settings, esiWageCeiling: parseInt(e.target.value)})} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
+                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Employee %</label><input type="number" step="0.01" value={settings.esiEmployeeRate || 0.75} onChange={e => setSettings({ ...settings, esiEmployeeRate: parseFloat(e.target.value) })} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
+                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Employer %</label><input type="number" step="0.01" value={settings.esiEmployerRate || 3.25} onChange={e => setSettings({ ...settings, esiEmployerRate: parseFloat(e.target.value) })} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
+                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Wage Ceiling ₹</label><input type="number" value={settings.esiWageCeiling || 21000} onChange={e => setSettings({ ...settings, esiWageCeiling: parseInt(e.target.value) })} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500" /></div>
                 </div>
             </div>
         </div>
     );
 }
 
-function PTTab({ settings, setSettings, ptSlabs, ptStates, selectedPtState, setSelectedPtState, initializePTSlabs, formatCurrency }) {
+function PTTab({ settings, setSettings, saveSettings, saving, ptSlabs, ptStates, selectedPtState, setSelectedPtState, initializePTSlabs, formatCurrency }) {
     const filteredSlabs = ptSlabs.filter(s => s.state === selectedPtState);
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Professional Tax</h2>
-                {ptSlabs.length === 0 && <Button onClick={initializePTSlabs} className="bg-pink-600 hover:bg-pink-700">Initialize PT Slabs</Button>}
+                <div className="flex items-center gap-4">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" checked={settings.ptEnabled} onChange={e => setSettings({ ...settings, ptEnabled: e.target.checked })} className="sr-only peer" />
+                        <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-pink-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                        <span className="ml-3 text-sm font-medium text-slate-900 dark:text-slate-300">Enable PT</span>
+                    </label>
+                    <Button onClick={saveSettings} disabled={saving} className="bg-pink-600 hover:bg-pink-700">{saving ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}Save</Button>
+                    {ptSlabs.length === 0 && <Button onClick={initializePTSlabs} className="bg-pink-600 hover:bg-pink-700">Initialize PT Slabs</Button>}
+                </div>
             </div>
             <div className="bg-slate-50 dark:bg-slate-700/30 rounded-lg p-6 border">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Organization State</label><select value={settings.ptState || 'Tamil Nadu'} onChange={e => { setSettings({...settings, ptState: e.target.value}); setSelectedPtState(e.target.value); }} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white">{(ptStates.length > 0 ? ptStates : ['Tamil Nadu', 'Karnataka', 'Maharashtra', 'Andhra Pradesh', 'Telangana', 'West Bengal', 'Gujarat', 'Kerala']).map(s => <option key={s} value={s}>{s}</option>)}</select></div>
+                    <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Organization State</label><select value={settings.ptState || 'Tamil Nadu'} onChange={e => { setSettings({ ...settings, ptState: e.target.value }); setSelectedPtState(e.target.value); }} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white">{(ptStates.length > 0 ? ptStates : ['Tamil Nadu', 'Karnataka', 'Maharashtra', 'Andhra Pradesh', 'Telangana', 'West Bengal', 'Gujarat', 'Kerala']).map(s => <option key={s} value={s}>{s}</option>)}</select></div>
                     <div><label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">View Slabs For</label><select value={selectedPtState} onChange={e => setSelectedPtState(e.target.value)} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white">{(ptStates.length > 0 ? ptStates : ['Tamil Nadu', 'Karnataka', 'Maharashtra']).map(s => <option key={s} value={s}>{s}</option>)}</select></div>
                 </div>
             </div>
@@ -247,19 +330,27 @@ function PTTab({ settings, setSettings, ptSlabs, ptStates, selectedPtState, setS
                 <h3 className="font-medium mb-4 text-slate-900 dark:text-white">PT Slabs - {selectedPtState}</h3>
                 {filteredSlabs.length > 0 ? (
                     <table className="w-full"><thead className="bg-slate-100 dark:bg-slate-700"><tr><th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">From (₹)</th><th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">To (₹)</th><th className="px-4 py-3 text-right text-xs font-semibold text-slate-700 dark:text-slate-300">Tax (₹)</th></tr></thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-600">{filteredSlabs.map((s, i) => <tr key={i} className="hover:bg-slate-100/50 dark:hover:bg-slate-700/50"><td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{formatCurrency(s.fromAmount)}</td><td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{s.toAmount ? formatCurrency(s.toAmount) : 'Above'}</td><td className="px-4 py-3 text-sm text-right font-medium text-slate-900 dark:text-white">{formatCurrency(s.taxAmount)}</td></tr>)}</tbody></table>
+                        <tbody className="divide-y divide-slate-200 dark:divide-slate-600">{filteredSlabs.map((s, i) => <tr key={i} className="hover:bg-slate-100/50 dark:hover:bg-slate-700/50"><td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{formatCurrency(s.fromAmount)}</td><td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{s.toAmount ? formatCurrency(s.toAmount) : 'Above'}</td><td className="px-4 py-3 text-sm text-right font-medium text-slate-900 dark:text-white">{formatCurrency(s.taxAmount)}</td></tr>)}</tbody></table>
                 ) : <div className="text-center py-8 text-slate-500"><Calculator className="w-10 h-10 mx-auto mb-3 opacity-50" /><p>No PT slabs found. Click "Initialize PT Slabs" to add.</p></div>}
             </div>
         </div>
     );
 }
 
-function TDSTab({ taxDeclarations, financialYear, setFinancialYear, formatCurrency }) {
+function TDSTab({ settings, setSettings, saveSettings, saving, taxDeclarations, financialYear, setFinancialYear, formatCurrency }) {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">TDS / Income Tax</h2>
-                <select value={financialYear} onChange={e => setFinancialYear(e.target.value)} className="px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"><option value="2025-26">FY 2025-26</option><option value="2024-25">FY 2024-25</option></select>
+                <div className="flex items-center gap-4">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" checked={settings.tdsEnabled} onChange={e => setSettings({ ...settings, tdsEnabled: e.target.checked })} className="sr-only peer" />
+                        <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-pink-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                        <span className="ml-3 text-sm font-medium text-slate-900 dark:text-slate-300">Enable TDS</span>
+                    </label>
+                    <Button onClick={saveSettings} disabled={saving} className="bg-pink-600 hover:bg-pink-700">{saving ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}Save</Button>
+                    <select value={financialYear} onChange={e => setFinancialYear(e.target.value)} className="px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"><option value="2025-26">FY 2025-26</option><option value="2024-25">FY 2024-25</option></select>
+                </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 rounded-lg p-4"><h3 className="font-medium text-blue-800 mb-2">Old Regime</h3><ul className="text-sm text-blue-700 space-y-1"><li>0 - ₹2.5L: Nil</li><li>₹2.5L - ₹5L: 5%</li><li>₹5L - ₹10L: 20%</li><li>Above ₹10L: 30%</li><li className="font-medium mt-2">+ Std Deduction ₹50K</li></ul></div>
@@ -269,7 +360,7 @@ function TDSTab({ taxDeclarations, financialYear, setFinancialYear, formatCurren
                 <h3 className="font-medium mb-4 text-slate-900 dark:text-white">Tax Declarations</h3>
                 {taxDeclarations.length > 0 ? (
                     <table className="w-full"><thead className="bg-slate-100 dark:bg-slate-700"><tr><th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">Employee</th><th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">Regime</th><th className="px-4 py-3 text-right text-xs font-semibold text-slate-700 dark:text-slate-300">80C</th><th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 dark:text-slate-300">Status</th></tr></thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-600">{taxDeclarations.map(d => <tr key={d.id} className="hover:bg-slate-100/50 dark:hover:bg-slate-700/50"><td className="px-4 py-3 text-sm text-slate-900 dark:text-white">{d.employeeName}</td><td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-medium ${d.taxRegime === 'NEW' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>{d.taxRegime || 'NEW'}</span></td><td className="px-4 py-3 text-sm text-right text-slate-700 dark:text-slate-300">{formatCurrency(d.total80C)}</td><td className="px-4 py-3 text-center"><span className={`px-2 py-1 rounded-full text-xs ${d.status === 'SUBMITTED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{d.status || 'DRAFT'}</span></td></tr>)}</tbody></table>
+                        <tbody className="divide-y divide-slate-200 dark:divide-slate-600">{taxDeclarations.map(d => <tr key={d.id} className="hover:bg-slate-100/50 dark:hover:bg-slate-700/50"><td className="px-4 py-3 text-sm text-slate-900 dark:text-white">{d.employeeName}</td><td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-medium ${d.taxRegime === 'NEW' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>{d.taxRegime || 'NEW'}</span></td><td className="px-4 py-3 text-sm text-right text-slate-700 dark:text-slate-300">{formatCurrency(d.total80C)}</td><td className="px-4 py-3 text-center"><span className={`px-2 py-1 rounded-full text-xs ${d.status === 'SUBMITTED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{d.status || 'DRAFT'}</span></td></tr>)}</tbody></table>
                 ) : <div className="text-center py-8 text-slate-500"><FileText className="w-10 h-10 mx-auto mb-3 opacity-50" /><p>No tax declarations for {financialYear}</p></div>}
             </div>
         </div>
@@ -288,7 +379,7 @@ function EmployeesTab({ employees, searchTerm, setSearchTerm, loadEmployees }) {
             <div className="bg-slate-50 dark:bg-slate-700/30 rounded-lg border overflow-hidden">
                 {filtered.length > 0 ? (
                     <table className="w-full"><thead className="bg-slate-100 dark:bg-slate-700"><tr><th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">Employee</th><th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">UAN</th><th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">ESI</th><th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 dark:text-slate-300">PF</th><th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 dark:text-slate-300">ESI</th><th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 dark:text-slate-300">PT</th><th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 dark:text-slate-300">Regime</th></tr></thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-600">{filtered.map(e => <tr key={e.id} className="hover:bg-slate-100/50 dark:hover:bg-slate-700/50"><td className="px-4 py-3"><p className="text-sm font-medium text-slate-900 dark:text-white">{e.employeeName}</p><p className="text-xs text-slate-500 dark:text-slate-400">{e.employeeCode}</p></td><td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{e.uanNumber || '-'}</td><td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{e.esiNumber || '-'}</td><td className="px-4 py-3 text-center">{e.isPfApplicable ? <CheckCircle className="w-4 h-4 text-green-500 mx-auto" /> : <AlertCircle className="w-4 h-4 text-slate-300 mx-auto" />}</td><td className="px-4 py-3 text-center">{e.isEsiApplicable ? <CheckCircle className="w-4 h-4 text-green-500 mx-auto" /> : <AlertCircle className="w-4 h-4 text-slate-300 mx-auto" />}</td><td className="px-4 py-3 text-center">{e.isPtApplicable ? <CheckCircle className="w-4 h-4 text-green-500 mx-auto" /> : <AlertCircle className="w-4 h-4 text-slate-300 mx-auto" />}</td><td className="px-4 py-3 text-center"><span className={`px-2 py-1 rounded text-xs ${e.taxRegime === 'OLD' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>{e.taxRegime || 'NEW'}</span></td></tr>)}</tbody></table>
+                        <tbody className="divide-y divide-slate-200 dark:divide-slate-600">{filtered.map(e => <tr key={e.id} className="hover:bg-slate-100/50 dark:hover:bg-slate-700/50"><td className="px-4 py-3"><p className="text-sm font-medium text-slate-900 dark:text-white">{e.employeeName}</p><p className="text-xs text-slate-500 dark:text-slate-400">{e.employeeCode}</p></td><td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{e.uanNumber || '-'}</td><td className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{e.esiNumber || '-'}</td><td className="px-4 py-3 text-center">{e.isPfApplicable ? <CheckCircle className="w-4 h-4 text-green-500 mx-auto" /> : <AlertCircle className="w-4 h-4 text-slate-300 mx-auto" />}</td><td className="px-4 py-3 text-center">{e.isEsiApplicable ? <CheckCircle className="w-4 h-4 text-green-500 mx-auto" /> : <AlertCircle className="w-4 h-4 text-slate-300 mx-auto" />}</td><td className="px-4 py-3 text-center">{e.isPtApplicable ? <CheckCircle className="w-4 h-4 text-green-500 mx-auto" /> : <AlertCircle className="w-4 h-4 text-slate-300 mx-auto" />}</td><td className="px-4 py-3 text-center"><span className={`px-2 py-1 rounded text-xs ${e.taxRegime === 'OLD' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>{e.taxRegime || 'NEW'}</span></td></tr>)}</tbody></table>
                 ) : <div className="text-center py-8 text-slate-500"><Users className="w-10 h-10 mx-auto mb-3 opacity-50" /><p>No employees found</p></div>}
             </div>
         </div>

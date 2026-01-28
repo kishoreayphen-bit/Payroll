@@ -28,11 +28,16 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     Long countByEmployeeIdAndStatusAndDateBetween(@Param("empId") Long employeeId, @Param("status") String status, 
                                                    @Param("start") LocalDate start, @Param("end") LocalDate end);
 
-    @Query("SELECT a FROM Attendance a WHERE a.organizationId = :orgId AND MONTH(a.date) = :month AND YEAR(a.date) = :year")
-    List<Attendance> findByOrganizationIdAndMonthYear(@Param("orgId") Long organizationId, 
-                                                       @Param("month") int month, @Param("year") int year);
+    // Prefer date range queries to avoid DB-specific MONTH/YEAR JPQL functions
+    default List<Attendance> findByOrganizationIdAndMonthYear(Long organizationId, int month, int year) {
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+        return findByOrganizationIdAndDateBetween(organizationId, start, end);
+    }
 
-    @Query("SELECT a FROM Attendance a WHERE a.employeeId = :empId AND MONTH(a.date) = :month AND YEAR(a.date) = :year")
-    List<Attendance> findByEmployeeIdAndMonthYear(@Param("empId") Long employeeId, 
-                                                   @Param("month") int month, @Param("year") int year);
+    default List<Attendance> findByEmployeeIdAndMonthYear(Long employeeId, int month, int year) {
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+        return findByEmployeeIdAndDateBetween(employeeId, start, end);
+    }
 }

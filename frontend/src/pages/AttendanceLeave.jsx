@@ -38,6 +38,7 @@ export default function AttendanceLeave() {
     const [importFile, setImportFile] = useState(null);
     const [importing, setImporting] = useState(false);
     const [importResult, setImportResult] = useState(null);
+    const [leaveBalances, setLeaveBalances] = useState([]);
 
     useEffect(() => {
         loadInitialData();
@@ -47,11 +48,13 @@ export default function AttendanceLeave() {
         if (organization?.id) {
             // Always load leave types for attendance marking
             loadLeaveTypes();
-            
+
             if (activeTab === 'attendance') {
                 loadAttendance();
             } else if (activeTab === 'leave-requests') {
                 loadLeaveRequests();
+            } else if (activeTab === 'leave-balance') {
+                loadLeaveBalances();
             }
         }
     }, [activeTab, organization?.id, selectedMonth, selectedYear]);
@@ -63,12 +66,12 @@ export default function AttendanceLeave() {
                 const orgRes = await api.get(`/organizations`);
                 const org = orgRes.data?.find(o => o.id === parseInt(orgId));
                 setOrganization(org);
-                
-                const empRes = await api.get(`/employees?organizationId=${orgId}`, { 
-                    headers: { 'X-Tenant-ID': orgId } 
+
+                const empRes = await api.get(`/employees?organizationId=${orgId}`, {
+                    headers: { 'X-Tenant-ID': orgId }
                 });
                 setEmployees(empRes.data || []);
-                
+
                 // Load leave types for attendance marking
                 const leaveRes = await api.get('/leave/types', {
                     headers: { 'X-Tenant-ID': orgId }
@@ -115,6 +118,51 @@ export default function AttendanceLeave() {
             setLeaveRequests(response.data || []);
         } catch (error) {
             console.error('Error loading leave requests:', error);
+        }
+    };
+
+    const loadLeaveBalances = async () => {
+        if (!organization?.id) return;
+        try {
+            // Calculate leave balances based on leave types and used leaves
+            const balances = employees.map(emp => {
+                const empLeaves = leaveRequests.filter(
+                    lr => lr.employeeId === emp.id && lr.status === 'APPROVED'
+                );
+                
+                const leaveUsage = leaveTypes.map(lt => {
+                    const used = empLeaves
+                        .filter(lr => lr.leaveTypeId === lt.id)
+                        .reduce((sum, lr) => {
+                            const start = new Date(lr.startDate);
+                            const end = new Date(lr.endDate);
+                            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                            return sum + days;
+                        }, 0);
+                    
+                    return {
+                        leaveTypeId: lt.id,
+                        leaveTypeName: lt.name,
+                        leaveTypeCode: lt.code,
+                        totalAllowed: lt.daysPerYear || 0,
+                        used: used,
+                        balance: (lt.daysPerYear || 0) - used,
+                        isPaid: lt.isPaid
+                    };
+                });
+                
+                return {
+                    employeeId: emp.id,
+                    employeeCode: emp.employeeId,
+                    employeeName: `${emp.firstName || ''} ${emp.lastName || ''}`.trim(),
+                    department: emp.department || '-',
+                    leaveBalances: leaveUsage
+                };
+            });
+            
+            setLeaveBalances(balances);
+        } catch (error) {
+            console.error('Error calculating leave balances:', error);
         }
     };
 
@@ -177,7 +225,7 @@ export default function AttendanceLeave() {
                 showAlertMessage('Please select a leave type', 'error');
                 return;
             }
-            
+
             const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const attendanceData = {
                 employeeId,
@@ -186,12 +234,12 @@ export default function AttendanceLeave() {
                 checkInTime: status === 'PRESENT' ? '09:00' : null,
                 checkOutTime: status === 'PRESENT' ? '18:00' : null
             };
-            
+
             // Add leave type if status is LEAVE
             if (status === 'LEAVE' && selectedLeaveType) {
                 attendanceData.leaveTypeId = selectedLeaveType;
             }
-            
+
             await api.post('/attendance', attendanceData, {
                 headers: { 'X-Tenant-ID': organization.id }
             });
@@ -341,7 +389,7 @@ export default function AttendanceLeave() {
             });
 
             setImportResult(response.data);
-            
+
             if (response.data.success) {
                 showAlertMessage(
                     `Import completed! ${response.data.successCount} records created, ${response.data.updatedCount} updated`,
@@ -398,7 +446,8 @@ export default function AttendanceLeave() {
     const tabs = [
         { id: 'attendance', label: 'Attendance', icon: Calendar },
         { id: 'leave-requests', label: 'Leave Requests', icon: FileText },
-        { id: 'leave-types', label: 'Leave Types', icon: CalendarDays }
+        { id: 'leave-types', label: 'Leave Types', icon: CalendarDays },
+        { id: 'leave-balance', label: 'Leave Balance', icon: Users }
     ];
 
     const getStatusColor = (status) => {
@@ -468,11 +517,10 @@ export default function AttendanceLeave() {
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap ${
-                                            activeTab === tab.id
-                                                ? 'text-pink-600 dark:text-pink-400 border-b-2 border-pink-600 dark:border-pink-400 bg-pink-50/50 dark:bg-pink-900/20'
-                                                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
-                                        }`}
+                                        className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap ${activeTab === tab.id
+                                            ? 'text-pink-600 dark:text-pink-400 border-b-2 border-pink-600 dark:border-pink-400 bg-pink-50/50 dark:bg-pink-900/20'
+                                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                            }`}
                                     >
                                         <tab.icon className="w-4 h-4" />
                                         {tab.label}
@@ -514,13 +562,85 @@ export default function AttendanceLeave() {
                                             </div>
                                         </div>
 
-                                        {/* Bulk Actions */}
+                                        {/* Employee Table - Moved to Top */}
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-sm">
+                                                <thead className="bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
+                                                    <tr>
+                                                        <th className="px-3 py-2 text-left font-semibold sticky left-0 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white z-10">Employee</th>
+                                                        {monthDays.map(day => (
+                                                            <th key={day} className="px-1 py-2 text-center font-medium min-w-[32px] text-slate-700 dark:text-slate-300">
+                                                                {day}
+                                                            </th>
+                                                        ))}
+                                                        <th className="px-3 py-2 text-center font-semibold sticky right-0 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white z-10">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {filteredEmployees.map(emp => (
+                                                        <tr key={emp.id} className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                                                            <td className="px-3 py-2 font-medium sticky left-0 bg-white dark:bg-slate-800 text-slate-900 dark:text-white z-10">
+                                                                {emp.firstName} {emp.lastName}
+                                                            </td>
+                                                            {monthDays.map(day => {
+                                                                const att = getAttendanceForEmployee(emp.id, day);
+                                                                const status = att?.status || '-';
+                                                                const dayOfWeek = new Date(selectedYear, selectedMonth - 1, day).getDay();
+                                                                const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                                                                return (
+                                                                    <td key={day} className={`px-1 py-1 text-center ${isWeekend ? 'bg-slate-100 dark:bg-slate-700/50' : ''}`}>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setSelectedEmployee(emp);
+                                                                                setSelectedDay(day);
+                                                                                setShowAttendanceModal(true);
+                                                                            }}
+                                                                            className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all hover:scale-110 ${status === 'PRESENT' ? 'bg-green-500 dark:bg-green-600 text-white shadow-sm' :
+                                                                                status === 'ABSENT' ? 'bg-red-500 dark:bg-red-600 text-white shadow-sm' :
+                                                                                    status === 'HALF_DAY' ? 'bg-yellow-500 dark:bg-yellow-600 text-white shadow-sm' :
+                                                                                        status === 'LEAVE' ? 'bg-blue-500 dark:bg-blue-600 text-white shadow-sm' :
+                                                                                            status === 'HOLIDAY' ? 'bg-purple-500 dark:bg-purple-600 text-white shadow-sm' :
+                                                                                                status === 'WEEKEND' ? 'bg-slate-300 dark:bg-slate-600 text-slate-600 dark:text-slate-300' :
+                                                                                                    'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-600'
+                                                                                }`}
+                                                                            title={status}
+                                                                        >
+                                                                            {status === 'PRESENT' ? 'P' : status === 'ABSENT' ? 'A' : status === 'HALF_DAY' ? 'HD' : status === 'LEAVE' ? 'L' : status === 'HOLIDAY' ? 'H' : status === 'WEEKEND' ? 'W' : '-'}
+                                                                        </button>
+                                                                    </td>
+                                                                );
+                                                            })}
+                                                            <td className="px-3 py-2 sticky right-0 bg-white dark:bg-slate-800 z-10">
+                                                                <div className="flex items-center gap-1">
+                                                                    <button
+                                                                        onClick={() => markEmployeeForMonth(emp.id, 'PRESENT')}
+                                                                        className="p-1.5 hover:bg-green-100 dark:hover:bg-green-900/30 rounded text-green-600 dark:text-green-400 transition-colors"
+                                                                        title="Mark Present for Month"
+                                                                    >
+                                                                        <CheckCircle className="w-4 h-4" />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => markEmployeeForMonth(emp.id, 'ABSENT')}
+                                                                        className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-red-600 dark:text-red-400 transition-colors"
+                                                                        title="Mark Absent for Month"
+                                                                    >
+                                                                        <XCircle className="w-4 h-4" />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        {/* Bulk Actions - Moved Below Table */}
                                         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
                                             <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
                                                 <Users className="w-4 h-4" />
                                                 Smart Attendance Initialization
                                             </h3>
-                                            
+
                                             {/* Auto-Initialize - Most Recommended */}
                                             <div className="bg-white dark:bg-slate-800 rounded-lg p-3 mb-3 border-2 border-indigo-300 dark:border-indigo-600">
                                                 <div className="flex items-start gap-3">
@@ -604,7 +724,7 @@ export default function AttendanceLeave() {
                                             </details>
                                         </div>
 
-                                        {/* Legend */}
+                                        {/* Legend - Moved Below Table */}
                                         <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 mb-3 border border-slate-200 dark:border-slate-700">
                                             <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Status Legend:</p>
                                             <div className="flex flex-wrap gap-3 text-xs">
@@ -633,78 +753,6 @@ export default function AttendanceLeave() {
                                                     <span className="text-slate-600 dark:text-slate-400">W - Weekend</span>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full text-sm">
-                                                <thead className="bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
-                                                    <tr>
-                                                        <th className="px-3 py-2 text-left font-semibold sticky left-0 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white z-10">Employee</th>
-                                                        {monthDays.map(day => (
-                                                            <th key={day} className="px-1 py-2 text-center font-medium min-w-[32px] text-slate-700 dark:text-slate-300">
-                                                                {day}
-                                                            </th>
-                                                        ))}
-                                                        <th className="px-3 py-2 text-center font-semibold sticky right-0 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white z-10">Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {filteredEmployees.map(emp => (
-                                                        <tr key={emp.id} className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/30">
-                                                            <td className="px-3 py-2 font-medium sticky left-0 bg-white dark:bg-slate-800 text-slate-900 dark:text-white z-10">
-                                                                {emp.firstName} {emp.lastName}
-                                                            </td>
-                                                            {monthDays.map(day => {
-                                                                const att = getAttendanceForEmployee(emp.id, day);
-                                                                const status = att?.status || '-';
-                                                                const dayOfWeek = new Date(selectedYear, selectedMonth - 1, day).getDay();
-                                                                const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-                                                                return (
-                                                                    <td key={day} className={`px-1 py-1 text-center ${isWeekend ? 'bg-slate-100 dark:bg-slate-700/50' : ''}`}>
-                                                                        <button
-                                                                            onClick={() => {
-                                                                                setSelectedEmployee(emp);
-                                                                                setSelectedDay(day);
-                                                                                setShowAttendanceModal(true);
-                                                                            }}
-                                                                            className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all hover:scale-110 ${
-                                                                                status === 'PRESENT' ? 'bg-green-500 dark:bg-green-600 text-white shadow-sm' :
-                                                                                status === 'ABSENT' ? 'bg-red-500 dark:bg-red-600 text-white shadow-sm' :
-                                                                                status === 'HALF_DAY' ? 'bg-yellow-500 dark:bg-yellow-600 text-white shadow-sm' :
-                                                                                status === 'LEAVE' ? 'bg-blue-500 dark:bg-blue-600 text-white shadow-sm' :
-                                                                                status === 'HOLIDAY' ? 'bg-purple-500 dark:bg-purple-600 text-white shadow-sm' :
-                                                                                status === 'WEEKEND' ? 'bg-slate-300 dark:bg-slate-600 text-slate-600 dark:text-slate-300' :
-                                                                                'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-600'
-                                                                            }`}
-                                                                            title={status}
-                                                                        >
-                                                                            {status === 'PRESENT' ? 'P' : status === 'ABSENT' ? 'A' : status === 'HALF_DAY' ? 'HD' : status === 'LEAVE' ? 'L' : status === 'HOLIDAY' ? 'H' : status === 'WEEKEND' ? 'W' : '-'}
-                                                                        </button>
-                                                                    </td>
-                                                                );
-                                                            })}
-                                                            <td className="px-3 py-2 sticky right-0 bg-white dark:bg-slate-800 z-10">
-                                                                <div className="flex items-center gap-1">
-                                                                    <button
-                                                                        onClick={() => markEmployeeForMonth(emp.id, 'PRESENT')}
-                                                                        className="p-1.5 hover:bg-green-100 dark:hover:bg-green-900/30 rounded text-green-600 dark:text-green-400 transition-colors"
-                                                                        title="Mark Present for Month"
-                                                                    >
-                                                                        <CheckCircle className="w-4 h-4" />
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => markEmployeeForMonth(emp.id, 'ABSENT')}
-                                                                        className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-red-600 dark:text-red-400 transition-colors"
-                                                                        title="Mark Absent for Month"
-                                                                    >
-                                                                        <XCircle className="w-4 h-4" />
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
                                         </div>
                                     </div>
                                 )}
@@ -824,6 +872,122 @@ export default function AttendanceLeave() {
                                         </div>
                                     </div>
                                 )}
+
+                                {activeTab === 'leave-balance' && (
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="font-semibold text-slate-900 dark:text-white">Employee Leave Balances</h3>
+                                            <Button onClick={loadLeaveBalances} variant="outline" size="sm">
+                                                <RefreshCw className="w-4 h-4 mr-2" />
+                                                Refresh
+                                            </Button>
+                                        </div>
+
+                                        {leaveTypes.length === 0 ? (
+                                            <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                                                No leave types configured. Please add leave types first.
+                                            </div>
+                                        ) : employees.length === 0 ? (
+                                            <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                                                No employees found.
+                                            </div>
+                                        ) : (
+                                            <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
+                                                <table className="w-full text-sm">
+                                                    <thead className="bg-slate-50 dark:bg-slate-700">
+                                                        <tr>
+                                                            <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-300 sticky left-0 bg-slate-50 dark:bg-slate-700 z-10">Employee</th>
+                                                            <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-300">Department</th>
+                                                            {leaveTypes.map(lt => (
+                                                                <th key={lt.id} className="px-4 py-3 text-center font-semibold text-slate-700 dark:text-slate-300 min-w-[100px]">
+                                                                    <div className="flex flex-col items-center">
+                                                                        <span>{lt.code}</span>
+                                                                        <span className="text-xs font-normal text-slate-500">({lt.daysPerYear}d)</span>
+                                                                    </div>
+                                                                </th>
+                                                            ))}
+                                                            <th className="px-4 py-3 text-center font-semibold text-slate-700 dark:text-slate-300">Total Used</th>
+                                                            <th className="px-4 py-3 text-center font-semibold text-slate-700 dark:text-slate-300">Total Balance</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                                                        {leaveBalances.map(emp => {
+                                                            const totalUsed = emp.leaveBalances?.reduce((sum, lb) => sum + lb.used, 0) || 0;
+                                                            const totalBalance = emp.leaveBalances?.reduce((sum, lb) => sum + lb.balance, 0) || 0;
+                                                            return (
+                                                                <tr key={emp.employeeId} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                                                    <td className="px-4 py-3 sticky left-0 bg-white dark:bg-slate-800 z-10">
+                                                                        <div>
+                                                                            <p className="font-medium text-slate-900 dark:text-white">{emp.employeeName}</p>
+                                                                            <p className="text-xs text-slate-500">{emp.employeeCode}</p>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{emp.department}</td>
+                                                                    {emp.leaveBalances?.map(lb => (
+                                                                        <td key={lb.leaveTypeId} className="px-4 py-3 text-center">
+                                                                            <div className="flex flex-col items-center">
+                                                                                <span className={`font-medium ${lb.balance <= 0 ? 'text-red-600' : lb.balance <= 2 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                                                                    {lb.balance}
+                                                                                </span>
+                                                                                <span className="text-xs text-slate-400">
+                                                                                    ({lb.used} used)
+                                                                                </span>
+                                                                            </div>
+                                                                        </td>
+                                                                    ))}
+                                                                    <td className="px-4 py-3 text-center">
+                                                                        <span className="px-2 py-1 bg-slate-100 dark:bg-slate-600 rounded text-slate-700 dark:text-slate-300 font-medium">
+                                                                            {totalUsed}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="px-4 py-3 text-center">
+                                                                        <span className={`px-2 py-1 rounded font-medium ${totalBalance <= 0 ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                                                            {totalBalance}
+                                                                        </span>
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+
+                                        {/* Leave Balance Summary */}
+                                        {leaveTypes.length > 0 && employees.length > 0 && (
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                                                {leaveTypes.map(lt => {
+                                                    const totalUsedForType = leaveBalances.reduce((sum, emp) => {
+                                                        const lb = emp.leaveBalances?.find(l => l.leaveTypeId === lt.id);
+                                                        return sum + (lb?.used || 0);
+                                                    }, 0);
+                                                    const totalBalanceForType = leaveBalances.reduce((sum, emp) => {
+                                                        const lb = emp.leaveBalances?.find(l => l.leaveTypeId === lt.id);
+                                                        return sum + (lb?.balance || 0);
+                                                    }, 0);
+                                                    return (
+                                                        <div key={lt.id} className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4 border border-slate-200 dark:border-slate-600">
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: lt.color || '#6B7280' }}></div>
+                                                                <h4 className="font-medium text-slate-900 dark:text-white">{lt.name}</h4>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                                                <div>
+                                                                    <p className="text-slate-500 dark:text-slate-400">Total Used</p>
+                                                                    <p className="font-bold text-slate-900 dark:text-white">{totalUsedForType}</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-slate-500 dark:text-slate-400">Total Balance</p>
+                                                                    <p className="font-bold text-emerald-600">{totalBalanceForType}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -892,19 +1056,27 @@ export default function AttendanceLeave() {
                                 </div>
                             </div>
                             <div>
-                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Leave Type (Required for Leave)</p>
+                                <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                    Leave Type <span className="text-red-500">*</span>
+                                    <span className="text-xs font-normal text-slate-500 dark:text-slate-400 ml-1">(Required for marking leave)</span>
+                                </p>
                                 <select
                                     value={selectedLeaveType || ''}
                                     onChange={(e) => setSelectedLeaveType(e.target.value ? parseInt(e.target.value) : null)}
                                     className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-pink-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                                 >
-                                    <option value="">Select Leave Type</option>
+                                    <option value="">-- Select Leave Type --</option>
                                     {leaveTypes.map(type => (
                                         <option key={type.id} value={type.id}>
-                                            {type.name} ({type.isPaid ? 'Paid' : 'Unpaid'}) - {type.daysPerYear} days/year
+                                            {type.name}
                                         </option>
                                     ))}
                                 </select>
+                                {leaveTypes.length === 0 && (
+                                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                        No leave types configured. Please add leave types in the "Leave Types" tab first.
+                                    </p>
+                                )}
                             </div>
                             <div>
                                 <button
@@ -1002,141 +1174,140 @@ export default function AttendanceLeave() {
                 <div className="fixed inset-0 bg-black/50 z-50 overflow-y-auto" onClick={closeImportModal}>
                     <div className="min-h-screen flex items-center justify-center p-4">
                         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 max-w-2xl w-full my-8 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                <Upload className="w-5 h-5 text-purple-600" />
-                                Import Attendance from Excel
-                            </h3>
-                            <button onClick={closeImportModal} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        <div className="space-y-4">
-                            {/* Instructions */}
-                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">📋 Instructions:</h4>
-                                <ol className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
-                                    <li>Download the Excel template using the button below</li>
-                                    <li>Fill in attendance data (Employee ID, Date, Status, Leave Type, etc.)</li>
-                                    <li>Upload the completed Excel file</li>
-                                    <li>Review import results and fix any errors if needed</li>
-                                </ol>
-                            </div>
-
-                            {/* Template Download */}
-                            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
-                                <div>
-                                    <p className="font-medium text-slate-900 dark:text-white">Excel Template</p>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400">Download the template with sample data</p>
-                                </div>
-                                <button
-                                    onClick={handleDownloadTemplate}
-                                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors"
-                                >
-                                    <Download className="w-4 h-4" />
-                                    Download Template
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <Upload className="w-5 h-5 text-purple-600" />
+                                    Import Attendance from Excel
+                                </h3>
+                                <button onClick={closeImportModal} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
 
-                            {/* File Upload */}
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                    Upload Excel File
-                                </label>
-                                <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-purple-500 dark:hover:border-purple-400 transition-colors">
-                                    <input
-                                        type="file"
-                                        accept=".xlsx,.xls"
-                                        onChange={handleFileSelect}
-                                        className="hidden"
-                                        id="excel-upload"
-                                    />
-                                    <label htmlFor="excel-upload" className="cursor-pointer">
-                                        <Upload className="w-12 h-12 mx-auto text-slate-400 dark:text-slate-500 mb-2" />
-                                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                            {importFile ? importFile.name : 'Click to select Excel file'}
-                                        </p>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                            Supports .xlsx and .xls files
-                                        </p>
-                                    </label>
+                            <div className="space-y-4">
+                                {/* Instructions */}
+                                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                                    <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">📋 Instructions:</h4>
+                                    <ol className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
+                                        <li>Download the Excel template using the button below</li>
+                                        <li>Fill in attendance data (Employee ID, Date, Status, Leave Type, etc.)</li>
+                                        <li>Upload the completed Excel file</li>
+                                        <li>Review import results and fix any errors if needed</li>
+                                    </ol>
                                 </div>
-                            </div>
 
-                            {/* Import Results */}
-                            {importResult && (
-                                <div className={`p-4 rounded-lg border ${
-                                    importResult.success 
-                                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
-                                        : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
-                                }`}>
-                                    <h4 className="font-semibold mb-2 flex items-center gap-2">
-                                        {importResult.success ? (
-                                            <CheckCircle className="w-5 h-5 text-green-600" />
-                                        ) : (
-                                            <AlertCircle className="w-5 h-5 text-yellow-600" />
-                                        )}
-                                        Import Results
-                                    </h4>
-                                    <div className="text-sm space-y-1">
-                                        <p>✅ Created: {importResult.successCount}</p>
-                                        <p>🔄 Updated: {importResult.updatedCount}</p>
-                                        <p>❌ Errors: {importResult.errorCount}</p>
-                                        <p>📊 Total Processed: {importResult.totalProcessed}</p>
+                                {/* Template Download */}
+                                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
+                                    <div>
+                                        <p className="font-medium text-slate-900 dark:text-white">Excel Template</p>
+                                        <p className="text-sm text-slate-600 dark:text-slate-400">Download the template with sample data</p>
                                     </div>
-                                    
-                                    {importResult.errors && importResult.errors.length > 0 && (
-                                        <div className="mt-3">
-                                            <p className="font-medium text-red-700 dark:text-red-300 mb-1">Errors:</p>
-                                            <div className="max-h-32 overflow-y-auto bg-white dark:bg-slate-800 rounded p-2 text-xs">
-                                                {importResult.errors.map((error, idx) => (
-                                                    <p key={idx} className="text-red-600 dark:text-red-400">{error}</p>
-                                                ))}
-                                            </div>
+                                    <button
+                                        onClick={handleDownloadTemplate}
+                                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors"
+                                    >
+                                        <Download className="w-4 h-4" />
+                                        Download Template
+                                    </button>
+                                </div>
+
+                                {/* File Upload */}
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                        Upload Excel File
+                                    </label>
+                                    <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-purple-500 dark:hover:border-purple-400 transition-colors">
+                                        <input
+                                            type="file"
+                                            accept=".xlsx,.xls"
+                                            onChange={handleFileSelect}
+                                            className="hidden"
+                                            id="excel-upload"
+                                        />
+                                        <label htmlFor="excel-upload" className="cursor-pointer">
+                                            <Upload className="w-12 h-12 mx-auto text-slate-400 dark:text-slate-500 mb-2" />
+                                            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                {importFile ? importFile.name : 'Click to select Excel file'}
+                                            </p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                                Supports .xlsx and .xls files
+                                            </p>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* Import Results */}
+                                {importResult && (
+                                    <div className={`p-4 rounded-lg border ${importResult.success
+                                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                                        : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                                        }`}>
+                                        <h4 className="font-semibold mb-2 flex items-center gap-2">
+                                            {importResult.success ? (
+                                                <CheckCircle className="w-5 h-5 text-green-600" />
+                                            ) : (
+                                                <AlertCircle className="w-5 h-5 text-yellow-600" />
+                                            )}
+                                            Import Results
+                                        </h4>
+                                        <div className="text-sm space-y-1">
+                                            <p>✅ Created: {importResult.successCount}</p>
+                                            <p>🔄 Updated: {importResult.updatedCount}</p>
+                                            <p>❌ Errors: {importResult.errorCount}</p>
+                                            <p>📊 Total Processed: {importResult.totalProcessed}</p>
                                         </div>
-                                    )}
-                                    
-                                    {importResult.warnings && importResult.warnings.length > 0 && (
-                                        <div className="mt-3">
-                                            <p className="font-medium text-yellow-700 dark:text-yellow-300 mb-1">Warnings:</p>
-                                            <div className="max-h-32 overflow-y-auto bg-white dark:bg-slate-800 rounded p-2 text-xs">
-                                                {importResult.warnings.map((warning, idx) => (
-                                                    <p key={idx} className="text-yellow-600 dark:text-yellow-400">{warning}</p>
-                                                ))}
+
+                                        {importResult.errors && importResult.errors.length > 0 && (
+                                            <div className="mt-3">
+                                                <p className="font-medium text-red-700 dark:text-red-300 mb-1">Errors:</p>
+                                                <div className="max-h-32 overflow-y-auto bg-white dark:bg-slate-800 rounded p-2 text-xs">
+                                                    {importResult.errors.map((error, idx) => (
+                                                        <p key={idx} className="text-red-600 dark:text-red-400">{error}</p>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
+
+                                        {importResult.warnings && importResult.warnings.length > 0 && (
+                                            <div className="mt-3">
+                                                <p className="font-medium text-yellow-700 dark:text-yellow-300 mb-1">Warnings:</p>
+                                                <div className="max-h-32 overflow-y-auto bg-white dark:bg-slate-800 rounded p-2 text-xs">
+                                                    {importResult.warnings.map((warning, idx) => (
+                                                        <p key={idx} className="text-yellow-600 dark:text-yellow-400">{warning}</p>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Action Buttons */}
+                                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                                    <Button onClick={closeImportModal} variant="outline">
+                                        {importResult ? 'Close' : 'Cancel'}
+                                    </Button>
+                                    {!importResult && (
+                                        <Button
+                                            onClick={handleImportAttendance}
+                                            disabled={!importFile || importing}
+                                            className="bg-purple-600 hover:bg-purple-700"
+                                        >
+                                            {importing ? (
+                                                <>
+                                                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                                                    Importing...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Upload className="w-4 h-4 mr-2" />
+                                                    Import Attendance
+                                                </>
+                                            )}
+                                        </Button>
                                     )}
                                 </div>
-                            )}
-
-                            {/* Action Buttons */}
-                            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-                                <Button onClick={closeImportModal} variant="outline">
-                                    {importResult ? 'Close' : 'Cancel'}
-                                </Button>
-                                {!importResult && (
-                                    <Button 
-                                        onClick={handleImportAttendance} 
-                                        disabled={!importFile || importing}
-                                        className="bg-purple-600 hover:bg-purple-700"
-                                    >
-                                        {importing ? (
-                                            <>
-                                                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                                                Importing...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Upload className="w-4 h-4 mr-2" />
-                                                Import Attendance
-                                            </>
-                                        )}
-                                    </Button>
-                                )}
                             </div>
                         </div>
-                    </div>
                     </div>
                 </div>
             )}

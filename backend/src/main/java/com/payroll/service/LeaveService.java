@@ -44,8 +44,8 @@ public class LeaveService {
     @Transactional
     public LeaveType updateLeaveType(Long id, LeaveType leaveType) {
         LeaveType existing = leaveTypeRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Leave type not found"));
-        
+                .orElseThrow(() -> new RuntimeException("Leave type not found"));
+
         existing.setName(leaveType.getName());
         existing.setCode(leaveType.getCode());
         existing.setDescription(leaveType.getDescription());
@@ -57,30 +57,36 @@ public class LeaveService {
         existing.setMaxEncashmentDays(leaveType.getMaxEncashmentDays());
         existing.setIsActive(leaveType.getIsActive());
         existing.setColor(leaveType.getColor());
-        
+
         return leaveTypeRepository.save(existing);
     }
 
     @Transactional
     public void initializeDefaultLeaveTypes(Long organizationId) {
         List<LeaveType> existingTypes = leaveTypeRepository.findByOrganizationId(organizationId);
-        if (!existingTypes.isEmpty()) return;
+        if (!existingTypes.isEmpty())
+            return;
 
         List<LeaveType> defaultTypes = Arrays.asList(
-            createDefaultLeaveType(organizationId, "Casual Leave", "CL", "For personal matters", 12, true, false, "#3B82F6"),
-            createDefaultLeaveType(organizationId, "Sick Leave", "SL", "For health-related absences", 12, true, false, "#EF4444"),
-            createDefaultLeaveType(organizationId, "Earned Leave", "EL", "Privilege/Annual leave", 15, true, true, "#10B981"),
-            createDefaultLeaveType(organizationId, "Maternity Leave", "ML", "For maternity", 182, true, false, "#EC4899"),
-            createDefaultLeaveType(organizationId, "Paternity Leave", "PL", "For paternity", 15, true, false, "#8B5CF6"),
-            createDefaultLeaveType(organizationId, "Comp Off", "CO", "Compensatory off", 0, true, false, "#F59E0B"),
-            createDefaultLeaveType(organizationId, "Loss of Pay", "LOP", "Unpaid leave", 0, false, false, "#6B7280")
-        );
+                createDefaultLeaveType(organizationId, "Casual Leave", "CL", "For personal matters", 12, true, false,
+                        "#3B82F6"),
+                createDefaultLeaveType(organizationId, "Sick Leave", "SL", "For health-related absences", 12, true,
+                        false, "#EF4444"),
+                createDefaultLeaveType(organizationId, "Earned Leave", "EL", "Privilege/Annual leave", 15, true, true,
+                        "#10B981"),
+                createDefaultLeaveType(organizationId, "Maternity Leave", "ML", "For maternity", 182, true, false,
+                        "#EC4899"),
+                createDefaultLeaveType(organizationId, "Paternity Leave", "PL", "For paternity", 15, true, false,
+                        "#8B5CF6"),
+                createDefaultLeaveType(organizationId, "Comp Off", "CO", "Compensatory off", 0, true, false, "#F59E0B"),
+                createDefaultLeaveType(organizationId, "Loss of Pay", "LOP", "Unpaid leave", 0, false, false,
+                        "#6B7280"));
 
         leaveTypeRepository.saveAll(defaultTypes);
     }
 
-    private LeaveType createDefaultLeaveType(Long orgId, String name, String code, String desc, 
-                                              int days, boolean paid, boolean carryForward, String color) {
+    private LeaveType createDefaultLeaveType(Long orgId, String name, String code, String desc,
+            int days, boolean paid, boolean carryForward, String color) {
         LeaveType type = new LeaveType();
         type.setOrganizationId(orgId);
         type.setName(name);
@@ -111,8 +117,8 @@ public class LeaveService {
     public LeaveRequest applyLeave(LeaveRequest request) {
         // Check for overlapping leaves
         List<LeaveRequest> overlapping = leaveRequestRepository.findOverlappingLeaves(
-            request.getEmployeeId(), request.getStartDate(), request.getEndDate());
-        
+                request.getEmployeeId(), request.getStartDate(), request.getEndDate());
+
         if (!overlapping.isEmpty()) {
             throw new RuntimeException("Leave already applied for this period");
         }
@@ -121,13 +127,17 @@ public class LeaveService {
         double totalDays = calculateLeaveDays(request.getStartDate(), request.getEndDate(), request.getIsHalfDay());
         request.setTotalDays(totalDays);
 
-        // Check balance
-        LeaveBalance balance = getOrCreateBalance(request.getEmployeeId(), request.getLeaveTypeId(), Year.now().getValue());
+        // Check balance - RELAXED for LOP Calculation Scenario
+        LeaveBalance balance = getOrCreateBalance(request.getEmployeeId(), request.getLeaveTypeId(),
+                Year.now().getValue());
         if (balance.getAvailableBalance() < totalDays) {
-            LeaveType leaveType = leaveTypeRepository.findById(request.getLeaveTypeId()).orElse(null);
-            if (leaveType != null && !"LOP".equals(leaveType.getCode())) {
-                throw new RuntimeException("Insufficient leave balance");
-            }
+            // LeaveType leaveType =
+            // leaveTypeRepository.findById(request.getLeaveTypeId()).orElse(null);
+            // Relaxed: Allow negative balance/excess leave.
+            // The PayRunService/AttendanceService will calculate this as LOP.
+            // if (leaveType != null && !"LOP".equals(leaveType.getCode())) {
+            // throw new RuntimeException("Insufficient leave balance");
+            // }
         }
 
         request.setStatus("PENDING");
@@ -137,7 +147,7 @@ public class LeaveService {
     @Transactional
     public LeaveRequest approveLeave(Long requestId, Long approvedBy) {
         LeaveRequest request = leaveRequestRepository.findById(requestId)
-            .orElseThrow(() -> new RuntimeException("Leave request not found"));
+                .orElseThrow(() -> new RuntimeException("Leave request not found"));
 
         if (!"PENDING".equals(request.getStatus())) {
             throw new RuntimeException("Leave request is not pending");
@@ -148,7 +158,8 @@ public class LeaveService {
         request.setApprovedAt(LocalDateTime.now());
 
         // Deduct from balance
-        LeaveBalance balance = getOrCreateBalance(request.getEmployeeId(), request.getLeaveTypeId(), Year.now().getValue());
+        LeaveBalance balance = getOrCreateBalance(request.getEmployeeId(), request.getLeaveTypeId(),
+                Year.now().getValue());
         balance.setUsed(balance.getUsed() + request.getTotalDays());
         leaveBalanceRepository.save(balance);
 
@@ -161,7 +172,7 @@ public class LeaveService {
     @Transactional
     public LeaveRequest rejectLeave(Long requestId, Long rejectedBy, String reason) {
         LeaveRequest request = leaveRequestRepository.findById(requestId)
-            .orElseThrow(() -> new RuntimeException("Leave request not found"));
+                .orElseThrow(() -> new RuntimeException("Leave request not found"));
 
         if (!"PENDING".equals(request.getStatus())) {
             throw new RuntimeException("Leave request is not pending");
@@ -178,11 +189,12 @@ public class LeaveService {
     @Transactional
     public LeaveRequest cancelLeave(Long requestId) {
         LeaveRequest request = leaveRequestRepository.findById(requestId)
-            .orElseThrow(() -> new RuntimeException("Leave request not found"));
+                .orElseThrow(() -> new RuntimeException("Leave request not found"));
 
         if ("APPROVED".equals(request.getStatus())) {
             // Restore balance
-            LeaveBalance balance = getOrCreateBalance(request.getEmployeeId(), request.getLeaveTypeId(), Year.now().getValue());
+            LeaveBalance balance = getOrCreateBalance(request.getEmployeeId(), request.getLeaveTypeId(),
+                    Year.now().getValue());
             balance.setUsed(balance.getUsed() - request.getTotalDays());
             leaveBalanceRepository.save(balance);
 
@@ -197,8 +209,9 @@ public class LeaveService {
     private void markLeaveInAttendance(LeaveRequest request) {
         for (LocalDate date = request.getStartDate(); !date.isAfter(request.getEndDate()); date = date.plusDays(1)) {
             if (date.getDayOfWeek() != DayOfWeek.SATURDAY && date.getDayOfWeek() != DayOfWeek.SUNDAY) {
-                Optional<Attendance> existing = attendanceRepository.findByEmployeeIdAndDate(request.getEmployeeId(), date);
-                
+                Optional<Attendance> existing = attendanceRepository.findByEmployeeIdAndDate(request.getEmployeeId(),
+                        date);
+
                 Attendance attendance;
                 if (existing.isPresent()) {
                     attendance = existing.get();
@@ -208,18 +221,18 @@ public class LeaveService {
                     attendance.setOrganizationId(request.getOrganizationId());
                     attendance.setDate(date);
                 }
-                
+
                 if (request.getIsHalfDay() != null && request.getIsHalfDay()) {
                     attendance.setStatus("HALF_DAY");
                 } else {
                     attendance.setStatus("LEAVE");
                 }
                 attendance.setRemarks("Leave: " + request.getReason());
-                
+
                 // Set leave type and request references for LOP calculation
                 attendance.setLeaveTypeId(request.getLeaveTypeId());
                 attendance.setLeaveRequestId(request.getId());
-                
+
                 attendanceRepository.save(attendance);
             }
         }
@@ -228,7 +241,8 @@ public class LeaveService {
     private void removeLeaveFromAttendance(LeaveRequest request) {
         for (LocalDate date = request.getStartDate(); !date.isAfter(request.getEndDate()); date = date.plusDays(1)) {
             Optional<Attendance> existing = attendanceRepository.findByEmployeeIdAndDate(request.getEmployeeId(), date);
-            if (existing.isPresent() && ("LEAVE".equals(existing.get().getStatus()) || "HALF_DAY".equals(existing.get().getStatus()))) {
+            if (existing.isPresent()
+                    && ("LEAVE".equals(existing.get().getStatus()) || "HALF_DAY".equals(existing.get().getStatus()))) {
                 attendanceRepository.delete(existing.get());
             }
         }
@@ -259,7 +273,7 @@ public class LeaveService {
 
         for (LeaveType type : leaveTypes) {
             LeaveBalance balance = getOrCreateBalance(employeeId, type.getId(), year);
-            
+
             Map<String, Object> balanceMap = new HashMap<>();
             balanceMap.put("leaveTypeId", type.getId());
             balanceMap.put("leaveTypeName", type.getName());
@@ -269,7 +283,7 @@ public class LeaveService {
             balanceMap.put("used", balance.getUsed());
             balanceMap.put("available", balance.getAvailableBalance());
             balanceMap.put("carryForward", balance.getCarryForward());
-            
+
             balances.add(balanceMap);
         }
 
@@ -278,26 +292,26 @@ public class LeaveService {
 
     private LeaveBalance getOrCreateBalance(Long employeeId, Long leaveTypeId, int year) {
         return leaveBalanceRepository.findByEmployeeIdAndLeaveTypeIdAndYear(employeeId, leaveTypeId, year)
-            .orElseGet(() -> {
-                LeaveType type = leaveTypeRepository.findById(leaveTypeId).orElse(null);
-                
-                LeaveBalance balance = new LeaveBalance();
-                balance.setEmployeeId(employeeId);
-                balance.setLeaveTypeId(leaveTypeId);
-                balance.setYear(year);
-                balance.setOpeningBalance(type != null ? type.getDaysPerYear().doubleValue() : 0.0);
-                balance.setUsed(0.0);
-                balance.setAccrued(0.0);
-                balance.setAdjustment(0.0);
-                balance.setCarryForward(0.0);
-                balance.setEncashed(0.0);
-                
-                if (type != null) {
-                    balance.setOrganizationId(type.getOrganizationId());
-                }
-                
-                return leaveBalanceRepository.save(balance);
-            });
+                .orElseGet(() -> {
+                    LeaveType type = leaveTypeRepository.findById(leaveTypeId).orElse(null);
+
+                    LeaveBalance balance = new LeaveBalance();
+                    balance.setEmployeeId(employeeId);
+                    balance.setLeaveTypeId(leaveTypeId);
+                    balance.setYear(year);
+                    balance.setOpeningBalance(type != null ? type.getDaysPerYear().doubleValue() : 0.0);
+                    balance.setUsed(0.0);
+                    balance.setAccrued(0.0);
+                    balance.setAdjustment(0.0);
+                    balance.setCarryForward(0.0);
+                    balance.setEncashed(0.0);
+
+                    if (type != null) {
+                        balance.setOrganizationId(type.getOrganizationId());
+                    }
+
+                    return leaveBalanceRepository.save(balance);
+                });
     }
 
     @Transactional

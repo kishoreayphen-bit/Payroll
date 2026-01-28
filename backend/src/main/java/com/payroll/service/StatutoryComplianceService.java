@@ -51,6 +51,10 @@ public class StatutoryComplianceService {
         settings.setPfIncludeEmployerContributionInCtc(dto.getPfIncludeEmployerContributionInCtc());
         settings.setPfEstablishmentId(dto.getPfEstablishmentId());
         settings.setPfEstablishmentName(dto.getPfEstablishmentName());
+        settings.setRestrictPfWage(dto.getRestrictPfWage());
+        settings.setIncludeAllowancesIfPfWageLow(dto.getIncludeAllowancesIfPfWageLow());
+        settings.setProrateRestrictedPfWage(dto.getProrateRestrictedPfWage());
+        settings.setConsiderApplicableAllowances(dto.getConsiderApplicableAllowances());
 
         // ESI Settings
         settings.setEsiEnabled(dto.getEsiEnabled());
@@ -355,6 +359,10 @@ public class StatutoryComplianceService {
         dto.setPfIncludeEmployerContributionInCtc(entity.getPfIncludeEmployerContributionInCtc());
         dto.setPfEstablishmentId(entity.getPfEstablishmentId());
         dto.setPfEstablishmentName(entity.getPfEstablishmentName());
+        dto.setRestrictPfWage(entity.getRestrictPfWage());
+        dto.setIncludeAllowancesIfPfWageLow(entity.getIncludeAllowancesIfPfWageLow());
+        dto.setProrateRestrictedPfWage(entity.getProrateRestrictedPfWage());
+        dto.setConsiderApplicableAllowances(entity.getConsiderApplicableAllowances());
 
         // ESI
         dto.setEsiEnabled(entity.getEsiEnabled());

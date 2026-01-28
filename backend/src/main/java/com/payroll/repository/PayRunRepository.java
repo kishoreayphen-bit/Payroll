@@ -23,19 +23,22 @@ public interface PayRunRepository extends JpaRepository<PayRun, Long> {
     Optional<PayRun> findByPayRunNumber(String payRunNumber);
 
     @Query("SELECT p FROM PayRun p WHERE p.tenantId = :tenantId AND p.payPeriodStart = :start AND p.payPeriodEnd = :end")
-    Optional<PayRun> findByTenantIdAndPayPeriod(@Param("tenantId") Long tenantId, 
-                                                  @Param("start") LocalDate start, 
-                                                  @Param("end") LocalDate end);
+    Optional<PayRun> findByTenantIdAndPayPeriod(@Param("tenantId") Long tenantId,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end);
 
     @Query("SELECT p FROM PayRun p WHERE p.tenantId = :tenantId AND p.status IN :statuses ORDER BY p.createdAt DESC")
-    List<PayRun> findByTenantIdAndStatusIn(@Param("tenantId") Long tenantId, 
-                                            @Param("statuses") List<PayRunStatus> statuses);
+    List<PayRun> findByTenantIdAndStatusIn(@Param("tenantId") Long tenantId,
+            @Param("statuses") List<PayRunStatus> statuses);
 
-    @Query("SELECT COUNT(p) FROM PayRun p WHERE p.tenantId = :tenantId AND YEAR(p.payPeriodStart) = :year")
+    @Query(value = "SELECT p.pay_run_number FROM pay_runs p WHERE p.tenant_id = :tenantId AND EXTRACT(YEAR FROM p.pay_period_start) = :year ORDER BY p.pay_run_number DESC LIMIT 1", nativeQuery = true)
+    Optional<String> findLatestPayRunNumber(@Param("tenantId") Long tenantId, @Param("year") int year);
+
+    @Query(value = "SELECT COUNT(*) FROM pay_runs p WHERE p.tenant_id = :tenantId AND EXTRACT(YEAR FROM p.pay_period_start) = :year", nativeQuery = true)
     Long countByTenantIdAndYear(@Param("tenantId") Long tenantId, @Param("year") int year);
 
     @Query("SELECT p FROM PayRun p WHERE p.tenantId = :tenantId AND p.payPeriodStart >= :startDate AND p.payPeriodStart <= :endDate ORDER BY p.payPeriodStart")
-    List<PayRun> findByTenantIdAndPayPeriodStartBetween(@Param("tenantId") Long tenantId, 
-                                                         @Param("startDate") LocalDate startDate, 
-                                                         @Param("endDate") LocalDate endDate);
+    List<PayRun> findByTenantIdAndPayPeriodStartBetween(@Param("tenantId") Long tenantId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 }

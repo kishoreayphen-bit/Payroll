@@ -56,8 +56,8 @@ public class PayRunEmployee {
     @Column(name = "leave_days")
     private Integer leaveDays = 0;
 
-    @Column(name = "lop_days")
-    private Integer lopDays = 0; // Loss of Pay days
+    @Column(name = "lop_days", precision = 5, scale = 2)
+    private java.math.BigDecimal lopDays = java.math.BigDecimal.ZERO; // Loss of Pay days
 
     @Column(name = "lop_deduction", precision = 15, scale = 2)
     private BigDecimal lopDeduction = BigDecimal.ZERO;
@@ -107,6 +107,12 @@ public class PayRunEmployee {
     @Column(name = "payslip_sent")
     private Boolean payslipSent = false;
 
+    @Column(name = "is_skipped")
+    private Boolean isSkipped = false;
+
+    @Column(name = "skip_reason", columnDefinition = "TEXT")
+    private String skipReason;
+
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
@@ -135,25 +141,50 @@ public class PayRunEmployee {
         PAID
     }
 
-    // Helper method to calculate totals
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status")
+    private PayRun.PaymentStatus paymentStatus = PayRun.PaymentStatus.UNPAID;
+
+    @Column(name = "payment_date")
+    private LocalDateTime paymentDate;
+
+    @Column(name = "is_withheld")
+    private Boolean isWithheld = false;
+
+    // Helper method to calculate totals (null-safe)
     public void calculateTotals() {
+        // Null-safe getters
+        BigDecimal safeBasic = basicSalary != null ? basicSalary : BigDecimal.ZERO;
+        BigDecimal safeHra = hra != null ? hra : BigDecimal.ZERO;
+        BigDecimal safeConveyance = conveyanceAllowance != null ? conveyanceAllowance : BigDecimal.ZERO;
+        BigDecimal safeFixed = fixedAllowance != null ? fixedAllowance : BigDecimal.ZERO;
+        BigDecimal safeOtherEarnings = otherEarnings != null ? otherEarnings : BigDecimal.ZERO;
+        BigDecimal safeLop = lopDeduction != null ? lopDeduction : BigDecimal.ZERO;
+        BigDecimal safePfEmp = pfEmployee != null ? pfEmployee : BigDecimal.ZERO;
+        BigDecimal safeEsiEmp = esiEmployee != null ? esiEmployee : BigDecimal.ZERO;
+        BigDecimal safePt = professionalTax != null ? professionalTax : BigDecimal.ZERO;
+        BigDecimal safeTds = tds != null ? tds : BigDecimal.ZERO;
+        BigDecimal safeOtherDed = otherDeductions != null ? otherDeductions : BigDecimal.ZERO;
+        BigDecimal safePfEmpr = pfEmployer != null ? pfEmployer : BigDecimal.ZERO;
+        BigDecimal safeEsiEmpr = esiEmployer != null ? esiEmployer : BigDecimal.ZERO;
+
         // Calculate gross salary
-        this.grossSalary = basicSalary
-                .add(hra)
-                .add(conveyanceAllowance)
-                .add(fixedAllowance)
-                .add(otherEarnings);
+        this.grossSalary = safeBasic
+                .add(safeHra)
+                .add(safeConveyance)
+                .add(safeFixed)
+                .add(safeOtherEarnings);
 
         // Calculate total deductions
-        this.totalDeductions = lopDeduction
-                .add(pfEmployee)
-                .add(esiEmployee)
-                .add(professionalTax)
-                .add(tds)
-                .add(otherDeductions);
+        this.totalDeductions = safeLop
+                .add(safePfEmp)
+                .add(safeEsiEmp)
+                .add(safePt)
+                .add(safeTds)
+                .add(safeOtherDed);
 
         // Calculate total employer contribution
-        this.totalEmployerContribution = pfEmployer.add(esiEmployer);
+        this.totalEmployerContribution = safePfEmpr.add(safeEsiEmpr);
 
         // Calculate net salary
         this.netSalary = grossSalary.subtract(totalDeductions);

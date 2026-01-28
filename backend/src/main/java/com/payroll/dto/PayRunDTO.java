@@ -20,6 +20,9 @@ public class PayRunDTO {
     private LocalDate payPeriodEnd;
     private LocalDate payDate;
     private String status;
+    private String payRunType;
+    private String paymentStatus;
+    private LocalDate paymentDate;
     private BigDecimal totalGrossPay;
     private BigDecimal totalDeductions;
     private BigDecimal totalNetPay;
@@ -42,6 +45,7 @@ public class PayRunDTO {
         private LocalDate payPeriodStart;
         private LocalDate payPeriodEnd;
         private LocalDate payDate;
+        private String payRunType;
         private String notes;
         private List<Long> employeeIds; // Optional: specific employees, null means all active
     }
@@ -53,5 +57,13 @@ public class PayRunDTO {
     public static class UpdateStatusRequest {
         private String status;
         private String notes;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RecordPaymentRequest {
+        private List<Long> employeeIds;
+        private java.time.LocalDate paymentDate;
     }
 }

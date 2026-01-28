@@ -50,6 +50,18 @@ public class StatutorySettings {
     @Column(name = "pf_establishment_name")
     private String pfEstablishmentName;
 
+    @Column(name = "restrict_pf_wage")
+    private Boolean restrictPfWage = true;
+
+    @Column(name = "include_allowances_if_pf_wage_low")
+    private Boolean includeAllowancesIfPfWageLow = true;
+
+    @Column(name = "prorate_restricted_pf_wage")
+    private Boolean prorateRestrictedPfWage = false;
+
+    @Column(name = "consider_applicable_allowances")
+    private Boolean considerApplicableAllowances = true;
+
     // ESI Settings
     @Column(name = "esi_enabled")
     private Boolean esiEnabled = true;

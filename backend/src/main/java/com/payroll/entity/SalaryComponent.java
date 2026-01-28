@@ -33,6 +33,9 @@ public class SalaryComponent {
     @Column(name = "code", nullable = false, length = 50)
     private String code;
 
+    @Column(name = "name_in_payslip", length = 100)
+    private String nameInPayslip;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 20)
     private ComponentType type;
@@ -64,6 +67,21 @@ public class SalaryComponent {
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "is_recurring")
+    private Boolean isRecurring = true;
+
+    @Column(name = "is_variable")
+    private Boolean isVariable = false;
+
+    @Column(name = "is_pf_applicable")
+    private Boolean isPfApplicable = false;
+
+    @Column(name = "is_include_in_ctc")
+    private Boolean isIncludeInCtc = true;
+
+    @Column(name = "is_pro_rata_applicable")
+    private Boolean isProRataApplicable = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

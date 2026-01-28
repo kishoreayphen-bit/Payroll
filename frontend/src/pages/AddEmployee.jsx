@@ -37,6 +37,15 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services/authService';
 
+// Utility function to capitalize first letter of each word
+const capitalizeWords = (str) => {
+    if (!str) return '';
+    return str
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+};
+
 const STEPS = [
     { id: 1, name: 'Basic Details', icon: User },
     { id: 2, name: 'Salary Details', icon: DollarSign },
@@ -551,17 +560,34 @@ function BasicDetailsStep({ register, errors }) {
                 </label>
                 <div className="grid grid-cols-3 gap-4">
                     <Input
-                        {...register('firstName', { required: 'First name is required' })}
+                        {...register('firstName', { 
+                            required: 'First name is required',
+                            onChange: (e) => {
+                                const capitalized = capitalizeWords(e.target.value);
+                                e.target.value = capitalized;
+                            }
+                        })}
                         placeholder="First Name"
                         className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
                     />
                     <Input
-                        {...register('middleName')}
+                        {...register('middleName', {
+                            onChange: (e) => {
+                                const capitalized = capitalizeWords(e.target.value);
+                                e.target.value = capitalized;
+                            }
+                        })}
                         placeholder="Middle Name"
                         className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
                     />
                     <Input
-                        {...register('lastName', { required: 'Last name is required' })}
+                        {...register('lastName', { 
+                            required: 'Last name is required',
+                            onChange: (e) => {
+                                const capitalized = capitalizeWords(e.target.value);
+                                e.target.value = capitalized;
+                            }
+                        })}
                         placeholder="Last Name"
                         className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
                     />
@@ -670,11 +696,11 @@ function BasicDetailsStep({ register, errors }) {
                         className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     >
                         <option value="">Select</option>
-                        <option value="manager">Manager</option>
-                        <option value="developer">Developer</option>
-                        <option value="designer">Designer</option>
-                        <option value="analyst">Analyst</option>
-                        <option value="hr">HR</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Developer">Developer</option>
+                        <option value="Designer">Designer</option>
+                        <option value="Analyst">Analyst</option>
+                        <option value="HR">HR</option>
                     </Select>
                     {errors.designation && <p className="text-xs text-red-500 mt-1">{errors.designation.message}</p>}
                 </div>
@@ -687,11 +713,11 @@ function BasicDetailsStep({ register, errors }) {
                         className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     >
                         <option value="">Select</option>
-                        <option value="engineering">Engineering</option>
-                        <option value="design">Design</option>
-                        <option value="marketing">Marketing</option>
-                        <option value="sales">Sales</option>
-                        <option value="hr">Human Resources</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Design">Design</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Human Resources">Human Resources</option>
                     </Select>
                     {errors.department && <p className="text-xs text-red-500 mt-1">{errors.department.message}</p>}
                 </div>
@@ -876,7 +902,13 @@ function PersonalDetailsStep({ register, errors, watch, setValue }) {
                         Father's Name <span className="text-pink-600">*</span>
                     </label>
                     <Input
-                        {...register('fatherName', { required: "Father's name is required" })}
+                        {...register('fatherName', { 
+                            required: "Father's name is required",
+                            onChange: (e) => {
+                                const capitalized = capitalizeWords(e.target.value);
+                                e.target.value = capitalized;
+                            }
+                        })}
                         placeholder="Enter father's name"
                         className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
                     />
@@ -940,7 +972,12 @@ function PersonalDetailsStep({ register, errors, watch, setValue }) {
                 />
                 <div className="grid grid-cols-3 gap-6">
                     <Input
-                        {...register('city')}
+                        {...register('city', {
+                            onChange: (e) => {
+                                const capitalized = capitalizeWords(e.target.value);
+                                e.target.value = capitalized;
+                            }
+                        })}
                         placeholder="City"
                         className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
                     />
@@ -1016,7 +1053,13 @@ function PaymentInformationStep({ register, errors, watch }) {
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Bank Name <span className="text-pink-600">*</span></label>
                             <Input
-                                {...register('bankName', { validate: (v) => paymentMethod !== 'bank_transfer' || !!v || 'Bank name is required' })}
+                                {...register('bankName', { 
+                                    validate: (v) => paymentMethod !== 'bank_transfer' || !!v || 'Bank name is required',
+                                    onChange: (e) => {
+                                        const capitalized = capitalizeWords(e.target.value);
+                                        e.target.value = capitalized;
+                                    }
+                                })}
                                 placeholder="Enter bank name"
                                 className="border-pink-200 focus:ring-pink-500 focus:border-pink-500"
                             />

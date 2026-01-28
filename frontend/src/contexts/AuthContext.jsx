@@ -44,7 +44,8 @@ export const AuthProvider = ({ children }) => {
     const login = async (credentials) => {
         try {
             const data = await authService.login(credentials);
-            setUser(data.user);
+            const storedUser = authService.getUser();
+            setUser(storedUser);
             setIsAuthenticated(true);
             return data;
         } catch (error) {
@@ -55,7 +56,8 @@ export const AuthProvider = ({ children }) => {
     const signup = async (userData) => {
         try {
             const data = await authService.signup(userData);
-            setUser(data.user);
+            const storedUser = authService.getUser();
+            setUser(storedUser);
             setIsAuthenticated(true);
             return data;
         } catch (error) {

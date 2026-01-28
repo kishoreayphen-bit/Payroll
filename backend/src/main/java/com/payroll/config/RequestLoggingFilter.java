@@ -23,8 +23,9 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         logger.info("=== Incoming Request ===");
         logger.info("Method: {}", request.getMethod());
         logger.info("URI: {}", request.getRequestURI());
-        logger.info("Auth Header: {}", request.getHeader("Authorization"));
-        logger.info("Content-Type: {}", request.getContentType());
+
+        java.util.Collections.list(request.getHeaderNames())
+                .forEach(headerName -> logger.info("Header: {} = {}", headerName, request.getHeader(headerName)));
 
         try {
             filterChain.doFilter(request, response);

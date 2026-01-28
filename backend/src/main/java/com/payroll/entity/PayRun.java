@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "pay_runs")
+@Table(name = "pay_runs", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "tenant_id", "pay_run_number" })
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,7 +23,7 @@ public class PayRun {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "pay_run_number", unique = true)
+    @Column(name = "pay_run_number")
     private String payRunNumber;
 
     @Column(name = "tenant_id", nullable = false)
@@ -39,6 +41,17 @@ public class PayRun {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private PayRunStatus status = PayRunStatus.DRAFT;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "pay_run_type", nullable = false)
+    private PayRunType payRunType = PayRunType.REGULAR;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status")
+    private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
+
+    @Column(name = "payment_date")
+    private LocalDate paymentDate;
 
     @Column(name = "total_gross_pay", precision = 15, scale = 2)
     private BigDecimal totalGrossPay = BigDecimal.ZERO;
@@ -94,12 +107,25 @@ public class PayRun {
     }
 
     public enum PayRunStatus {
-        DRAFT,           // Initial state, can be edited
-        CALCULATING,     // Payroll calculations in progress
-        PENDING_APPROVAL,// Ready for review/approval
-        APPROVED,        // Approved, ready for payment
-        PROCESSING,      // Payment processing in progress
-        COMPLETED,       // Payroll completed
-        CANCELLED        // Cancelled
+        DRAFT, // Initial state, can be edited
+        CALCULATING, // Payroll calculations in progress
+        PENDING_APPROVAL, // Ready for review/approval
+        APPROVED, // Approved, ready for payment
+        PROCESSING, // Payment processing in progress
+        COMPLETED, // Payroll completed
+        CANCELLED // Cancelled
+    }
+
+    public enum PayRunType {
+        REGULAR,
+        ONE_TIME_PAYOUT,
+        OFF_CYCLE,
+        RESETTLEMENT
+    }
+
+    public enum PaymentStatus {
+        UNPAID,
+        PARTIALLY_PAID,
+        PAID
     }
 }

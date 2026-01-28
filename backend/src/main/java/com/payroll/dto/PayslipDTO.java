@@ -47,7 +47,7 @@ public class PayslipDTO {
     // Attendance
     private Integer workingDays;
     private Integer daysWorked;
-    private Integer lopDays;
+    private java.math.BigDecimal lopDays;
 
     // PDF and email status
     private String pdfPath;

@@ -31,6 +31,7 @@ public class EmployeeSalaryService {
     private final SalaryComponentRepository salaryComponentRepository;
     private final EmployeeRepository employeeRepository;
     private final ProfessionalTaxService professionalTaxService;
+    private final com.payroll.repository.StatutorySettingsRepository statutorySettingsRepository;
 
     @Transactional(readOnly = true)
     public List<EmployeeSalaryComponentDTO> getEmployeeComponents(Long employeeId) {
@@ -122,11 +123,21 @@ public class EmployeeSalaryService {
         List<SalaryBreakdownDTO.ComponentBreakdown> earnings = new ArrayList<>();
         List<SalaryBreakdownDTO.ComponentBreakdown> deductions = new ArrayList<>();
 
+        BigDecimal earnedBasic = BigDecimal.ZERO;
+        BigDecimal earnedTotalAllowances = BigDecimal.ZERO;
+
         // First pass: Calculate FIXED components
         for (EmployeeSalaryComponent empComp : components) {
             if (empComp.getComponent().getCalculationType() == CalculationType.FIXED) {
                 BigDecimal amount = empComp.getValue();
                 calculatedAmounts.put(empComp.getComponent().getId(), amount);
+
+                String compCode = empComp.getComponent().getCode().toUpperCase();
+                if (compCode.equals("BASIC")) {
+                    earnedBasic = amount;
+                } else if (empComp.getComponent().getType() == ComponentType.EARNING) {
+                    earnedTotalAllowances = earnedTotalAllowances.add(amount);
+                }
 
                 SalaryBreakdownDTO.ComponentBreakdown cb = createComponentBreakdown(empComp, amount, amount);
                 if (empComp.getComponent().getType() == ComponentType.EARNING) {
@@ -140,9 +151,35 @@ public class EmployeeSalaryService {
         // Second pass: Calculate PERCENTAGE components
         for (EmployeeSalaryComponent empComp : components) {
             if (empComp.getComponent().getCalculationType() == CalculationType.PERCENTAGE) {
-                BigDecimal baseAmount = getBaseAmount(empComp, calculatedAmounts, breakdown.getMonthlyCtc());
-                BigDecimal amount = baseAmount.multiply(empComp.getValue()).divide(BigDecimal.valueOf(100), 2,
-                        RoundingMode.HALF_UP);
+                BigDecimal amount;
+                BigDecimal baseAmount;
+
+                String compCode = empComp.getComponent().getCode().toUpperCase();
+
+                // Special handling for EPF / PF
+                if (compCode.equals("EPF") || compCode.equals("PF")) {
+                    baseAmount = earnedBasic; // Nominal base for display
+                    amount = calculateManagedPF(employee, earnedBasic, earnedTotalAllowances);
+                } else {
+                    // Standard Percentage Calculation
+                    baseAmount = getBaseAmount(empComp, calculatedAmounts, breakdown.getMonthlyCtc());
+                    amount = baseAmount.multiply(empComp.getValue()).divide(BigDecimal.valueOf(100), 2,
+                            RoundingMode.HALF_UP);
+
+                    // Check for Statutory Disable
+                    com.payroll.entity.StatutorySettings settings = statutorySettingsRepository
+                            .findByTenantId(employee.getOrganization().getId()).orElse(null);
+                    if (settings != null) {
+                        if (compCode.equals("ESI") && Boolean.FALSE.equals(settings.getEsiEnabled())) {
+                            amount = BigDecimal.ZERO;
+                        }
+                        if ((compCode.equals("PT") || compCode.equals("PROFESSIONAL TAX"))
+                                && Boolean.FALSE.equals(settings.getPtEnabled())) {
+                            amount = BigDecimal.ZERO;
+                        }
+                    }
+                }
+
                 calculatedAmounts.put(empComp.getComponent().getId(), amount);
 
                 SalaryBreakdownDTO.ComponentBreakdown cb = createComponentBreakdown(empComp, baseAmount, amount);
@@ -356,5 +393,46 @@ public class EmployeeSalaryService {
             esc.setValue(ptAmount);
             employeeSalaryComponentRepository.save(esc);
         }
+    }
+
+    private BigDecimal calculateManagedPF(Employee employee, BigDecimal earnedBasic, BigDecimal earnedTotalAllowances) {
+        com.payroll.entity.StatutorySettings settings = statutorySettingsRepository
+                .findByTenantId(employee.getOrganization().getId())
+                .orElse(null);
+
+        // Default to Basic * 12% if no settings found (or should we default to 0?
+        // Safety fallback 12%)
+        if (settings == null) {
+            return earnedBasic.multiply(new BigDecimal("0.12")).setScale(2, RoundingMode.HALF_UP);
+        }
+
+        if (settings.getPfEnabled() != null && !settings.getPfEnabled()) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal pfWage = earnedBasic;
+        BigDecimal wageCap = settings.getPfWageCeiling() != null ? settings.getPfWageCeiling()
+                : new BigDecimal("15000");
+
+        // Rule 1: Include Allowances if Basic is strictly less than Cap
+        // (Using defaults if null to be safe)
+        boolean includeAllowances = settings.getIncludeAllowancesIfPfWageLow() != null
+                && settings.getIncludeAllowancesIfPfWageLow();
+        if (includeAllowances && earnedBasic.compareTo(wageCap) < 0) {
+            pfWage = pfWage.add(earnedTotalAllowances);
+        }
+
+        // Rule 2: Restrict PF Wage to Cap if enabled
+        boolean restrict = settings.getRestrictPfWage() != null && settings.getRestrictPfWage();
+        if (restrict) {
+            if (pfWage.compareTo(wageCap) > 0) {
+                pfWage = wageCap;
+            }
+        }
+
+        // Calculate Employee Contribution
+        BigDecimal rate = settings.getPfEmployeeRate() != null ? settings.getPfEmployeeRate() : new BigDecimal("12");
+        return pfWage.multiply(rate)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
     }
 }

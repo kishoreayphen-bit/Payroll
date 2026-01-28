@@ -63,11 +63,11 @@ public class PayslipController {
             @RequestHeader("X-Employee-ID") Long employeeId) {
         log.info("Downloading payslip: {} for employee: {}", payslipId, employeeId);
         byte[] pdfBytes = payslipService.getPayslipPdf(payslipId, employeeId);
-        
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("attachment", "payslip.pdf");
-        
+
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(pdfBytes);
